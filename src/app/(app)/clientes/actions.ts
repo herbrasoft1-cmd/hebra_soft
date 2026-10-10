@@ -13,14 +13,21 @@ export async function saveCustomer(formData: FormData) {
     address: String(formData.get("address") ?? "").trim() || null,
   };
   if (!record.name) return;
-  if (id) await supabase.from("customers").update(record).eq("id", id).eq("tenant_id", tenant.id);
-  else await supabase.from("customers").insert({ ...record, tenant_id: tenant.id });
+  const { error } = id
+    ? await supabase.from("customers").update(record).eq("id", id).eq("tenant_id", tenant.id)
+    : await supabase.from("customers").insert({ ...record, tenant_id: tenant.id });
+  if (error) throw new Error("No se pudo guardar el cliente.");
   revalidatePath("/clientes");
   revalidatePath("/pedidos");
 }
 
 export async function deleteCustomer(formData: FormData) {
   const { supabase, tenant } = await getSession();
-  await supabase.from("customers").delete().eq("id", String(formData.get("id"))).eq("tenant_id", tenant.id);
+  const { error } = await supabase
+    .from("customers")
+    .delete()
+    .eq("id", String(formData.get("id")))
+    .eq("tenant_id", tenant.id);
+  if (error) throw new Error("No se pudo eliminar el cliente.");
   revalidatePath("/clientes");
 }

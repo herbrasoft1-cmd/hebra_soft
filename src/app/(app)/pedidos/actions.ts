@@ -20,7 +20,7 @@ export async function saveOrder(formData: FormData) {
   let customerId = String(formData.get("customer_id") ?? "") || null;
   const newCustomer = String(formData.get("new_customer_name") ?? "").trim();
   if (!customerId && newCustomer) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("customers")
       .insert({
         tenant_id: tenant.id,
@@ -30,6 +30,7 @@ export async function saveOrder(formData: FormData) {
       })
       .select("id")
       .single();
+    if (error) throw new Error("No se pudo crear el cliente nuevo.");
     customerId = data?.id ?? null;
   }
 
@@ -46,9 +47,13 @@ export async function saveOrder(formData: FormData) {
   if (!record.title) return;
 
   if (id) {
-    await supabase.from("orders").update(record).eq("id", id).eq("tenant_id", tenant.id);
+    const { error } = await supabase.from("orders").update(record).eq("id", id).eq("tenant_id", tenant.id);
+    if (error) throw new Error("No se pudo guardar el pedido.");
   } else {
-    await supabase.from("orders").insert({ ...record, tenant_id: tenant.id, status: "espera" });
+    const { error } = await supabase
+      .from("orders")
+      .insert({ ...record, tenant_id: tenant.id, status: "espera" });
+    if (error) throw new Error("No se pudo crear el pedido.");
   }
   revalidate();
 }
@@ -56,39 +61,29 @@ export async function saveOrder(formData: FormData) {
 export async function moveOrder(id: string, status: OrderStatus) {
   if (!STATUSES.includes(status)) return;
   const { supabase, tenant } = await getSession();
-  await supabase.from("orders").update({ status }).eq("id", id).eq("tenant_id", tenant.id);
+  const { error } = await supabase.from("orders").update({ status }).eq("id", id).eq("tenant_id", tenant.id);
+  if (error) throw new Error("No se pudo mover el pedido.");
   revalidate();
 }
 
 export async function deleteOrder(formData: FormData) {
   const { supabase, tenant } = await getSession();
-  await supabase.from("orders").delete().eq("id", String(formData.get("id"))).eq("tenant_id", tenant.id);
+  const { error } = await supabase
+    .from("orders")
+    .delete()
+    .eq("id", String(formData.get("id")))
+    .eq("tenant_id", tenant.id);
+  if (error) throw new Error("No se pudo eliminar el pedido.");
   revalidate();
 }
 
-/** Marca el pedido como pagado y lo registra como ingreso en la caja. */
+/** Marca el pedido como pagado y lo registra como ingreso en la caja (una sola transacción en la base). */
 export async function markPaid(formData: FormData) {
-  const { supabase, tenant } = await getSession();
+  const { supabase } = await getSession();
   const id = String(formData.get("id"));
   const method = String(formData.get("payment_method") ?? "Transferencia");
-  const { data: order } = await supabase
-    .from("orders")
-    .select("id, title, price, quantity, paid")
-    .eq("id", id)
-    .eq("tenant_id", tenant.id)
-    .single();
-  if (!order || order.paid) return;
-
-  await supabase.from("orders").update({ paid: true }).eq("id", id).eq("tenant_id", tenant.id);
-  await supabase.from("transactions").insert({
-    tenant_id: tenant.id,
-    type: "ingreso",
-    category: "Venta",
-    description: order.title,
-    amount: Number(order.price) * Number(order.quantity),
-    payment_method: method,
-    order_id: order.id,
-  });
+  const { error } = await supabase.rpc("mark_order_paid", { p_order_id: id, p_payment_method: method });
+  if (error) throw new Error("No se pudo registrar el pago.");
   revalidate();
   revalidatePath("/caja");
 }

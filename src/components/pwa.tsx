@@ -66,6 +66,9 @@ export function InstallPrompt() {
   const [done, setDone] = useState<string | null>(null);
 
   useEffect(() => {
+    // Solo en producción: en dev, el layout se remonta en cada navegación y el aviso reaparecería siempre.
+    if (process.env.NODE_ENV !== "production") return;
+
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       (navigator as Navigator & { standalone?: boolean }).standalone === true;

@@ -4,10 +4,10 @@ import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/tenant";
 
 /** Registro rápido de ingreso o gasto (un toque desde Inicio). */
-export async function addTransaction(formData: FormData): Promise<{ ok: boolean }> {
+export async function addTransaction(formData: FormData): Promise<{ ok: boolean; error?: string }> {
   const { supabase, tenant } = await getSession();
   const amount = Number(formData.get("amount") ?? 0);
-  if (!(amount > 0)) return { ok: false };
+  if (!(amount > 0)) return { ok: false, error: "Escribe un valor mayor a cero." };
   const { error } = await supabase.from("transactions").insert({
     tenant_id: tenant.id,
     type: formData.get("type") === "gasto" ? "gasto" : "ingreso",
@@ -17,14 +17,20 @@ export async function addTransaction(formData: FormData): Promise<{ ok: boolean 
     payment_method: String(formData.get("payment_method") ?? "") || null,
     occurred_on: String(formData.get("occurred_on") ?? "") || new Date().toISOString().slice(0, 10),
   });
+  if (error) return { ok: false, error: "No se pudo guardar el movimiento." };
   revalidatePath("/caja");
   revalidatePath("/inicio");
-  return { ok: !error };
+  return { ok: true };
 }
 
 export async function deleteTransaction(formData: FormData) {
   const { supabase, tenant } = await getSession();
-  await supabase.from("transactions").delete().eq("id", String(formData.get("id"))).eq("tenant_id", tenant.id);
+  const { error } = await supabase
+    .from("transactions")
+    .delete()
+    .eq("id", String(formData.get("id")))
+    .eq("tenant_id", tenant.id);
+  if (error) throw new Error("No se pudo eliminar el movimiento.");
   revalidatePath("/caja");
   revalidatePath("/inicio");
 }

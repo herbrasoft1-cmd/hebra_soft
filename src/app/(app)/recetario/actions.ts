@@ -29,14 +29,20 @@ export async function updateProduct(formData: FormData) {
   if (formData.has("sale_price")) patch.sale_price = Number(formData.get("sale_price"));
   if (formData.has("labor_minutes")) patch.labor_seconds = Math.round(Number(formData.get("labor_minutes")) * 60);
 
-  await supabase.from("products").update(patch).eq("id", id).eq("tenant_id", tenant.id);
+  const { error } = await supabase.from("products").update(patch).eq("id", id).eq("tenant_id", tenant.id);
+  if (error) throw new Error("No se pudo guardar el patrón.");
   revalidatePath(`/recetario/${id}`);
   revalidatePath("/recetario");
 }
 
 export async function deleteProduct(formData: FormData) {
   const { supabase, tenant } = await getSession();
-  await supabase.from("products").delete().eq("id", String(formData.get("id"))).eq("tenant_id", tenant.id);
+  const { error } = await supabase
+    .from("products")
+    .delete()
+    .eq("id", String(formData.get("id")))
+    .eq("tenant_id", tenant.id);
+  if (error) throw new Error("No se pudo eliminar el patrón.");
   revalidatePath("/recetario");
   redirect("/recetario");
 }
@@ -49,21 +55,23 @@ export async function upsertRecipeLine(formData: FormData) {
   const quantity = Number(String(formData.get("quantity") ?? "").replace(",", "."));
   if (!supplyId || !(quantity > 0)) return;
 
-  await supabase.from("product_supplies").upsert(
+  const { error } = await supabase.from("product_supplies").upsert(
     { tenant_id: tenant.id, product_id: productId, supply_id: supplyId, quantity },
     { onConflict: "product_id,supply_id" },
   );
+  if (error) throw new Error("No se pudo agregar el insumo al patrón.");
   revalidatePath(`/recetario/${productId}`);
 }
 
 export async function removeRecipeLine(formData: FormData) {
   const { supabase, tenant } = await getSession();
   const productId = String(formData.get("product_id"));
-  await supabase
+  const { error } = await supabase
     .from("product_supplies")
     .delete()
     .eq("id", String(formData.get("id")))
     .eq("tenant_id", tenant.id);
+  if (error) throw new Error("No se pudo quitar el insumo del patrón.");
   revalidatePath(`/recetario/${productId}`);
 }
 

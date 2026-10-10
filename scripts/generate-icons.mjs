@@ -2,9 +2,10 @@
 // Uso: npm run icons
 import sharp from "sharp";
 import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 
 const svg = await readFile(new URL("../public/icons/icon.svg", import.meta.url));
-const out = (name) => new URL(`../public/icons/${name}`, import.meta.url).pathname;
+const out = (name) => fileURLToPath(new URL(`../public/icons/${name}`, import.meta.url));
 
 await sharp(svg).resize(192, 192).png().toFile(out("icon-192.png"));
 await sharp(svg).resize(512, 512).png().toFile(out("icon-512.png"));

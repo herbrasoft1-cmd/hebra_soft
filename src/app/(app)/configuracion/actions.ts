@@ -5,7 +5,7 @@ import { getSession } from "@/lib/tenant";
 
 export async function updateTenant(formData: FormData) {
   const { supabase, tenant } = await getSession();
-  await supabase
+  const { error } = await supabase
     .from("tenants")
     .update({
       name: String(formData.get("name") ?? tenant.name).trim() || tenant.name,
@@ -16,6 +16,7 @@ export async function updateTenant(formData: FormData) {
       instagram: String(formData.get("instagram") ?? "").trim().replace(/^@/, "") || null,
     })
     .eq("id", tenant.id);
+  if (error) throw new Error("No se pudo guardar la configuración.");
   revalidatePath("/", "layout");
 }
 
@@ -32,7 +33,11 @@ export async function uploadLogo(formData: FormData): Promise<{ error?: string }
   if (error) return { error: "No se pudo subir el logo." };
 
   const { data } = supabase.storage.from("logos").getPublicUrl(path);
-  await supabase.from("tenants").update({ logo_url: `${data.publicUrl}?v=${Date.now()}` }).eq("id", tenant.id);
+  const { error: updateError } = await supabase
+    .from("tenants")
+    .update({ logo_url: `${data.publicUrl}?v=${Date.now()}` })
+    .eq("id", tenant.id);
+  if (updateError) return { error: "El logo se subió pero no se pudo guardar. Intenta de nuevo." };
   revalidatePath("/configuracion");
   return {};
 }

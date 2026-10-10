@@ -29,13 +29,17 @@ export async function saveSupply(formData: FormData) {
   if (!data.name || data.quantity_purchased <= 0) throw new Error("Nombre y cantidad son obligatorios");
 
   if (id) {
-    await supabase
+    const { error } = await supabase
       .from("supplies")
       .update({ ...data, quantity_remaining: remaining })
       .eq("id", id)
       .eq("tenant_id", tenant.id);
+    if (error) throw new Error("No se pudo guardar el insumo.");
   } else {
-    await supabase.from("supplies").insert({ ...data, quantity_remaining: remaining, tenant_id: tenant.id });
+    const { error } = await supabase
+      .from("supplies")
+      .insert({ ...data, quantity_remaining: remaining, tenant_id: tenant.id });
+    if (error) throw new Error("No se pudo crear el insumo.");
   }
   revalidatePath("/insumos");
   revalidatePath("/inicio");

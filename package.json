@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "HEBRA — SaaS multitenant de gestión operativa y costeo para negocios handmade (PWA)",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -24,9 +27,9 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "sharp": "^0.34.0",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.7.0",
-    "vitest": "^3.2.0"
+    "vitest": "^5.0.3"
   }
 }

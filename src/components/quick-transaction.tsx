@@ -20,6 +20,7 @@ export function QuickTransactionSheet({
   type?: "ingreso" | "gasto";
 }) {
   const [kind, setKind] = useState<"ingreso" | "gasto">(type);
+  const [error, setError] = useState<string | null>(null);
   const cats = kind === "ingreso" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
 
   return (
@@ -28,6 +29,7 @@ export function QuickTransactionSheet({
         action={async (fd) => {
           const res = await addTransaction(fd);
           if (res.ok) onClose();
+          else setError(res.error ?? "No se pudo guardar.");
         }}
         className="flex flex-col gap-3.5"
       >
@@ -77,6 +79,7 @@ export function QuickTransactionSheet({
             </select>
           </label>
         </div>
+        {error && <p className="text-sm text-primary-ink">{error}</p>}
         <SubmitButton>{kind === "ingreso" ? "Guardar venta" : "Guardar gasto"}</SubmitButton>
       </form>
     </Sheet>

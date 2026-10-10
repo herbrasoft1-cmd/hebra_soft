@@ -69,7 +69,11 @@ export function RecipeEditor(props: Props) {
             id="product-name"
             name="name"
             defaultValue={product.name}
-            onBlur={(e) => e.currentTarget.form?.requestSubmit()}
+            required
+            onBlur={(e) => {
+              if (e.currentTarget.value.trim()) e.currentTarget.form?.requestSubmit();
+              else e.currentTarget.value = product.name;
+            }}
             className="w-full bg-transparent font-display text-[32px] leading-tight outline-none focus:underline"
           />
         </form>
