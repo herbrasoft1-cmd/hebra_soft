@@ -1,0 +1,26 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { getSession } from "@/lib/tenant";
+
+export async function saveCustomer(formData: FormData) {
+  const { supabase, tenant } = await getSession();
+  const id = String(formData.get("id") ?? "");
+  const record = {
+    name: String(formData.get("name") ?? "").trim(),
+    whatsapp: String(formData.get("whatsapp") ?? "").trim() || null,
+    instagram: String(formData.get("instagram") ?? "").trim().replace(/^@/, "") || null,
+    address: String(formData.get("address") ?? "").trim() || null,
+  };
+  if (!record.name) return;
+  if (id) await supabase.from("customers").update(record).eq("id", id).eq("tenant_id", tenant.id);
+  else await supabase.from("customers").insert({ ...record, tenant_id: tenant.id });
+  revalidatePath("/clientes");
+  revalidatePath("/pedidos");
+}
+
+export async function deleteCustomer(formData: FormData) {
+  const { supabase, tenant } = await getSession();
+  await supabase.from("customers").delete().eq("id", String(formData.get("id"))).eq("tenant_id", tenant.id);
+  revalidatePath("/clientes");
+}

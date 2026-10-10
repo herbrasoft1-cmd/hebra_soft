@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+/* Modo nocturno cálido: se activa con la clase .dark en <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+   Paleta orgánica HEBRA
+   - Fondo lino #FDFBF7 · Texto carbón #2D312E · Terracota #C97A63 · Eucalipto #5F7D6B
+   - El terracota de botones se oscurece a #A85B45 para que el texto blanco
+     cumpla contraste AA; #C97A63 queda para acentos e ilustraciones.
+   --------------------------------------------------------------------------- */
+:root {
+  --c-bg: #fdfbf7;
+  --c-surface: #ffffff;
+  --c-surface-2: #f7f2ea;
+  --c-line: #efe8de;
+  --c-line-strong: #e2d8cc;
+  --c-ink: #2d312e;
+  --c-ink-2: #4a4f4b;
+  --c-muted: #6b6f6c;
+  --c-primary: #a85b45;
+  --c-on-primary: #ffffff;
+  --c-primary-soft: #f8ede6;
+  --c-primary-ink: #8a4836;
+  --c-accent: #c97a63;
+  --c-sage: #5f7d6b;
+  --c-on-sage: #ffffff;
+  --c-sage-soft: #eaf1ec;
+  --c-sage-ink: #3f5a4a;
+  --c-night: #2d312e;
+  --c-on-night: #fdfbf7;
+  --c-on-night-muted: #d8cfc3;
+  color-scheme: light;
+}
+
+.dark {
+  --c-bg: #231c19;
+  --c-surface: #2e2622;
+  --c-surface-2: #2a221f;
+  --c-line: #3a302b;
+  --c-line-strong: #4a3d36;
+  --c-ink: #efe5d8;
+  --c-ink-2: #d8caba;
+  --c-muted: #bdae9c;
+  --c-primary: #d9a77f;
+  --c-on-primary: #231c19;
+  --c-primary-soft: #3a2b23;
+  --c-primary-ink: #e8c1a0;
+  --c-accent: #d9a77f;
+  --c-sage: #8fb09b;
+  --c-on-sage: #1c2620;
+  --c-sage-soft: #2c3530;
+  --c-sage-ink: #cfe0d4;
+  --c-night: #171210;
+  --c-on-night: #f3dcc6;
+  --c-on-night-muted: #bdae9c;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-line: var(--c-line);
+  --color-line-strong: var(--c-line-strong);
+  --color-ink: var(--c-ink);
+  --color-ink-2: var(--c-ink-2);
+  --color-muted: var(--c-muted);
+  --color-primary: var(--c-primary);
+  --color-on-primary: var(--c-on-primary);
+  --color-primary-soft: var(--c-primary-soft);
+  --color-primary-ink: var(--c-primary-ink);
+  --color-accent: var(--c-accent);
+  --color-sage: var(--c-sage);
+  --color-on-sage: var(--c-on-sage);
+  --color-sage-soft: var(--c-sage-soft);
+  --color-sage-ink: var(--c-sage-ink);
+  --color-night: var(--c-night);
+  --color-on-night: var(--c-on-night);
+  --color-on-night-muted: var(--c-on-night-muted);
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "DM Sans", system-ui, -apple-system, sans-serif;
+}
+
+html,
+body {
+  background: var(--c-bg);
+  color: var(--c-ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Respeta las zonas seguras del celular cuando la PWA está instalada */
+.pb-safe {
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Utilidades de componentes (Tailwind v4: @utility permite usarlas con @apply) */
+@utility field {
+  @apply flex flex-col gap-1.5 text-sm text-ink-2;
+}
+@utility input {
+  @apply min-h-12 w-full rounded-xl border border-line-strong bg-surface px-3.5 text-[15px] text-ink outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20;
+}
+@utility btn {
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 text-[15px] font-semibold transition active:scale-[0.98] disabled:opacity-60 cursor-pointer;
+}
+@utility btn-primary {
+  @apply btn bg-primary text-on-primary hover:brightness-95;
+}
+@utility btn-sage {
+  @apply btn bg-sage text-on-sage hover:brightness-95;
+}
+@utility btn-ghost {
+  @apply btn border border-line-strong bg-surface text-ink hover:bg-surface-2;
+}
+@utility card {
+  @apply rounded-[18px] border border-line bg-surface;
+}
+@utility chip {
+  @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap;
+}
+
+dialog::backdrop {
+  background: rgb(45 49 46 / 0.45);
+}

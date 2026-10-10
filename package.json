@@ -1,0 +1,32 @@
+{
+  "name": "hebra",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HEBRA — SaaS multitenant de gestión operativa y costeo para negocios handmade (PWA)",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "icons": "node scripts/generate-icons.mjs"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.3",
+    "jspdf": "^4.2.1",
+    "next": "^16.4.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "sharp": "^0.34.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.7.0",
+    "vitest": "^3.2.0"
+  }
+}
