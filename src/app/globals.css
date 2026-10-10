@@ -31,6 +31,13 @@
   --c-on-night: #fdfbf7;
   --c-on-night-muted: #d8cfc3;
   color-scheme: light;
+
+  /* Elevación: sombras en capas (umbra ajustada + penumbra difusa), como Stripe/Linear */
+  --c-shadow-xs: 0 1px 2px rgb(45 49 46 / 0.05);
+  --c-shadow-sm: 0 1px 2px rgb(45 49 46 / 0.04), 0 3px 8px rgb(45 49 46 / 0.06);
+  --c-shadow-md: 0 2px 6px rgb(45 49 46 / 0.05), 0 12px 28px rgb(45 49 46 / 0.09);
+  --c-shadow-lg: 0 8px 16px rgb(45 49 46 / 0.06), 0 28px 56px rgb(45 49 46 / 0.16);
+  --c-shadow-up: 0 -1px 2px rgb(45 49 46 / 0.03), 0 -10px 24px rgb(45 49 46 / 0.07);
 }
 
 .dark {
@@ -55,6 +62,13 @@
   --c-on-night: #f3dcc6;
   --c-on-night-muted: #bdae9c;
   color-scheme: dark;
+
+  /* En oscuro las sombras casi no se ven contra el fondo: se apoyan en negro puro y más opacidad */
+  --c-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.3);
+  --c-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3), 0 3px 10px rgb(0 0 0 / 0.35);
+  --c-shadow-md: 0 2px 6px rgb(0 0 0 / 0.32), 0 14px 32px rgb(0 0 0 / 0.42);
+  --c-shadow-lg: 0 10px 20px rgb(0 0 0 / 0.38), 0 32px 64px rgb(0 0 0 / 0.55);
+  --c-shadow-up: 0 -1px 2px rgb(0 0 0 / 0.25), 0 -12px 28px rgb(0 0 0 / 0.38);
 }
 
 @theme inline {
@@ -81,6 +95,11 @@
 
   --font-display: "Fraunces", Georgia, serif;
   --font-sans: "DM Sans", system-ui, -apple-system, sans-serif;
+
+  --shadow-xs: var(--c-shadow-xs);
+  --shadow-sm: var(--c-shadow-sm);
+  --shadow-md: var(--c-shadow-md);
+  --shadow-lg: var(--c-shadow-lg);
 }
 
 html,
@@ -95,6 +114,10 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+.font-display {
+  letter-spacing: -0.015em;
+}
+
 /* Respeta las zonas seguras del celular cuando la PWA está instalada */
 .pb-safe {
   padding-bottom: max(12px, env(safe-area-inset-bottom));
@@ -105,28 +128,31 @@ body {
 
 /* Utilidades de componentes (Tailwind v4: @utility permite usarlas con @apply) */
 @utility field {
-  @apply flex flex-col gap-1.5 text-sm text-ink-2;
+  @apply flex flex-col gap-1.5 text-sm font-medium text-ink-2;
 }
 @utility input {
-  @apply min-h-12 w-full rounded-xl border border-line-strong bg-surface px-3.5 text-[15px] text-ink outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20;
+  @apply min-h-12 w-full rounded-xl border border-line-strong bg-surface px-3.5 text-[15px] text-ink shadow-xs outline-none transition focus:border-primary focus:shadow-none focus:ring-[3px] focus:ring-primary/15;
 }
 @utility btn {
-  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 text-[15px] font-semibold transition active:scale-[0.98] disabled:opacity-60 cursor-pointer;
+  @apply inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl px-5 text-[15px] font-semibold tracking-[-0.01em] transition-all duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30;
 }
 @utility btn-primary {
-  @apply btn bg-primary text-on-primary hover:brightness-95;
+  @apply btn bg-primary text-on-primary shadow-sm hover:shadow-md hover:brightness-95;
 }
 @utility btn-sage {
-  @apply btn bg-sage text-on-sage hover:brightness-95;
+  @apply btn bg-sage text-on-sage shadow-sm hover:shadow-md hover:brightness-95;
 }
 @utility btn-ghost {
-  @apply btn border border-line-strong bg-surface text-ink hover:bg-surface-2;
+  @apply btn border border-line-strong bg-surface text-ink shadow-xs hover:bg-surface-2 hover:shadow-sm;
 }
 @utility card {
-  @apply rounded-[18px] border border-line bg-surface;
+  @apply rounded-2xl border border-line bg-surface shadow-sm;
 }
 @utility chip {
   @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap;
+}
+@utility icon-btn {
+  @apply inline-flex cursor-pointer items-center justify-center rounded-full text-ink-2 transition-all duration-150 hover:bg-surface-2 hover:text-ink active:scale-90 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30;
 }
 
 dialog::backdrop {

@@ -153,6 +153,41 @@ export const IconArrowRight = (p: P) => (
   </Base>
 );
 
+export const IconClose = (p: P) => (
+  <Base strokeWidth={2} {...p}>
+    <path d="M6 6l12 12M18 6L6 18" />
+  </Base>
+);
+
+export const IconTrendUp = (p: P) => (
+  <Base {...p}>
+    <path d="M3 16l6-6 4 4 7-8" />
+    <path d="M15 6h5v5" />
+  </Base>
+);
+
+export const IconTrendDown = (p: P) => (
+  <Base {...p}>
+    <path d="M3 8l6 6 4-4 7 8" />
+    <path d="M15 18h5v-5" />
+  </Base>
+);
+
+export const IconChart = (p: P) => (
+  <Base {...p}>
+    <path d="M4 20V10M11 20V4M18 20v-7" />
+    <path d="M3 20h18" />
+  </Base>
+);
+
+export const IconWallet = (p: P) => (
+  <Base {...p}>
+    <path d="M3 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    <path d="M3 8l9-4 5 4" />
+    <circle cx="16.5" cy="13.2" r="1.1" fill="currentColor" stroke="none" />
+  </Base>
+);
+
 /** Logo HEBRA: ovillo con hebra suelta */
 export function Logo({ size = 34 }: { size?: number }) {
   return (

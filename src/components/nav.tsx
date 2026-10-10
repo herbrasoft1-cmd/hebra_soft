@@ -6,6 +6,7 @@ import type { ComponentType } from "react";
 import {
   IconAgujas,
   IconCaja,
+  IconChart,
   IconClientes,
   IconHebra,
   IconInicio,
@@ -25,6 +26,7 @@ export function useNavItems(recipeLabel: string): Item[] {
     { href: "/pedidos", label: "Pedidos", icon: IconHebra, mobile: true },
     { href: "/clientes", label: "Clientes", icon: IconClientes, mobile: false },
     { href: "/caja", label: "Caja", icon: IconCaja, mobile: true },
+    { href: "/analitica", label: "Analítica", icon: IconChart, mobile: false },
     { href: "/configuracion", label: "Configuración", icon: IconAgujas, mobile: false },
   ];
 }
@@ -38,13 +40,13 @@ export function Sidebar({ businessName, recipeLabel }: { businessName: string; r
   const path = usePathname();
   const items = useNavItems(recipeLabel);
   return (
-    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-6 border-r border-line bg-surface-2 px-4 py-6 md:flex">
+    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-7 border-r border-line bg-surface-2 px-4 py-6 md:flex">
       <Link href="/inicio" className="flex items-center gap-2.5 px-2">
         <Logo />
-        <span className="font-display text-[22px] font-semibold text-ink">hebra</span>
+        <span className="font-display text-2xl font-semibold text-ink">hebra</span>
       </Link>
-      <p className="truncate px-2 text-sm text-muted">{businessName}</p>
-      <nav className="flex flex-col gap-1" aria-label="Principal">
+      <p className="truncate px-2 text-xs font-semibold tracking-wide text-muted uppercase">{businessName}</p>
+      <nav className="flex flex-col gap-0.5" aria-label="Principal">
         {items.map((it) => {
           const active = isActive(path, it.href);
           const Icon = it.icon;
@@ -53,8 +55,10 @@ export function Sidebar({ businessName, recipeLabel }: { businessName: string; r
               key={it.href}
               href={it.href}
               aria-current={active ? "page" : undefined}
-              className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-[15px] transition ${
-                active ? "bg-primary-soft font-semibold text-primary-ink" : "text-ink-2 hover:bg-surface"
+              className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-medium transition-all focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30 ${
+                active
+                  ? "bg-primary-soft font-semibold text-primary-ink shadow-xs"
+                  : "text-ink-2 hover:bg-surface hover:text-ink"
               }`}
             >
               <Icon size={20} />
@@ -77,7 +81,7 @@ export function BottomNav({ recipeLabel }: { recipeLabel: string }) {
   return (
     <nav
       aria-label="Principal"
-      className="pb-safe fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-line bg-surface px-1.5 pt-1.5 md:hidden"
+      className="pb-safe fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-line bg-surface/90 px-1.5 pt-1.5 shadow-[var(--c-shadow-up)] backdrop-blur-lg md:hidden"
     >
       {items.map((it) => {
         const active = isActive(path, it.href);
@@ -87,12 +91,18 @@ export function BottomNav({ recipeLabel }: { recipeLabel: string }) {
             key={it.href}
             href={it.href}
             aria-current={active ? "page" : undefined}
-            className={`flex min-h-13 flex-col items-center justify-center gap-0.5 text-[11px] ${
-              active ? "font-semibold text-primary" : "text-muted"
+            className={`flex min-h-13 flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors focus-visible:outline-none ${
+              active ? "text-primary-ink" : "text-muted"
             }`}
           >
-            <Icon size={22} />
-            {it.label}
+            <span
+              className={`flex h-7 w-11 items-center justify-center rounded-full transition-colors ${
+                active ? "bg-primary-soft" : ""
+              }`}
+            >
+              <Icon size={21} />
+            </span>
+            <span className={active ? "font-semibold" : ""}>{it.label}</span>
           </Link>
         );
       })}

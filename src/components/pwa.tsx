@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 import { IconCheck, IconWifiOff } from "./icons";
 import { useTimer } from "./timer";
 
+const INSTALL_BENEFITS = [
+  "Abre al instante, sin buscar el link",
+  "El cronómetro sigue aunque se caiga el internet",
+  "Se ve a pantalla completa, como una app",
+];
+
 /** Registra el service worker (solo en producción para no interferir con el hot reload). */
 export function ServiceWorkerRegister() {
   useEffect(() => {
@@ -124,25 +130,30 @@ export function InstallPrompt() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="install-title"
-            className="pb-safe flex w-full max-w-md flex-col gap-4 rounded-t-[28px] bg-bg px-6 pt-4 md:rounded-[28px] md:pb-6"
+            className="pb-safe flex w-full max-w-md flex-col gap-5 rounded-t-3xl bg-bg px-6 pt-4 shadow-lg md:rounded-2xl md:pb-6"
           >
             <div className="h-1.5 w-10 self-center rounded-full bg-line-strong md:hidden" />
             <div className="flex items-center gap-3.5">
-              <img src="/icons/icon-192.png" alt="" width={64} height={64} className="rounded-2xl" />
-              <div>
-                <h2 id="install-title" className="font-display text-[22px] font-semibold">
+              <img src="/icons/icon-192.png" alt="" width={56} height={56} className="rounded-2xl shadow-sm" />
+              <div className="flex flex-col gap-0.5">
+                <h2 id="install-title" className="font-display text-xl font-semibold">
                   Instala HEBRA
                 </h2>
                 <p className="text-sm text-ink-2">Tenla a un toque, junto a tus otras apps.</p>
               </div>
             </div>
-            <ul className="flex flex-col gap-2.5 text-sm">
-              <li>· Abre al instante, sin buscar el link</li>
-              <li>· El cronómetro sigue aunque se caiga el internet</li>
-              <li>· Se ve a pantalla completa, como una app</li>
+            <ul className="flex flex-col gap-2.5">
+              {INSTALL_BENEFITS.map((text) => (
+                <li key={text} className="flex items-center gap-2.5 text-sm text-ink-2">
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-sage-soft text-sage-ink">
+                    <IconCheck size={12} />
+                  </span>
+                  {text}
+                </li>
+              ))}
             </ul>
             {isIos ? (
-              <p className="rounded-xl bg-surface-2 p-3 text-sm text-ink-2">
+              <p className="rounded-xl bg-surface-2 p-3.5 text-sm text-ink-2">
                 En iPhone: toca el botón <strong>Compartir</strong> de Safari y luego{" "}
                 <strong>“Agregar a pantalla de inicio”</strong>.
               </p>
@@ -151,7 +162,7 @@ export function InstallPrompt() {
                 Instalar app
               </button>
             )}
-            <button onClick={dismiss} className="btn text-ink-2">
+            <button onClick={dismiss} className="btn text-ink-2 hover:bg-surface-2">
               Ahora no
             </button>
           </div>

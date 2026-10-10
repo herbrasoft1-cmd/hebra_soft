@@ -126,23 +126,30 @@ export function Board({
                 const id = e.dataTransfer.getData("text/order-id");
                 if (id) move(id, s);
               }}
-              className={`flex min-h-[560px] flex-col gap-3 rounded-[20px] bg-surface-2 p-3.5 transition ${
-                dragOver === s ? "ring-2 ring-primary/40" : ""
+              className={`flex min-h-[560px] flex-col gap-3 rounded-2xl border p-3.5 transition-all ${
+                dragOver === s
+                  ? "border-primary/40 bg-primary-soft/40 shadow-inner"
+                  : "border-line bg-surface-2"
               }`}
             >
               <div className="flex items-center gap-2 px-1 pt-1">
-                <span className={`size-2.5 rounded-full ${DOT[s]}`} />
-                <h2 className="flex-1 text-[15px] font-semibold">{statusLabels[s]}</h2>
-                <span className="rounded-full bg-surface px-2.5 py-0.5 text-[13px] font-semibold text-ink-2">
+                <span className={`size-2 rounded-full ${DOT[s]}`} />
+                <h2 className="flex-1 text-[13px] font-semibold tracking-wide text-ink-2 uppercase">{statusLabels[s]}</h2>
+                <span className="rounded-full bg-surface px-2.5 py-0.5 text-[12px] font-semibold text-ink-2 shadow-xs">
                   {byStatus(s).length}
                 </span>
               </div>
+              {byStatus(s).length === 0 && (
+                <p className="rounded-xl border border-dashed border-line-strong px-3 py-6 text-center text-xs text-muted">
+                  Sin pedidos aquí
+                </p>
+              )}
               {byStatus(s).map((o) => (
                 <div
                   key={o.id}
                   draggable
                   onDragStart={(e) => e.dataTransfer.setData("text/order-id", o.id)}
-                  className="cursor-grab active:cursor-grabbing"
+                  className="cursor-grab transition-transform active:cursor-grabbing active:scale-[0.98]"
                 >
                   <OrderCard order={o} onMove={move} onEdit={() => setEditing(o)} compact />
                 </div>
@@ -184,7 +191,7 @@ function OrderCard({
   const overdue = o.due_date && o.status !== "enviado" && dueLabel(o.due_date).startsWith("Vencido");
 
   return (
-    <article className="card flex flex-col gap-3 p-4">
+    <article className="card flex flex-col gap-3 p-4 transition-all hover:shadow-md">
       <button onClick={onEdit} className="flex items-start justify-between gap-2 text-left">
         <span className="flex min-w-0 flex-col gap-0.5">
           <span className="text-[15px] font-semibold">
@@ -193,7 +200,7 @@ function OrderCard({
           </span>
           {o.details && <span className="line-clamp-2 text-[13px] text-muted">{o.details}</span>}
         </span>
-        <span className={`chip ${overdue ? "bg-primary text-on-primary" : "bg-primary-soft text-primary-ink"}`}>
+        <span className={`chip shrink-0 ${overdue ? "bg-primary text-on-primary" : "bg-primary-soft text-primary-ink"}`}>
           {o.status === "enviado" ? "Entregado" : dueLabel(o.due_date)}
         </span>
       </button>

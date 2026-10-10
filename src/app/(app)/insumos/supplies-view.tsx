@@ -50,6 +50,7 @@ export function SuppliesView({ supplies, units, examples }: { supplies: Supply[]
 
       {supplies.length === 0 ? (
         <EmptyState
+          icon={IconOvillo}
           title="Aún no tienes insumos"
           text="Empieza registrando tu última compra de lana o hilo."
           action={
@@ -69,7 +70,7 @@ export function SuppliesView({ supplies, units, examples }: { supplies: Supply[]
               <li key={s.id}>
                 <button
                   onClick={() => setEditing(s)}
-                  className="card flex w-full flex-col gap-2.5 px-4 py-3.5 text-left transition hover:border-line-strong"
+                  className="card flex w-full flex-col gap-2.5 px-4 py-3.5 text-left transition-all hover:-translate-y-0.5 hover:border-line-strong hover:shadow-md"
                 >
                   <div className="flex items-center gap-3">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">

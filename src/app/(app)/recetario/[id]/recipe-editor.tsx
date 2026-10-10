@@ -90,7 +90,7 @@ export function RecipeEditor(props: Props) {
               <button
                 onClick={() => (isThis ? (running ? pause() : resume()) : start(product.id, product.name))}
                 aria-label={isThis && running ? "Pausar cronómetro" : "Iniciar cronómetro"}
-                className="flex size-15 items-center justify-center rounded-full bg-accent text-night"
+                className="flex size-15 cursor-pointer items-center justify-center rounded-full bg-accent text-night shadow-md transition-all duration-150 hover:brightness-95 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
               >
                 {isThis && running ? <IconPause size={24} /> : <IconPlay size={24} />}
               </button>
@@ -98,7 +98,7 @@ export function RecipeEditor(props: Props) {
                 <button
                   onClick={() => stop()}
                   aria-label="Terminar sesión y guardar tiempo"
-                  className="flex size-15 items-center justify-center rounded-full bg-white/10"
+                  className="flex size-15 cursor-pointer items-center justify-center rounded-full bg-white/10 transition-all duration-150 hover:bg-white/15 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                 >
                   <IconStop size={20} />
                 </button>
@@ -176,7 +176,7 @@ export function RecipeEditor(props: Props) {
                   <form action={removeRecipeLine}>
                     <input type="hidden" name="id" value={l.id} />
                     <input type="hidden" name="product_id" value={product.id} />
-                    <button aria-label={`Quitar ${l.supplies.name}`} className="flex size-10 items-center justify-center rounded-full text-muted hover:bg-surface-2">
+                    <button aria-label={`Quitar ${l.supplies.name}`} className="icon-btn size-10">
                       <IconTrash size={18} />
                     </button>
                   </form>

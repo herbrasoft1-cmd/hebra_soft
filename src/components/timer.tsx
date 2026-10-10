@@ -192,8 +192,12 @@ export function MiniTimer() {
   const { timer, elapsed, running, pause, resume, stop } = useTimer();
   if (!timer) return null;
   return (
-    <div className="flex flex-col gap-2.5 rounded-[18px] bg-night p-3.5 text-on-night">
-      <Link href={`/recetario/${timer.productId}`} className="truncate text-xs text-on-night-muted hover:underline">
+    <div className="flex flex-col gap-3 rounded-2xl bg-night p-4 text-on-night shadow-md">
+      <Link
+        href={`/recetario/${timer.productId}`}
+        className="truncate text-xs font-medium text-on-night-muted transition-colors hover:text-on-night"
+      >
+        <span className={`mr-1.5 inline-block size-1.5 rounded-full ${running ? "bg-accent" : "bg-on-night-muted"}`} />
         {running ? "Tejiendo ahora" : "En pausa"} · {timer.productName}
       </Link>
       <div className="flex items-center justify-between gap-2">
@@ -202,14 +206,14 @@ export function MiniTimer() {
           <button
             onClick={running ? pause : resume}
             aria-label={running ? "Pausar cronómetro" : "Continuar cronómetro"}
-            className="flex size-11 items-center justify-center rounded-full bg-accent text-night"
+            className="flex size-11 cursor-pointer items-center justify-center rounded-full bg-accent text-night shadow-sm transition-all duration-150 hover:brightness-95 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
           >
             {running ? <IconPause size={18} /> : <IconPlay size={18} />}
           </button>
           <button
             onClick={() => stop()}
             aria-label="Detener y guardar tiempo"
-            className="flex size-11 items-center justify-center rounded-full bg-white/10 text-on-night"
+            className="flex size-11 cursor-pointer items-center justify-center rounded-full bg-white/10 text-on-night transition-all duration-150 hover:bg-white/15 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
           >
             <IconStop size={16} />
           </button>
@@ -226,13 +230,13 @@ export function FloatingTimer() {
   return (
     <div className="fixed inset-x-3 bottom-[calc(76px+env(safe-area-inset-bottom))] z-30 flex items-center gap-3 rounded-2xl bg-night px-4 py-2.5 text-on-night shadow-lg md:hidden">
       <Link href={`/recetario/${timer.productId}`} className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate text-xs text-on-night-muted">{timer.productName}</span>
+        <span className="truncate text-xs font-medium text-on-night-muted">{timer.productName}</span>
         <span className="font-display text-lg tabular-nums">{clock(elapsed)}</span>
       </Link>
       <button
         onClick={running ? pause : resume}
         aria-label={running ? "Pausar cronómetro" : "Continuar cronómetro"}
-        className="flex size-11 items-center justify-center rounded-full bg-accent text-night"
+        className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-accent text-night shadow-sm transition-all duration-150 hover:brightness-95 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
       >
         {running ? <IconPause size={18} /> : <IconPlay size={18} />}
       </button>

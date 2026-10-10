@@ -1,4 +1,6 @@
-import { PageHeader } from "@/components/page-header";
+import type { ComponentType } from "react";
+import { IconCaja, IconTrendDown, IconTrendUp, IconWallet } from "@/components/icons";
+import { EmptyState, PageHeader } from "@/components/page-header";
 import { RemissionButton } from "@/components/remission-button";
 import { SubmitButton } from "@/components/submit-button";
 import { money } from "@/lib/format";
@@ -49,17 +51,21 @@ export default async function CashPage() {
     <>
       <PageHeader title="Caja" subtitle={`Movimientos de ${monthName}`} action={<CashActions />} />
 
-      <div className="mb-6 grid grid-cols-3 gap-2.5">
-        <Stat label="Ingresos" value={money(income)} tone="sage" />
-        <Stat label="Gastos" value={money(expense)} tone="primary" />
-        <Stat label="Balance" value={money(income - expense)} tone="ink" />
+      <div className="mb-7 grid grid-cols-3 gap-3">
+        <Stat label="Ingresos" value={money(income)} icon={IconTrendUp} tone="sage" />
+        <Stat label="Gastos" value={money(expense)} icon={IconTrendDown} tone="primary" />
+        <Stat label="Balance" value={money(income - expense)} icon={IconWallet} tone="ink" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <section className="flex flex-col gap-3">
           <h2 className="font-display text-xl font-semibold">Movimientos</h2>
           {list.length === 0 ? (
-            <p className="card p-6 text-center text-sm text-muted">Aún no hay movimientos este mes.</p>
+            <EmptyState
+              icon={IconCaja}
+              title="Aún no hay movimientos"
+              text="Registra tu primera venta o gasto del mes con el botón de arriba."
+            />
           ) : (
             <ul className="card flex flex-col">
               {list.map((t) => (
@@ -127,12 +133,34 @@ export default async function CashPage() {
   );
 }
 
-function Stat({ label, value, tone }: { label: string; value: string; tone: "sage" | "primary" | "ink" }) {
-  const color = tone === "sage" ? "text-sage-ink" : tone === "primary" ? "text-primary-ink" : "text-ink";
+const STAT_TONE = {
+  sage: { badge: "bg-sage-soft text-sage-ink", text: "text-sage-ink" },
+  primary: { badge: "bg-primary-soft text-primary-ink", text: "text-primary-ink" },
+  ink: { badge: "bg-surface-2 text-ink-2", text: "text-ink" },
+} as const;
+
+function Stat({
+  label,
+  value,
+  icon: Icon,
+  tone,
+}: {
+  label: string;
+  value: string;
+  icon: ComponentType<{ size?: number }>;
+  tone: keyof typeof STAT_TONE;
+}) {
   return (
-    <div className="card flex flex-col gap-1 p-3 md:p-4">
-      <span className="text-xs text-muted">{label}</span>
-      <span className={`font-display text-lg font-semibold md:text-2xl ${color}`}>{value}</span>
+    <div className="card flex flex-col gap-2.5 p-3.5 md:gap-3 md:p-5">
+      <span className={`flex size-8 items-center justify-center rounded-full md:size-9 ${STAT_TONE[tone].badge}`}>
+        <Icon size={17} />
+      </span>
+      <span className="flex flex-col gap-0.5">
+        <span className={`truncate font-display text-lg leading-tight font-semibold md:text-[26px] ${STAT_TONE[tone].text}`}>
+          {value}
+        </span>
+        <span className="truncate text-[12px] text-muted md:text-[13px]">{label}</span>
+      </span>
     </div>
   );
 }

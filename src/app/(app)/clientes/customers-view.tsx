@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { IconPlus } from "@/components/icons";
+import { IconClientes, IconPlus } from "@/components/icons";
 import { EmptyState } from "@/components/page-header";
 import { Sheet } from "@/components/sheet";
 import { SubmitButton } from "@/components/submit-button";
@@ -29,7 +29,11 @@ export function CustomersView({ customers }: { customers: Row[] }) {
       </div>
 
       {customers.length === 0 ? (
-        <EmptyState title="Sin clientes aún" text="Se crean solos al registrar un pedido, o puedes agregarlos aquí." />
+        <EmptyState
+          icon={IconClientes}
+          title="Sin clientes aún"
+          text="Se crean solos al registrar un pedido, o puedes agregarlos aquí."
+        />
       ) : (
         <ul className="grid gap-2.5 md:grid-cols-2">
           {list.map((c) => {

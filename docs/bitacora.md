@@ -79,5 +79,79 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     `vitest.config.ts` → `vitest.config.mts`. Se agregó `"engines": {"node": ">=20"}` a
     `package.json` para que Vercel use la versión correcta de Node.
   - Verificado: `npm run lint`, `npm test` y `npm run build` pasan limpio después de todos los cambios.
-  - **Pendiente antes de desplegar:** correr `supabase/migrations/0002_mark_order_paid.sql` en
-    Supabase (SQL Editor). Ver `pendientes.md` para el resto de recomendaciones no bloqueantes.
+  - Commit `64c169e` pusheado a `main` en https://github.com/herbrasoft1-cmd/hebra_soft.
+  - **Actualización:** el usuario corrió `supabase/migrations/0002_mark_order_paid.sql` en Supabase.
+    Con esto, todas las migraciones están aplicadas y no quedan bloqueantes para producción — solo
+    quedan las recomendaciones no bloqueantes y el roadmap sugerido en `pendientes.md`, y configurar
+    las variables de entorno + Site URL/Redirect URLs al desplegar en Vercel con el dominio real.
+
+- **Rediseño visual (mismo día).** El usuario sintió que la app se veía "de juguete" y pidió
+  aplicar buenas prácticas de UI/UX (profundidad, tipografía, espacio, sombras, copy, íconos en vez
+  de emojis) para que se viera como un software profesional. Cambios, de mayor a menor alcance:
+  - **Sistema de elevación nuevo en `globals.css`:** tokens `--c-shadow-xs/sm/md/lg/up` (distintos
+    en modo claro y oscuro — en oscuro las sombras casi no se ven, así que usan negro puro con más
+    opacidad), registrados como utilidades `shadow-*` de Tailwind. Antes no había ninguna sombra en
+    toda la app; `card`, `btn-primary`, `btn-sage`, `btn-ghost` e `input` ahora las usan.
+  - **Radios de borde estandarizados:** botones de `rounded-2xl` (16px, "burbuja") a `rounded-xl`
+    (12px); cards de un arbitrario `rounded-[18px]` al `rounded-2xl` estándar de Tailwind. El modal
+    centrado de escritorio bajó de `rounded-[28px]` a `rounded-2xl` (el bottom-sheet móvil conserva
+    el radio grande, es un patrón reconocido de iOS/Android).
+  - **Estados de foco e interacción:** se agregó `focus-visible:ring` consistente a botones, enlaces
+    del menú y a los botones circulares del cronómetro (play/pausa/stop), que antes no tenían ningún
+    feedback de hover/focus/press — se sentían "muertos" al interactuar.
+  - **Nueva utilidad `icon-btn`** para botones circulares de solo ícono (cerrar, quitar insumo),
+    reemplaza estilos repetidos sin estados.
+  - **Tipografía:** `letter-spacing: -0.015em` global en `font-display` (Fraunces) para un trazo más
+    fino en títulos grandes.
+  - **Componentes rediseñados:** `Sheet` (modal/hoja: sombra real, botón de cerrar con ícono ✕ en
+    vez de texto "Cerrar"), `Sidebar`/`BottomNav` (indicador activo con cápsula, barra inferior con
+    `backdrop-blur` tipo iOS y sombra hacia arriba en vez de solo un borde), `EmptyState` (ahora
+    acepta un ícono circular, antes era solo texto centrado), `InstallPrompt` (mismo tratamiento de
+    sombra/radio que `Sheet`, lista de beneficios con íconos de check en vez de viñetas de texto).
+  - **Nuevos íconos** (mismo trazo que el set existente): `IconClose`, `IconTrendUp`,
+    `IconTrendDown`, `IconWallet` — para el botón de cerrar y para darle ícono a cada tarjeta de
+    estadística (antes eran solo número + texto, sin ícono).
+  - **Pantallas con pasada dedicada:** Inicio (tarjetas de estadísticas con ícono y tono de color,
+    tarjetas de "Por agotarse" con hover), Pedidos (columnas del Kanban con mejor jerarquía,
+    indicador de columna vacía, tarjetas con hover), Insumos (tarjeta de insumo con elevación al
+    pasar el mouse), login/registro/bienvenida (el formulario ahora vive en una tarjeta elevada
+    sobre fondo `surface-2`, antes flotaba directo sobre el fondo).
+  - El resto de pantallas (Caja, Clientes, Configuración, editor del recetario) heredan las mejoras
+    automáticamente porque reusan las utilidades `card`/`btn-*`/`input` de `globals.css`.
+  - Verificado: `npm run lint`, `npm test` y `npm run build` pasan limpio. No se verificó visualmente
+    en navegador (sin herramienta de captura de pantalla en esta sesión) — recomendado abrir
+    `localhost:3000` y recorrer las pantallas antes de dar por cerrado el rediseño.
+
+- **Analítica, gráficos e insights + skeletons (mismo día).** El usuario sintió que el software
+  seguía "muy básico": faltaba analítica del negocio, insights, gráficos, estados vacíos y
+  skeletons. Se cargó la skill `dataviz` antes de escribir cualquier gráfico (siguiendo su
+  instrucción explícita) y se aplicó su metodología: color secuencial de un solo tono por gráfico
+  (nunca categórico, porque el trabajo de los datos es magnitud/ranking, no identidad), barras
+  delgadas ancladas a la línea base, tooltip accesible en hover/foco, y una vista de tabla como
+  equivalente accesible de cada gráfico.
+  - **Nueva página `/analitica`** (ítem de menú solo en escritorio, como Clientes/Configuración):
+    tendencia de ventas de los últimos 6 meses (barras), productos más vendidos y gastos por
+    categoría (rankings), y 3-4 insights calculados en texto (variación de ventas mes vs mes
+    anterior, producto más vendido, mayor categoría de gasto, margen real promedio del recetario
+    comparado con el costeo). Estado vacío propio si el negocio no tiene datos aún.
+  - **`src/components/charts.tsx`** (nuevo): `TrendBars` (columnas), `RankingBars` (barras
+    horizontales), `Sparkline` (mini tendencia para tarjetas de estadística). Sin librería externa
+    de gráficos — SVG/HTML a mano, consistente con los íconos ya hechos a mano del proyecto.
+  - **Bug real encontrado en vivo (no lo detecta TypeScript):** se pasó `formatValue={money}` como
+    prop desde un Server Component (`analitica/page.tsx`) a un Client Component (`TrendBars`) — Next
+    no permite pasar funciones a través de ese límite, solo valores serializables. Se vio en los
+    logs del `npm run dev` que seguía corriendo (confirmado con tráfico real de un usuario
+    navegando `/analitica` e `/inicio` en vivo). Fix: los componentes de gráficos reciben un string
+    `format: "money" | "compact"` y resuelven la función internamente, nunca una función como prop.
+  - Se conectó `Sparkline` a la tarjeta "Ventas del mes" de Inicio (tendencia de los últimos 14
+    días) para no dejarlo como código sin usar.
+  - **Skeletons:** `src/components/skeleton.tsx` (primitivo `Skeleton` + `SkeletonHeader/Stat/Row/
+    Card`) y un `loading.tsx` específico por ruta (inicio, insumos, recetario, recetario/[id],
+    pedidos, caja, clientes, configuración, analítica) que imita la forma real de cada pantalla,
+    en vez del spinner genérico que había antes en `(app)/loading.tsx` (ese spinner genérico se
+    deja como resguardo para rutas futuras sin su propio `loading.tsx`).
+  - **Estados vacíos:** el de Caja (antes texto plano) ahora usa `EmptyState` con ícono, igual que
+    Insumos/Clientes/Recetario.
+  - Verificado con el servidor de desarrollo corriendo (no solo build estático): se confirmó en los
+    logs que `/inicio`, `/analitica` y `/configuracion` cargan sin errores con una sesión real.
+    `npm run lint`, `npm test` y `npm run build` también pasan limpio.

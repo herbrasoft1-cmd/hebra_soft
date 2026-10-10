@@ -34,6 +34,22 @@ export const UNIT_LABEL: Record<Unit, { short: string; long: string }> = {
 const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 const DAYS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
+/** "ene", "feb"… para ejes de gráficos y etiquetas cortas. */
+export function shortMonth(d: Date): string {
+  return MONTHS[d.getMonth()]!;
+}
+
+/** Compacta valores grandes para ejes/tarjetas: 12.300 -> "12,3K", 1.400.000 -> "1,4M". */
+export function compactMoney(n: number): string {
+  const v = Math.round(Number(n ?? 0));
+  const abs = Math.abs(v);
+  if (abs < 1000) return money(v);
+  const unit = abs >= 1_000_000 ? ["M", 1_000_000] : ["K", 1000];
+  const [suffix, divisor] = unit as [string, number];
+  const short = (v / divisor).toFixed(1).replace(".", ",").replace(",0", "");
+  return `$${short}${suffix}`;
+}
+
 /** "Hoy", "Mañana", "Vie 16" o "16 oct". */
 export function dueLabel(date: string | null): string {
   if (!date) return "Sin fecha";

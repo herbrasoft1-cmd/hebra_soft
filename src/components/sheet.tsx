@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { IconClose } from "./icons";
 
 /**
  * Hoja inferior en celular / modal centrado en escritorio, sobre <dialog> nativo
@@ -34,14 +35,14 @@ export function Sheet({
         if (e.target === ref.current) onClose();
       }}
       aria-label={title}
-      className="m-0 mt-auto w-full max-w-none rounded-t-[28px] bg-bg p-0 text-ink md:m-auto md:max-w-lg md:rounded-[28px]"
+      className="m-0 mt-auto w-full max-w-none rounded-t-[28px] bg-bg p-0 text-ink shadow-lg md:m-auto md:max-w-lg md:rounded-2xl"
     >
-      <div className="pb-safe flex flex-col gap-4 px-6 pt-4 md:pb-6">
+      <div className="pb-safe flex flex-col gap-5 px-6 pt-4 md:pb-6">
         <div className="h-1.5 w-10 self-center rounded-full bg-line-strong md:hidden" />
         <div className="flex items-center justify-between gap-3">
-          <h2 className="font-display text-[22px] font-semibold">{title}</h2>
-          <button onClick={onClose} className="btn min-h-10 px-3 text-sm text-ink-2" aria-label="Cerrar">
-            Cerrar
+          <h2 className="font-display text-xl font-semibold">{title}</h2>
+          <button onClick={onClose} className="icon-btn -mr-1.5 size-9" aria-label="Cerrar">
+            <IconClose size={18} />
           </button>
         </div>
         {children}

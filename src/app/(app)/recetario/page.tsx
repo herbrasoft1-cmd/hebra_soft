@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IconRecetario } from "@/components/icons";
 import { EmptyState, PageHeader } from "@/components/page-header";
 import { SubmitButton } from "@/components/submit-button";
 import { costBreakdown } from "@/lib/costing";
@@ -59,6 +60,7 @@ export default async function RecipesPage() {
 
       {products.length === 0 ? (
         <EmptyState
+          icon={IconRecetario}
           title={`Crea tu primer ${mod.recipe.itemLabel.toLowerCase()}`}
           text="Agrega los insumos que usa y mide el tiempo con el cronómetro: HEBRA te dirá cuánto cobrar."
         />

@@ -5,11 +5,20 @@
 - [x] Correr `supabase/migrations/0001_hebra_schema.sql` en Supabase (SQL Editor).
 - [x] Configurar *Site URL* y *Redirect URLs* en Supabase (Authentication → URL Configuration).
 - [x] Repo en GitHub, build/lint/test en verde, auditoría de producción (ver `bitacora.md`).
-- [ ] **Correr `supabase/migrations/0002_mark_order_paid.sql` en Supabase** (SQL Editor) — sin esto,
-      marcar un pedido como pagado va a fallar.
+- [x] Correr `supabase/migrations/0002_mark_order_paid.sql` en Supabase (SQL Editor).
 - [ ] Al desplegar en Vercel: agregar `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`
       como variables de entorno, y actualizar *Site URL* / *Redirect URLs* en Supabase con el
       dominio real.
+
+## Después del rediseño visual + analítica
+- [x] Verificado con tráfico real en `npm run dev` que `/inicio`, `/analitica` y `/configuracion`
+      cargan sin errores (no solo build estático).
+- [ ] Revisar a ojo el gusto/estética general (colores, espaciado) — lo verificado fue que
+      funciona y compila, no una revisión visual de diseño completa.
+- [ ] Revisar especialmente: tablero de Pedidos (drag & drop), cronómetro en recetario, modal de
+      "Instala HEBRA" (solo visible en `npm run build && npm start`, no en dev), los nuevos
+      gráficos de `/analitica` con datos reales variados (muchos meses, muchos productos).
+- [ ] Probar modo nocturno en las pantallas nuevas (`/analitica`, skeletons).
 
 ## Recomendaciones no bloqueantes (mejoras futuras, no impiden lanzar)
 - [ ] Content-Security-Policy estricta (hoy solo hay headers básicos: nosniff, X-Frame-Options,
@@ -27,4 +36,6 @@
 - [ ] Planes y cobro de suscripción del SaaS.
 - [ ] Cola offline también para ventas y movimientos de pedidos (hoy solo el cronómetro tiene cola
       offline).
-- [ ] Reportes mensuales (productos más rentables, tiempo promedio por pieza).
+- [x] Reportes/analítica básica (ventas por mes, productos más rentables, gastos por categoría,
+      margen real) — página `/analitica`. Pendiente como mejora futura: exportar a PDF/Excel,
+      rango de fechas personalizable (hoy es fijo a los últimos 6 meses).
