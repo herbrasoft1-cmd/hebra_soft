@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { logAudit } from "@/lib/audit";
 import { getSession } from "@/lib/tenant";
 
 export async function createProduct(formData: FormData) {
@@ -37,12 +38,10 @@ export async function updateProduct(formData: FormData) {
 
 export async function deleteProduct(formData: FormData) {
   const { supabase, tenant } = await getSession();
-  const { error } = await supabase
-    .from("products")
-    .delete()
-    .eq("id", String(formData.get("id")))
-    .eq("tenant_id", tenant.id);
+  const id = String(formData.get("id"));
+  const { error } = await supabase.from("products").delete().eq("id", id).eq("tenant_id", tenant.id);
   if (error) throw new Error("No se pudo eliminar el patrón.");
+  await logAudit(supabase, { tenantId: tenant.id, action: "delete", entityType: "product", entityId: id });
   revalidatePath("/recetario");
   redirect("/recetario");
 }

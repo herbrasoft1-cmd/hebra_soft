@@ -5,13 +5,13 @@ import { getSession } from "@/lib/tenant";
 import { getIndustryModule } from "@/modules";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const { tenant } = await getSession();
+  const { tenant, role } = await getSession();
   const mod = getIndustryModule(tenant.industry);
 
   return (
     <TimerProvider>
       <div className="flex min-h-dvh">
-        <Sidebar businessName={tenant.name} recipeLabel={mod.recipe.menuLabel} />
+        <Sidebar businessName={tenant.name} recipeLabel={mod.recipe.menuLabel} role={role} />
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="pt-safe" />
           <OfflineBanner />
@@ -19,7 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </div>
       <FloatingTimer />
-      <BottomNav recipeLabel={mod.recipe.menuLabel} />
+      <BottomNav recipeLabel={mod.recipe.menuLabel} role={role} />
       <InstallPrompt />
     </TimerProvider>
   );

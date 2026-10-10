@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import { reportError } from "@/lib/report-error";
 
 /** Última red de seguridad: solo se activa si el propio layout raíz falla. */
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
-    console.error(error);
+    reportError(error, "global");
   }, [error]);
 
   return (

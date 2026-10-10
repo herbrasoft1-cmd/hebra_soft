@@ -13,6 +13,12 @@ async function siteOrigin() {
   return `${proto}://${host}`;
 }
 
+/** Solo rutas relativas del propio sitio — nunca redirigir a una URL externa. */
+function safeNext(v: FormDataEntryValue | null): string | null {
+  const s = String(v ?? "");
+  return s.startsWith("/") && !s.startsWith("//") ? s : null;
+}
+
 export async function signIn(_: AuthState, formData: FormData): Promise<AuthState> {
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
@@ -20,23 +26,28 @@ export async function signIn(_: AuthState, formData: FormData): Promise<AuthStat
     password: String(formData.get("password") ?? ""),
   });
   if (error) return { error: "Correo o contraseña incorrectos." };
-  redirect("/inicio");
+  redirect(safeNext(formData.get("next")) ?? "/inicio");
 }
 
 export async function signUp(_: AuthState, formData: FormData): Promise<AuthState> {
   const supabase = await createClient();
+  const invite = String(formData.get("invite") ?? "").trim() || null;
   const businessName = String(formData.get("business") ?? "").trim();
   const industry = String(formData.get("industry") ?? "crochet");
   const password = String(formData.get("password") ?? "");
 
-  if (businessName.length < 2) return { error: "Escribe el nombre de tu negocio." };
+  // Si viene de una invitación, se une al negocio del que invitó: no hace falta nombre de negocio.
+  if (!invite && businessName.length < 2) return { error: "Escribe el nombre de tu negocio." };
   if (password.length < 8) return { error: "La contraseña debe tener al menos 8 caracteres." };
+
+  const redirectTo = new URL("/auth/callback", await siteOrigin());
+  if (invite) redirectTo.searchParams.set("invite", invite);
 
   const { data, error } = await supabase.auth.signUp({
     email: String(formData.get("email") ?? "").trim(),
     password,
     options: {
-      emailRedirectTo: `${await siteOrigin()}/auth/callback`,
+      emailRedirectTo: redirectTo.toString(),
       // Se guardan para crear el negocio después de confirmar el correo
       data: {
         full_name: String(formData.get("name") ?? "").trim(),
@@ -47,8 +58,9 @@ export async function signUp(_: AuthState, formData: FormData): Promise<AuthStat
   });
   if (error) return { error: error.message };
 
-  // Si el proyecto no exige confirmar correo, ya hay sesión: creamos el negocio de una vez.
+  // Si el proyecto no exige confirmar correo, ya hay sesión.
   if (data.session) {
+    if (invite) redirect(`/invitar/${invite}`);
     const { error: rpcError } = await supabase.rpc("create_tenant", {
       p_name: businessName,
       p_industry: industry,

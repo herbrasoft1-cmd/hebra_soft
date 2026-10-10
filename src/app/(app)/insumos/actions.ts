@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { logAudit } from "@/lib/audit";
 import { getSession } from "@/lib/tenant";
 import type { Unit } from "@/lib/types";
 
@@ -47,12 +48,10 @@ export async function saveSupply(formData: FormData) {
 
 export async function deleteSupply(formData: FormData): Promise<{ error?: string }> {
   const { supabase, tenant } = await getSession();
-  const { error } = await supabase
-    .from("supplies")
-    .delete()
-    .eq("id", String(formData.get("id")))
-    .eq("tenant_id", tenant.id);
+  const id = String(formData.get("id"));
+  const { error } = await supabase.from("supplies").delete().eq("id", id).eq("tenant_id", tenant.id);
   if (error) return { error: "No se puede eliminar: el insumo está en algún patrón del recetario." };
+  await logAudit(supabase, { tenantId: tenant.id, action: "delete", entityType: "supply", entityId: id });
   revalidatePath("/insumos");
   return {};
 }

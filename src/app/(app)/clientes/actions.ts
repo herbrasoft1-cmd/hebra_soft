@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { logAudit } from "@/lib/audit";
 import { getSession } from "@/lib/tenant";
 
 export async function saveCustomer(formData: FormData) {
@@ -23,11 +24,9 @@ export async function saveCustomer(formData: FormData) {
 
 export async function deleteCustomer(formData: FormData) {
   const { supabase, tenant } = await getSession();
-  const { error } = await supabase
-    .from("customers")
-    .delete()
-    .eq("id", String(formData.get("id")))
-    .eq("tenant_id", tenant.id);
+  const id = String(formData.get("id"));
+  const { error } = await supabase.from("customers").delete().eq("id", id).eq("tenant_id", tenant.id);
   if (error) throw new Error("No se pudo eliminar el cliente.");
+  await logAudit(supabase, { tenantId: tenant.id, action: "delete", entityType: "customer", entityId: id });
   revalidatePath("/clientes");
 }

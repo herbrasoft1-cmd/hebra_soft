@@ -1,16 +1,32 @@
+import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/logout-button";
 import { PageHeader } from "@/components/page-header";
 import { SubmitButton } from "@/components/submit-button";
 import { ThemeToggle } from "@/components/theme";
 import { getSession } from "@/lib/tenant";
+import type { Invitation, Membership } from "@/lib/types";
 import { INDUSTRY_OPTIONS } from "@/modules";
+import { ActivitySection } from "./activity-section";
 import { updateTenant } from "./actions";
 import { LogoUpload } from "./logo-upload";
+import { TeamSection } from "./team-section";
 
 export const metadata = { title: "Configuración" };
 
 export default async function SettingsPage() {
-  const { tenant, user } = await getSession();
+  const { supabase, tenant, user, role } = await getSession();
+  if (role === "staff") redirect("/inicio");
+
+  const [{ data: members }, { data: invitations }, { data: activity }] = await Promise.all([
+    supabase.rpc("list_members", { p_tenant_id: tenant.id }),
+    supabase
+      .from("invitations")
+      .select("*")
+      .eq("tenant_id", tenant.id)
+      .is("accepted_at", null)
+      .order("created_at", { ascending: false }),
+    supabase.rpc("list_audit_log", { p_tenant_id: tenant.id, p_limit: 50 }),
+  ]);
 
   return (
     <>
@@ -62,8 +78,21 @@ export default async function SettingsPage() {
             <p className="text-sm text-ink-2">El modo nocturno usa tonos café y sepia para tejer de noche sin cansar la vista.</p>
             <ThemeToggle />
           </section>
-          <LogoutButton />
         </div>
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <TeamSection
+          members={(members ?? []) as Membership[]}
+          invitations={(invitations ?? []) as Invitation[]}
+          viewerRole={role}
+          viewerId={user.id}
+        />
+        <ActivitySection entries={activity ?? []} />
+      </div>
+
+      <div className="mt-6 max-w-sm">
+        <LogoutButton />
       </div>
     </>
   );

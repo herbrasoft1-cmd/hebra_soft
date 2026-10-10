@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { IconChart, IconTrendUp } from "@/components/icons";
 import { RankingBars, TrendBars } from "@/components/charts";
 import { EmptyState, PageHeader } from "@/components/page-header";
@@ -21,7 +22,8 @@ const monthKey = (iso: string) => {
 };
 
 export default async function AnalyticsPage() {
-  const { supabase, tenant } = await getSession();
+  const { supabase, tenant, role } = await getSession();
+  if (role === "staff") redirect("/inicio");
 
   const now = new Date();
   const periodStart = new Date(now.getFullYear(), now.getMonth() - 5, 1);

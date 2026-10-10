@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { logAudit } from "@/lib/audit";
 import { getSession } from "@/lib/tenant";
 import type { OrderStatus } from "@/lib/types";
 
@@ -68,12 +69,10 @@ export async function moveOrder(id: string, status: OrderStatus) {
 
 export async function deleteOrder(formData: FormData) {
   const { supabase, tenant } = await getSession();
-  const { error } = await supabase
-    .from("orders")
-    .delete()
-    .eq("id", String(formData.get("id")))
-    .eq("tenant_id", tenant.id);
+  const id = String(formData.get("id"));
+  const { error } = await supabase.from("orders").delete().eq("id", id).eq("tenant_id", tenant.id);
   if (error) throw new Error("No se pudo eliminar el pedido.");
+  await logAudit(supabase, { tenantId: tenant.id, action: "delete", entityType: "order", entityId: id });
   revalidate();
 }
 

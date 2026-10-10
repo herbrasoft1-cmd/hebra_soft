@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import { redirect } from "next/navigation";
 import { IconCaja, IconTrendDown, IconTrendUp, IconWallet } from "@/components/icons";
 import { EmptyState, PageHeader } from "@/components/page-header";
 import { RemissionButton } from "@/components/remission-button";
@@ -12,7 +13,8 @@ import { CashActions } from "./cash-actions";
 export const metadata = { title: "Caja" };
 
 export default async function CashPage() {
-  const { supabase, tenant } = await getSession();
+  const { supabase, tenant, role } = await getSession();
+  if (role === "staff") redirect("/inicio");
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
 

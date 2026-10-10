@@ -2,10 +2,11 @@
 
 import { useEffect } from "react";
 import { Logo } from "@/components/icons";
+import { reportError } from "@/lib/report-error";
 
 export default function AppError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
-    console.error(error);
+    reportError(error, "app");
   }, [error]);
 
   return (

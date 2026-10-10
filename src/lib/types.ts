@@ -1,6 +1,26 @@
 export type Unit = "g" | "m" | "u" | "ml";
 export type OrderStatus = "espera" | "proceso" | "calidad" | "enviado";
 export type TransactionType = "ingreso" | "gasto";
+export type Role = "owner" | "admin" | "staff";
+
+export type Membership = {
+  user_id: string;
+  email: string;
+  role: Role;
+  joined_at: string;
+};
+
+export type Invitation = {
+  id: string;
+  tenant_id: string;
+  email: string;
+  role: Role;
+  token: string;
+  invited_by: string | null;
+  created_at: string;
+  expires_at: string;
+  accepted_at: string | null;
+};
 
 export type Tenant = {
   id: string;

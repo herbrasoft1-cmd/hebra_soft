@@ -10,13 +10,19 @@ export default async function OrdersPage() {
   const { supabase, tenant } = await getSession();
   const mod = getIndustryModule(tenant.industry);
 
+  // El tablero es para trabajo activo, no historial: pedidos sin enviar + enviados en los
+  // últimos 90 días, con un límite de seguridad para negocios con muchísimos pedidos.
+  const cutoff = new Date(Date.now() - 90 * 86400000).toISOString();
+
   const [{ data: orders }, { data: customers }, { data: products }] = await Promise.all([
     supabase
       .from("orders")
       .select("*, customers(name, whatsapp, instagram, address)")
       .eq("tenant_id", tenant.id)
-      .order("due_date", { ascending: true, nullsFirst: false }),
-    supabase.from("customers").select("*").eq("tenant_id", tenant.id).order("name"),
+      .or(`status.neq.enviado,updated_at.gte.${cutoff}`)
+      .order("due_date", { ascending: true, nullsFirst: false })
+      .limit(300),
+    supabase.from("customers").select("*").eq("tenant_id", tenant.id).order("name").limit(300),
     supabase.from("products").select("id, name, sale_price").eq("tenant_id", tenant.id).order("name"),
   ]);
 

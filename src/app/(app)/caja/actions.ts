@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { logAudit } from "@/lib/audit";
 import { getSession } from "@/lib/tenant";
 
 /** Registro rápido de ingreso o gasto (un toque desde Inicio). */
@@ -25,12 +26,10 @@ export async function addTransaction(formData: FormData): Promise<{ ok: boolean;
 
 export async function deleteTransaction(formData: FormData) {
   const { supabase, tenant } = await getSession();
-  const { error } = await supabase
-    .from("transactions")
-    .delete()
-    .eq("id", String(formData.get("id")))
-    .eq("tenant_id", tenant.id);
+  const id = String(formData.get("id"));
+  const { error } = await supabase.from("transactions").delete().eq("id", id).eq("tenant_id", tenant.id);
   if (error) throw new Error("No se pudo eliminar el movimiento.");
+  await logAudit(supabase, { tenantId: tenant.id, action: "delete", entityType: "transaction", entityId: id });
   revalidatePath("/caja");
   revalidatePath("/inicio");
 }

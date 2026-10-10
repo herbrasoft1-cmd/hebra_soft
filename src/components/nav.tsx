@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
+import type { Role } from "@/lib/types";
 import {
   IconAgujas,
   IconCaja,
@@ -16,19 +17,26 @@ import {
 } from "./icons";
 import { MiniTimer } from "./timer";
 
-type Item = { href: string; label: string; icon: ComponentType<{ size?: number }>; mobile: boolean };
+type Item = {
+  href: string;
+  label: string;
+  icon: ComponentType<{ size?: number }>;
+  mobile: boolean;
+  adminOnly?: boolean;
+};
 
-export function useNavItems(recipeLabel: string): Item[] {
-  return [
+export function useNavItems(recipeLabel: string, role: Role): Item[] {
+  const items: Item[] = [
     { href: "/inicio", label: "Inicio", icon: IconInicio, mobile: true },
     { href: "/insumos", label: "Insumos", icon: IconOvillo, mobile: true },
     { href: "/recetario", label: recipeLabel, icon: IconRecetario, mobile: true },
     { href: "/pedidos", label: "Pedidos", icon: IconHebra, mobile: true },
     { href: "/clientes", label: "Clientes", icon: IconClientes, mobile: false },
-    { href: "/caja", label: "Caja", icon: IconCaja, mobile: true },
-    { href: "/analitica", label: "Analítica", icon: IconChart, mobile: false },
-    { href: "/configuracion", label: "Configuración", icon: IconAgujas, mobile: false },
+    { href: "/caja", label: "Caja", icon: IconCaja, mobile: true, adminOnly: true },
+    { href: "/analitica", label: "Analítica", icon: IconChart, mobile: false, adminOnly: true },
+    { href: "/configuracion", label: "Configuración", icon: IconAgujas, mobile: false, adminOnly: true },
   ];
+  return items.filter((it) => !it.adminOnly || role !== "staff");
 }
 
 function isActive(path: string, href: string) {
@@ -36,9 +44,17 @@ function isActive(path: string, href: string) {
 }
 
 /** Menú lateral (escritorio) */
-export function Sidebar({ businessName, recipeLabel }: { businessName: string; recipeLabel: string }) {
+export function Sidebar({
+  businessName,
+  recipeLabel,
+  role,
+}: {
+  businessName: string;
+  recipeLabel: string;
+  role: Role;
+}) {
   const path = usePathname();
-  const items = useNavItems(recipeLabel);
+  const items = useNavItems(recipeLabel, role);
   return (
     <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-7 border-r border-line bg-surface-2 px-4 py-6 md:flex">
       <Link href="/inicio" className="flex items-center gap-2.5 px-2">
@@ -75,13 +91,14 @@ export function Sidebar({ businessName, recipeLabel }: { businessName: string; r
 }
 
 /** Barra inferior (celular) */
-export function BottomNav({ recipeLabel }: { recipeLabel: string }) {
+export function BottomNav({ recipeLabel, role }: { recipeLabel: string; role: Role }) {
   const path = usePathname();
-  const items = useNavItems(recipeLabel).filter((i) => i.mobile);
+  const items = useNavItems(recipeLabel, role).filter((i) => i.mobile);
   return (
     <nav
       aria-label="Principal"
-      className="pb-safe fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-line bg-surface/90 px-1.5 pt-1.5 shadow-[var(--c-shadow-up)] backdrop-blur-lg md:hidden"
+      style={{ gridTemplateColumns: `repeat(${items.length}, 1fr)` }}
+      className="pb-safe fixed inset-x-0 bottom-0 z-30 grid border-t border-line bg-surface/90 px-1.5 pt-1.5 shadow-[var(--c-shadow-up)] backdrop-blur-lg md:hidden"
     >
       {items.map((it) => {
         const active = isActive(path, it.href);

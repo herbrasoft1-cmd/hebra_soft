@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { logAudit } from "@/lib/audit";
 import { getSession } from "@/lib/tenant";
 
 export async function updateTenant(formData: FormData) {
@@ -17,6 +18,7 @@ export async function updateTenant(formData: FormData) {
     })
     .eq("id", tenant.id);
   if (error) throw new Error("No se pudo guardar la configuración.");
+  await logAudit(supabase, { tenantId: tenant.id, action: "update_tenant", entityType: "tenant", entityId: tenant.id });
   revalidatePath("/", "layout");
 }
 

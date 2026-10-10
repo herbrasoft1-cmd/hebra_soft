@@ -189,3 +189,55 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     se tocó sin pedirlo. El indicador de Next.js en modo desarrollo (burbuja "N" abajo a la
     izquierda) se monta encima del botón "Inicio" de la barra inferior en vista móvil — es
     herramienta de desarrollo, no existe en producción.
+
+- **"Versión enterprise" — Fase 1 (equipo y roles) + Fase 2 (rendimiento y auditoría) (mismo día).**
+  El usuario pidió una "versión enterprise". Al preguntarle qué significa eso en concreto, eligió
+  las 4 opciones (equipo/roles, planes de pago, seguridad/cumplimiento, rendimiento) — demasiado
+  para una sola pasada. Se entró a modo plan: se exploró el código existente con un agente, se
+  diseñó y criticó la Fase 1 con un segundo agente antes de escribir una sola línea, y se escribió
+  un plan completo (`C:\Users\T460s\.claude\plans\smooth-riding-phoenix.md`) que el usuario aprobó.
+  Planes de pago (necesita cuenta de Stripe) y SSO/cumplimiento avanzado (necesita plan pago de
+  Supabase + proveedor de identidad) quedaron explícitamente fuera — requieren algo externo del
+  usuario que no se puede improvisar.
+  - **Fase 1 — Colaboración en equipo y roles:**
+    - Migración `supabase/migrations/0003_team_roles.sql` (nueva, **pendiente de correr en
+      Supabase**): tabla `invitations`, función `has_role`, trigger `protect_last_owner` (nunca
+      dejar un negocio sin dueño), RPCs `create_invitation`/`accept_invitation`/`list_members`/
+      `update_member_role`/`remove_member`. Se convirtieron `create_remission` y `mark_order_paid`
+      a `security definer` (si no, se habrían roto para "staff" al restringir `transactions`).
+      `transactions` queda restringida a admin+ (select/insert/update/delete); `tenants_update`
+      también a admin+. `tenants_select` se deja igual a propósito: Recetario necesita leer
+      `hourly_rate` y eso lo usa también el personal.
+    - Invitación sin servicio de correo ni `service_role` key (no está configurada): se genera un
+      enlace `/invitar/[token]` que el dueño comparte manualmente (mismo patrón que compartir
+      remisiones por WhatsApp). Flujo completo en `src/app/(auth)/actions.ts` (campos `next`/
+      `invite`), `src/app/auth/callback/route.ts`, `/login` y `/registro` (ahora envueltos en
+      `<Suspense>` por `useSearchParams()`), y la nueva ruta `src/app/invitar/[token]/`.
+    - `src/lib/tenant.ts`: `getSession()` ahora también devuelve `role`, y usa la membresía más
+      reciente (antes la primera) para que aceptar una invitación active ese negocio de inmediato.
+    - Nueva sección "Equipo" dentro de `/configuracion` (`team-section.tsx`, `team-actions.ts`,
+      `invite-sheet.tsx`, `member-row.tsx`): invitar, cambiar rol, quitar miembros/salir.
+    - `nav.tsx`: Caja/Analítica/Configuración se ocultan para "staff" (`adminOnly`); esas 3 páginas
+      además redirigen a `/inicio` si un staff intenta entrar directo por URL — la protección real
+      es la RLS de la base, esto es solo UX.
+  - **Fase 2 — Rendimiento y auditoría:**
+    - Paginación real (`.range()`, 50 por página, `?page=` en la URL) en `clientes/page.tsx` e
+      `insumos/page.tsx`, que antes traían la tabla completa sin límite. Nuevo componente
+      reutilizable `src/components/pager.tsx`.
+    - `pedidos/page.tsx` traía *todos* los pedidos de la historia del negocio sin filtro; ahora se
+      acota a activos + enviados en los últimos 90 días, con un límite de seguridad adicional (el
+      tablero Kanban es para trabajo activo, no historial completo).
+    - Migración `supabase/migrations/0004_audit_log.sql` (nueva, **pendiente de correr**): tabla
+      `audit_log`, RPC `log_audit` (inserta) y `list_audit_log` (lee con el correo de quién hizo
+      el cambio). Helper `src/lib/audit.ts` — nunca lanza si falla, para no tumbar la acción
+      principal por un problema de auditoría. Conectado en: invitar/cambiar rol/quitar miembros,
+      guardar configuración del negocio, y las eliminaciones de insumo/patrón/pedido/cliente/
+      movimiento. Nueva tarjeta "Actividad" en Configuración con las últimas 50 entradas.
+    - `src/lib/report-error.ts`: un solo punto de paso para errores no capturados (hoy solo
+      `console.error`, estructurado para que conectar un monitor real como Sentry después sea
+      cambiar una función, no cada pantalla). No se instaló ningún SDK de monitoreo — eso necesita
+      una cuenta del usuario.
+  - Verificado: `npm run lint`, `npm test` y `npm run build` pasan limpio. **No verificado en vivo
+    todavía**: las migraciones 0003 y 0004 no se han corrido en Supabase, así que el flujo de
+    invitación/roles/auditoría no se ha probado con datos reales — eso es lo siguiente apenas el
+    usuario corra las migraciones.
