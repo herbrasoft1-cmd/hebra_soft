@@ -13,12 +13,18 @@
 ## Después del rediseño visual + analítica
 - [x] Verificado con tráfico real en `npm run dev` que `/inicio`, `/analitica` y `/configuracion`
       cargan sin errores (no solo build estático).
-- [ ] Revisar a ojo el gusto/estética general (colores, espaciado) — lo verificado fue que
-      funciona y compila, no una revisión visual de diseño completa.
-- [ ] Revisar especialmente: tablero de Pedidos (drag & drop), cronómetro en recetario, modal de
-      "Instala HEBRA" (solo visible en `npm run build && npm start`, no en dev), los nuevos
-      gráficos de `/analitica` con datos reales variados (muchos meses, muchos productos).
-- [ ] Probar modo nocturno en las pantallas nuevas (`/analitica`, skeletons).
+- [x] Auditoría visual real con Playwright: capturas de pantalla de las 8 pantallas principales,
+      vacías y con datos reales, claro/oscuro, escritorio/móvil. Dos bugs reales encontrados y
+      corregidos (tarjeta anidada en "Revisa tu correo", truncado de etiquetas en tarjetas de
+      estadística en móvil). Detalle en `bitacora.md`.
+- [ ] **Reactivar "Confirm email" en Supabase** (Authentication → Providers → Email) — se
+      desactivó temporalmente para poder crear una cuenta de prueba durante la auditoría visual.
+      Dejarlo desactivado en producción permite registrarse sin correo real.
+- [ ] Borrar la cuenta de prueba `qa.visual.*@gmail.com` desde Supabase → Authentication → Users
+      (y su negocio "Taller QA" asociado) si no se quiere dejar datos de prueba.
+- [ ] Revisar especialmente: modal de "Instala HEBRA" (solo visible en `npm run build && npm
+      start`, no en dev), los gráficos de `/analitica` con datos reales variados (muchos meses,
+      muchos productos, varias categorías de gasto).
 
 ## Recomendaciones no bloqueantes (mejoras futuras, no impiden lanzar)
 - [ ] Content-Security-Policy estricta (hoy solo hay headers básicos: nosniff, X-Frame-Options,

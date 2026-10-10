@@ -155,3 +155,37 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
   - Verificado con el servidor de desarrollo corriendo (no solo build estático): se confirmó en los
     logs que `/inicio`, `/analitica` y `/configuracion` cargan sin errores con una sesión real.
     `npm run lint`, `npm test` y `npm run build` también pasan limpio.
+
+- **Auditoría visual real con Playwright (mismo día).** El usuario pidió ver visualmente cómo
+  quedó la app. Se instaló Playwright en la carpeta de scratchpad (no se agregó al proyecto) y se
+  usó para navegar la app real en `localhost:3000`, crear una cuenta de prueba desechable, y
+  recorrer con capturas de pantalla reales: login, registro (claro y oscuro), las 8 pantallas
+  principales vacías, el flujo completo con datos reales (insumo → patrón con receta y cronómetro
+  → pedido → venta en caja → analítica con gráfico e insight), modo oscuro autenticado, vista móvil
+  (390px) y el modal de edición de pedido.
+  - **Bloqueo encontrado:** Supabase tenía "Confirm email" activado, así que no se podía crear una
+    cuenta de prueba sin acceso a un correo real. El usuario lo desactivó temporalmente en
+    Supabase → Authentication → Providers → Email para esta sesión de pruebas.
+    **Pendiente: volver a activar "Confirm email" antes de un lanzamiento real** (quedó
+    desactivado), y borrar la cuenta de prueba `qa.visual.*@gmail.com` desde Supabase →
+    Authentication → Users si no se quiere dejar basura de pruebas.
+  - **Bug real encontrado y corregido:** la pantalla "Revisa tu correo" (tras registrarse) tenía
+    una tarjeta (`card`) anidada dentro de la tarjeta que ya pone `(auth)/layout.tsx` desde el
+    rediseño — se veía con doble borde y doble sombra. Se quitó el `card` redundante en
+    `src/app/(auth)/registro/page.tsx`.
+  - **Bug real encontrado y corregido:** en móvil (390px), las etiquetas de las tarjetas de
+    estadística ("Ventas del mes", "Pedidos activos") se truncaban con "…" por falta de espacio
+    en 3 columnas angostas. Se redujo el tamaño de fuente/padding de esas tarjetas en mobile
+    (`inicio/page.tsx` y `caja/page.tsx`) — ahora caben completas.
+  - **Verificado sin hallazgos (confirmado visualmente, no solo por código):** el motor de costeo
+    calcula correctamente en pantalla (materiales, mano de obra, desgaste, los 3 precios sugeridos
+    — se comprobó la aritmética a mano contra la captura); el tablero Kanban de pedidos; la
+    analítica con datos reales (gráfico de barras, ranking, insight calculado); el modal de edición
+    con el nuevo botón de cerrar; modo oscuro en pantallas autenticadas; la barra inferior móvil
+    con el estado activo resaltado.
+  - **Observaciones menores, no corregidas (a criterio del usuario):** el ícono de "Configuración"
+    (agujas cruzadas, ya existía antes del rediseño) en el header móvil puede confundirse con un
+    botón de cerrar por su forma de X dentro de un círculo — es un ícono de marca preexistente, no
+    se tocó sin pedirlo. El indicador de Next.js en modo desarrollo (burbuja "N" abajo a la
+    izquierda) se monta encima del botón "Inicio" de la barra inferior en vista móvil — es
+    herramienta de desarrollo, no existe en producción.

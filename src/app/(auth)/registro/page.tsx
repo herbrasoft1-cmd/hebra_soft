@@ -10,10 +10,10 @@ export default function RegisterPage() {
 
   if (state.message) {
     return (
-      <div className="card flex flex-col gap-3 p-5 text-center">
+      <div className="flex flex-col items-center gap-3 text-center">
         <h1 className="font-display text-2xl">Revisa tu correo</h1>
         <p className="text-ink-2">{state.message}</p>
-        <Link href="/login" className="btn-primary">
+        <Link href="/login" className="btn-primary mt-1 w-full">
           Ir a iniciar sesión
         </Link>
       </div>

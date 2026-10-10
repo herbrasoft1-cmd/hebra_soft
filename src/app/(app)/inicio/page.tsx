@@ -182,16 +182,16 @@ function Stat({
   spark?: number[];
 }) {
   return (
-    <div className="card flex flex-col gap-2.5 p-3.5 md:gap-3 md:p-5">
+    <div className="card flex flex-col gap-2 p-2.5 md:gap-3 md:p-5">
       <div className="flex items-center justify-between">
-        <span className={`flex size-8 items-center justify-center rounded-full md:size-9 ${STAT_TONE[tone]}`}>
-          <Icon size={17} />
+        <span className={`flex size-7 shrink-0 items-center justify-center rounded-full md:size-9 ${STAT_TONE[tone]}`}>
+          <Icon size={15} />
         </span>
         {spark && <Sparkline data={spark} className="h-6 w-14 text-sage md:w-16" />}
       </div>
       <span className="flex flex-col gap-0.5">
-        <span className="truncate font-display text-lg leading-tight font-semibold md:text-[26px]">{value}</span>
-        <span className="truncate text-[12px] text-muted md:text-[13px]">{label}</span>
+        <span className="truncate font-display text-base leading-tight font-semibold md:text-[26px]">{value}</span>
+        <span className="truncate text-[10.5px] leading-tight text-muted md:text-[13px]">{label}</span>
       </span>
     </div>
   );
