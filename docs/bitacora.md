@@ -479,3 +479,42 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     encontró el bug del `<button>` anidado; quedó resuelto antes de cerrar la fase.
   - `npm run lint`/`test` (49/49, +8 nuevas de `costing.ts`)/`build` pasan limpio. Casilla de la
     Fase 4 marcada en `docs/ROADMAP.md`, entrada en `docs/CHANGELOG.md`.
+
+- **Fase 5 del roadmap Enterprise: inventario multisede (mismo día).** El usuario pidió la fase
+  completa de una vez.
+  - Antes de diseñar nada se revisó a fondo el esquema de `supplies`, porque esta fase toca el
+    corazón del costeo. Dos hallazgos que cambiaron el plan para bien: `supplies.unit_cost` ya es una
+    columna generada (`total_cost / quantity_purchased`), así que el costo promedio ponderado sale
+    solo con que cada lote nuevo sume su cantidad y su valor al agregado — no hubo que tocar esa
+    columna ni arriesgar nada que ya funcionaba; y `consume_order_supplies` (el trigger que descuenta
+    insumos al enviar un pedido, desde el MVP) ya resolvía "consumir por pedido", así que no se tocó.
+  - **Migración `0012`:** `suppliers`, `supply_lots` (historial de recepción, no fuente de verdad del
+    stock), `purchase_orders`/`purchase_order_lines` (borrador→por_aprobar→en_tránsito→recibida),
+    `stock_transfers`. RPCs `advance_purchase_order` y `complete_transfer` (`security definer`, cada
+    una valida el rol internamente). Trigger `supplies_reorder_check`: al cruzar `low_stock_threshold`
+    por debajo, crea una OC borrador automática si no hay ya una abierta para ese insumo.
+  - `src/lib/inventory.ts` (`needsReorder`, `suggestTransfer`, `blockedOrders`) con 8 pruebas. `/insumos`
+    extendido (no se creó `/inventario` nueva, mismo criterio de las Fases 2 y 3) con 4 KPIs y los
+    paneles de Órdenes de compra y Transferir entre sedes.
+  - **Bug real encontrado en la verificación con el servidor real:** el botón para avanzar una OC
+    llamaba al server action directo desde un `onClick` sin `useTransition` — al avanzar dos estados
+    seguidos, el segundo click todavía veía el `po.status` anterior (la revalidación no había llegado)
+    y reenviaba la misma transición; el RPC la rechazaba (`No se puede pasar de por_aprobar a
+    por_aprobar`) y el error quedaba sin capturar, como unhandled rejection. Se corrigió envolviendo
+    `advance`/`applySuggestion` en `useTransition` (así la revalidación queda coordinada con la propia
+    llamada) + `alert` en el catch, igual que ya hacía `deleteSupply`.
+  - **Gap real encontrado:** `createSupplier` existía en `actions.ts` desde el plan pero no estaba
+    conectado a ninguna UI — no había forma de crear un proveedor desde la app. Se agregó una sección
+    "Proveedores" (lista + alta rápida) en el panel de Insumos, con el mismo patrón que
+    `ChannelsSection` de Configuración.
+  - **Verificado de punta a punta con datos reales, no solo build/tests:** se creó un proveedor, una
+    OC de 50g de Lana café a $180/g, y se avanzó por los 4 estados — al llegar a "recibida" el costo
+    pasó de $150/g a $160/g exacto (promedio ponderado: (15.000 + 9.000) / 150) y el stock subió a
+    150g; se bajó el punto de reorden por debajo del stock actual y apareció automáticamente una OC
+    borrador de 250g (`greatest(umbral·2 − restante, umbral)`); se transfirieron 30g de Principal a
+    Bogotá y el stock se movió de verdad entre las dos filas de `supplies` ($160/g heredado en la fila
+    nueva). La sugerencia de transferencia automática (`suggestTransfer`/`blockedOrders`) se dejó
+    cubierta solo por las 8 pruebas unitarias — armar en vivo un pedido bloqueado por falta de insumo
+    en una sede específica era desproporcionado frente a lo que ya prueban esos tests.
+  - `npm run lint`/`test` (56/56, +8 nuevas de `inventory.ts`)/`build` pasan limpio. Casilla de la
+    Fase 5 marcada en `docs/ROADMAP.md`, entrada en `docs/CHANGELOG.md`.

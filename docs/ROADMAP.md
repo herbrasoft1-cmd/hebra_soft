@@ -77,7 +77,7 @@ Estado: marca `[x]` al cerrar cada fase.
 
 ---
 
-## [ ] Fase 5 — Inventario multisede
+## [x] Fase 5 — Inventario multisede
 
 - Lotes (`supply_lots`) por sede con costo; costo promedio ponderado; punto de reorden por insumo y sede; proveedores.
 - Órdenes de compra: borrador → por aprobar → en tránsito → recibida (al recibir suma stock). Borradores automáticos al bajar del reorden.

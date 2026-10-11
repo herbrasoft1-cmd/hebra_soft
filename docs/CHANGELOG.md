@@ -2,6 +2,45 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Fase 5 — Inventario multisede (2026-10-11)
+
+Antes de diseñar nada se revisó a fondo el esquema de `supplies` porque esta fase toca el corazón
+del costeo. Dos hallazgos clave: `supplies.unit_cost` ya es una columna generada
+(`total_cost / quantity_purchased`), así que el costo promedio ponderado sale solo con que cada lote
+nuevo sume su cantidad y su valor al agregado — no hizo falta tocar esa columna ni reescribir nada.
+Y `consume_order_supplies` (el trigger que descuenta insumos al enviar un pedido, desde el MVP) no
+se tocó en absoluto.
+
+- Migración `0012`: `suppliers`, `supply_lots` (historial de recepción, no fuente de verdad del
+  stock), `purchase_orders` + `purchase_order_lines` (flujo borrador → por_aprobar → en_tránsito →
+  recibida), `stock_transfers`. RPCs `advance_purchase_order` (valida la transición y el rol; al
+  llegar a "recibida" crea el lote y sube `quantity_purchased`/`total_cost`/`quantity_remaining`) y
+  `complete_transfer` (resta del origen, busca o crea la fila destino por nombre+unidad+sede). Trigger
+  `supplies_reorder_check`: al cruzar `low_stock_threshold` por debajo, crea una OC borrador
+  automática de una sola línea si no hay ya una abierta para ese insumo.
+- `src/lib/inventory.ts`: `needsReorder`, `suggestTransfer` (heurística sede-con-excedente →
+  sede-con-pedido-bloqueado), `blockedOrders`. Con 8 pruebas.
+- `/insumos` extendido (no se creó `/inventario` nueva, mismo criterio de las Fases 2 y 3): 4 KPIs
+  (valor de inventario, bajo punto de reorden, OCs abiertas, proveedores), panel de **Órdenes de
+  compra** con botones de avance por estado, panel de **Transferir entre sedes** (manual + sugerida),
+  selector de proveedor en "Nueva compra".
+- **Bug real encontrado en verificación en vivo**: el botón de avanzar una OC llamaba al server
+  action directo desde un `onClick` sin `useTransition`, así que la revalidación del `po.status` no
+  quedaba coordinada con la propia llamada — al avanzar dos estados seguidos rápido, el segundo click
+  todavía veía el estado anterior y reenviaba la misma transición (el RPC la rechazaba, y el error
+  quedaba sin capturar). Se corrigió envolviendo `advance`/`applySuggestion` en `useTransition` +
+  manejo de error con `alert`, igual que el patrón ya usado en `deleteSupply`.
+- **Gap real encontrado**: `createSupplier` existía en `actions.ts` desde el plan pero no estaba
+  conectado a ninguna UI — no había forma de crear un proveedor. Se agregó una sección "Proveedores"
+  en el panel de Insumos (lista + alta rápida), siguiendo el mismo patrón de `ChannelsSection`.
+- Verificado en vivo contra datos reales (no solo build/tests): ciclo completo de una OC
+  (borrador→recibida) con costo promedio ponderado exacto ($150→$160/g al recibir 50g a $180);
+  reorden automático disparado al cruzar el umbral (OC de 250g = `greatest(umbral·2−restante, umbral)`);
+  transferencia manual entre Principal y Bogotá moviendo stock real entre dos filas de `supplies`.
+- Fuera de esta fase, a propósito: crear un insumo nuevo desde una OC (se sigue usando "Nueva
+  compra"), agrupar varios insumos en una OC automática, "rotación promedio" (necesitaría historial
+  de valor de inventario que no se guarda), deshacer una transferencia o recepción confirmada.
+
 ## Fase 4 — Recetario, costeo y simulador (2026-10-11)
 
 Simulador de precio nuevo en Recetario, con margen **sobre precio de venta** (no sobre costo, como

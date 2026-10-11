@@ -85,7 +85,16 @@
 - [ ] Borrar si se quiere: cuentas de prueba `qa.tejedora.*@gmail.com`/`qa.ventas.*@gmail.com`, la
       sede "Bogotá" y varios pedidos de prueba ("Gorro canal-test", dos "Amigurumi Osito" con precio
       $0), creados durante la verificación de las Fases 1-3.
-- [ ] Fase 5 — Inventario multisede (siguiente).
+- [x] Fase 5 — Inventario multisede. Migración `0012` corrida (`suppliers`, `supply_lots`,
+      `purchase_orders`/`purchase_order_lines`, `stock_transfers`, RPCs `advance_purchase_order`/
+      `complete_transfer`, trigger de reorden automático). Verificado con el servidor real: ciclo
+      completo de una OC con costo promedio ponderado exacto, reorden automático al cruzar el umbral,
+      transferencia real entre sedes. Dos problemas reales encontrados y corregidos (botón de avanzar
+      OC sin `useTransition`; falta de UI para crear proveedores). Ver `docs/CHANGELOG.md` y
+      `docs/bitacora.md`.
+- [ ] Borrar si se quiere (datos de prueba de la Fase 5): proveedor "Lanas del Valle", la OC
+      `#C25BA8` (borrador, creada por reorden automático) y los 30g de "Lana café" transferidos a la
+      sede "Bogotá".
 - [ ] **Fase 6 — Finanzas y facturación: excluida por ahora** (pedido explícito del usuario,
       2026-10-11). No empezar sin que lo pida de nuevo.
 - [ ] **Fase 7 — Integraciones, seguridad y plan: excluida por ahora** (mismo pedido). No empezar

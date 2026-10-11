@@ -57,6 +57,7 @@ export type Supply = {
   unit_cost: number;
   low_stock_threshold: number;
   location_id: string | null;
+  supplier_id: string | null;
 };
 
 export type Product = {
@@ -139,6 +140,63 @@ export type Availability = {
   user_id: string;
   weekday: number; // 0 = lunes .. 6 = domingo
   hours: number;
+};
+
+export type Supplier = {
+  id: string;
+  tenant_id: string;
+  name: string;
+  contact: string | null;
+};
+
+export type SupplyLot = {
+  id: string;
+  supply_id: string;
+  supplier_id: string | null;
+  lot_code: string | null;
+  quantity_received: number;
+  unit_cost: number;
+  received_at: string;
+  purchase_order_id: string | null;
+  created_at: string;
+};
+
+export type PurchaseOrderStatus = "borrador" | "por_aprobar" | "en_transito" | "recibida";
+
+export type PurchaseOrderLine = {
+  id: string;
+  purchase_order_id: string;
+  supply_id: string;
+  quantity: number;
+  unit_cost: number;
+  supplies?: Pick<Supply, "name" | "unit"> | null;
+};
+
+export type PurchaseOrder = {
+  id: string;
+  tenant_id: string;
+  location_id: string | null;
+  supplier_id: string | null;
+  status: PurchaseOrderStatus;
+  notes: string | null;
+  auto_created: boolean;
+  created_at: string;
+  approved_at: string | null;
+  received_at: string | null;
+  purchase_order_lines?: PurchaseOrderLine[];
+  suppliers?: Pick<Supplier, "name"> | null;
+  locations?: Pick<Location, "name"> | null;
+};
+
+export type StockTransfer = {
+  id: string;
+  tenant_id: string;
+  from_supply_id: string;
+  to_location_id: string;
+  quantity: number;
+  status: "pendiente" | "completada";
+  created_at: string;
+  completed_at: string | null;
 };
 
 export type Transaction = {
