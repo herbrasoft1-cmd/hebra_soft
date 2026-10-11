@@ -2,6 +2,48 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Fase 8 — Móvil por rol y portal del cliente (2026-10-11)
+
+Las Fases 6 y 7 siguen excluidas, así que el roadmap saltó directo de la 5 a la 8. Los 3 mockups
+(`Ent-Movil-Turno`, `Ent-Movil-Pedido`, `Ent-Portal`) asumen anticipos/pasarela de pago (Wompi/PSE/
+Nequi) — exactamente lo que excluyen esas dos fases. Se resolvió con **saldo real sin pasarela**:
+el saldo se calcula de verdad como `precio×cantidad − Σ transacciones de ingreso ligadas al pedido`
+(reutilizando `transactions.order_id`, que ya existía) y el botón de pago se volvió un mensaje de
+WhatsApp prellenado con el monto, no un cobro real.
+
+- Migración `0013`: `product_steps` (pasos del patrón) + `order_step_progress` (marcado por pedido,
+  vía RPC `toggle_order_step`, sin insert/update/delete directo). `orders.tracking_token` (token
+  aleatorio, autogenerado con `gen_random_uuid()`, no `gen_random_bytes` — pgcrypto no está en el
+  search_path de las funciones `security definer` de este proyecto) y `orders.progress_photo_url`.
+  RPC `get_order_tracking` (autoriza por token, no por sesión, igual que `accept_invitation`;
+  proyecta solo los campos mínimos del mockup, nunca `select *`) y `get_order_balance`/
+  `register_order_payment` para el saldo real. Bucket de Storage `avance` (foto de avance), mismo
+  patrón que el bucket `logos`.
+- **"Mi turno"** (`src/app/(app)/inicio/shift-home.tsx`): nueva vista de Inicio solo para tejedora
+  (antes compartía `SimpleHome` con Ventas). No se creó el bottom-nav de 4 pestañas del mockup (Mi
+  turno/Tareas/Patrones/Perfil) — se reutiliza el actual (Tareas ya es Pedidos propio, Patrones ya es
+  Recetario), mismo criterio de "evolucionar, no bifurcar" de toda la sesión. Cronómetro con barra de
+  progreso contra la meta del patrón, pasos del patrón marcables, una sola foto de avance (no
+  galería).
+- Editor de pasos en Recetario (`product_steps` no tenía ninguna UI para crearse — se agregó, mismo
+  patrón que el gap de proveedores encontrado en la Fase 5).
+- Detalle de pedido móvil nuevo (`/pedidos/[id]`, no existía): línea de tiempo, alerta de riesgo
+  (reutiliza `ordersAtRisk` de `analytics.ts`), tarjeta de pago con saldo real y registro de abonos,
+  "Compartir seguimiento", reutiliza `moveOrder`/`assignOrder`/`markPaid` ya existentes de Pedidos.
+- Portal público `/seguimiento/[token]` (fuera de `(app)`, agregado a `PUBLIC_PATHS` en `proxy.ts`):
+  sin sesión, por token.
+- **Bug real encontrado en la verificación con el servidor real:** el helper `revalidate()` de
+  `pedidos/actions.ts` solo llamaba `revalidatePath("/pedidos")`, que no revalida la ruta dinámica
+  `/pedidos/[id]` — así que registrar un abono desde el propio detalle del pedido no actualizaba el
+  saldo en pantalla (sí quedaba guardado en la base, solo no se reflejaba). Se corrigió agregando
+  `revalidatePath("/pedidos/[id]", "page")` al helper compartido.
+- Verificado de punta a punta con datos reales: cronómetro + pasos + foto en "Mi turno" (persistidos
+  tras recargar); dos abonos reales ($20.000 + $10.000) reflejados correctamente en el saldo
+  ($45.000 → $15.000); portal abierto en un contexto de Playwright sin `storageState` (sin sesión)
+  mostrando exactamente el saldo real y nada más que los campos del mockup; token inválido → 404.
+- `npm run lint`/`test` (64/64, +8 nuevas de `tracking.ts`)/`build` pasan limpio. Casilla de la Fase
+  8 marcada en `docs/ROADMAP.md`.
+
 ## Fase 5 — Inventario multisede (2026-10-11)
 
 Antes de diseñar nada se revisó a fondo el esquema de `supplies` porque esta fase toca el corazón

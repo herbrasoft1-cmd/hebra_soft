@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { IconBack } from "@/components/icons";
 import { canFully } from "@/lib/permissions";
 import { getSession } from "@/lib/tenant";
-import type { Membership, Product, ProductSupply, ProductVersion, SalesChannel, Supply } from "@/lib/types";
+import type { Membership, Product, ProductStep, ProductSupply, ProductVersion, SalesChannel, Supply } from "@/lib/types";
 import { getIndustryModule } from "@/modules";
 import { RecipeEditor } from "./recipe-editor";
 import { RecipeViewer, type ReadonlyLine } from "./recipe-viewer";
@@ -21,7 +21,7 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
 
   const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000).toISOString();
 
-  const [{ data: product }, { data: lines }, { data: supplies }, { data: channels }, { data: versions }, { data: members }, { count: soldCount }, { data: timerSessions }] =
+  const [{ data: product }, { data: lines }, { data: supplies }, { data: channels }, { data: versions }, { data: members }, { count: soldCount }, { data: timerSessions }, { data: steps }] =
     await Promise.all([
       supabase.from("products").select("*").eq("id", id).eq("tenant_id", tenant.id).maybeSingle(),
       supabase.from("product_supplies").select(linesSelect).eq("product_id", id).eq("tenant_id", tenant.id),
@@ -39,6 +39,7 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
       canEdit
         ? supabase.from("timer_sessions").select("user_id, order_id, seconds").eq("tenant_id", tenant.id).eq("product_id", id).not("order_id", "is", null)
         : Promise.resolve({ data: [] }),
+      canEdit ? supabase.from("product_steps").select("*").eq("product_id", id).order("position") : Promise.resolve({ data: [] }),
     ]);
 
   if (!product) notFound();
@@ -64,6 +65,7 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
           members={(members ?? []) as Membership[]}
           soldLast90Days={soldCount ?? 0}
           timerSessions={(timerSessions ?? []) as { user_id: string; order_id: string | null; seconds: number }[]}
+          steps={(steps ?? []) as ProductStep[]}
         />
       ) : (
         <RecipeViewer

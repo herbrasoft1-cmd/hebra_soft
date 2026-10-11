@@ -99,7 +99,18 @@
       2026-10-11). No empezar sin que lo pida de nuevo.
 - [ ] **Fase 7 — Integraciones, seguridad y plan: excluida por ahora** (mismo pedido). No empezar
       sin que lo pida de nuevo.
-- [ ] Fase 8 — Móvil por rol y portal del cliente.
+- [x] Fase 8 — Móvil por rol y portal del cliente. Migración `0013` corrida (`product_steps`,
+      `order_step_progress`, `orders.tracking_token`/`progress_photo_url`, RPCs `get_order_tracking`/
+      `get_order_balance`/`register_order_payment`/`toggle_order_step`, bucket `avance`). "Saldo real
+      sin pasarela" (decisión confirmada con el usuario): usa `transactions.order_id` existente, sin
+      Wompi/PSE/Nequi real. Verificado con el servidor real: "Mi turno" con cronómetro+pasos+foto;
+      saldo correcto tras dos abonos reales; portal público abierto sin sesión (`storageState` vacío)
+      mostrando solo los campos del mockup; token inválido → 404. Un bug real encontrado y corregido
+      (`revalidatePath("/pedidos")` no revalidaba `/pedidos/[id]`). Ver `docs/CHANGELOG.md` y
+      `docs/bitacora.md`.
+- [ ] Borrar si se quiere (datos de prueba de la Fase 8): los 3 pasos agregados a "Amigurumi Osito"
+      en Recetario, la foto de avance subida al pedido `#B5F445`, y los dos abonos ($20.000 +
+      $10.000) registrados en el pedido `#A5A159` de Marcela Ríos.
 - [ ] Fase 9 — Listo para producción.
 
 ## Roadmap sugerido (del README original)

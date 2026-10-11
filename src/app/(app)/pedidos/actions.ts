@@ -11,6 +11,7 @@ const STATUSES: OrderStatus[] = ["espera", "proceso", "calidad", "enviado"];
 
 function revalidate() {
   revalidatePath("/pedidos");
+  revalidatePath("/pedidos/[id]", "page");
   revalidatePath("/inicio");
   revalidatePath("/insumos");
 }
@@ -88,6 +89,16 @@ export async function markPaid(formData: FormData) {
   const method = String(formData.get("payment_method") ?? "Transferencia");
   const { error } = await supabase.rpc("mark_order_paid", { p_order_id: id, p_payment_method: method });
   if (error) throw new Error("No se pudo registrar el pago.");
+  revalidate();
+  revalidatePath("/caja");
+}
+
+/** Registra un abono real del pedido (saldo = precio − Σ abonos), sin pasarela de pago. */
+export async function registerOrderPayment(orderId: string, amount: number, method: string) {
+  const { supabase, role } = await getSession();
+  if (!canFully(role, "manage_orders")) throw new Error("No tienes permiso para registrar pagos de este pedido.");
+  const { error } = await supabase.rpc("register_order_payment", { p_order_id: orderId, p_amount: amount, p_method: method });
+  if (error) throw new Error(error.message);
   revalidate();
   revalidatePath("/caja");
 }

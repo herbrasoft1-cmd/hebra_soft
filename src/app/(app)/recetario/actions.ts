@@ -106,6 +106,36 @@ export async function logTimerSession(s: {
   revalidatePath("/recetario");
 }
 
+/** Agrega un paso al patrón (lo tilda la tejedora desde "Mi turno", Fase 8). */
+export async function addProductStep(formData: FormData) {
+  const { supabase, tenant, role } = await getSession();
+  if (!canFully(role, "edit_recipes")) throw new Error("No tienes permiso para editar este patrón.");
+  const productId = String(formData.get("product_id"));
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return;
+  const detail = String(formData.get("detail") ?? "").trim() || null;
+  const { count } = await supabase.from("product_steps").select("id", { count: "exact", head: true }).eq("product_id", productId);
+
+  const { error } = await supabase
+    .from("product_steps")
+    .insert({ tenant_id: tenant.id, product_id: productId, name, detail, position: count ?? 0 });
+  if (error) throw new Error("No se pudo agregar el paso.");
+  revalidatePath(`/recetario/${productId}`);
+}
+
+export async function removeProductStep(formData: FormData) {
+  const { supabase, tenant, role } = await getSession();
+  if (!canFully(role, "edit_recipes")) throw new Error("No tienes permiso para editar este patrón.");
+  const productId = String(formData.get("product_id"));
+  const { error } = await supabase
+    .from("product_steps")
+    .delete()
+    .eq("id", String(formData.get("id")))
+    .eq("tenant_id", tenant.id);
+  if (error) throw new Error("No se pudo quitar el paso.");
+  revalidatePath(`/recetario/${productId}`);
+}
+
 /** "Publicar precio" del simulador: crea una versión nueva y actualiza el precio vigente del patrón. */
 export async function publishProductVersion(input: {
   productId: string;

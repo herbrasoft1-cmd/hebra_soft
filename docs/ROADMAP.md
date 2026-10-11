@@ -118,7 +118,7 @@ Estado: marca `[x]` al cerrar cada fase.
 
 ---
 
-## [ ] Fase 8 — Móvil por rol y portal del cliente
+## [x] Fase 8 — Móvil por rol y portal del cliente
 
 - Inicio de tejedora "Mi turno": pedido actual, cronómetro contra la meta, pasos del patrón (`product_steps`) marcables, siguiente tarea. Subir foto del avance (Storage).
 - Detalle de pedido móvil: línea de tiempo en hebra, riesgo, cliente, saldo y "enviar link de pago".

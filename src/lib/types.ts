@@ -131,7 +131,25 @@ export type Order = {
   channel: string | null;
   created_at: string;
   assigned_to: string | null;
+  tracking_token: string | null;
+  progress_photo_url: string | null;
   customers?: Pick<Customer, "name" | "whatsapp" | "instagram" | "address"> | null;
+};
+
+export type ProductStep = {
+  id: string;
+  tenant_id: string;
+  product_id: string;
+  position: number;
+  name: string;
+  detail: string | null;
+};
+
+export type OrderStepProgress = {
+  id: string;
+  order_id: string;
+  step_id: string;
+  done_at: string;
 };
 
 export type Availability = {

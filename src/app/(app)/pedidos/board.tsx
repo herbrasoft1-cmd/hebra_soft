@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useOptimistic, useState, useTransition } from "react";
 import { ordersAtRisk } from "@/lib/analytics";
 import { IconArrowRight, IconPlus, IconTrash } from "@/components/icons";
@@ -413,6 +414,9 @@ function OrderCard({
         {canUseTimer && product && o.status !== "enviado" && (
           <OrderTimerButton orderId={o.id} productId={product.id} productName={product.name} />
         )}
+        <Link href={`/pedidos/${o.id}`} className="btn-ghost min-h-11 flex-1 px-3 text-sm">
+          Detalle
+        </Link>
         {wa && (
           <a href={wa} target="_blank" rel="noreferrer" className="btn-ghost min-h-11 flex-1 px-3 text-sm">
             WhatsApp

@@ -25,6 +25,7 @@ import { getSession } from "@/lib/tenant";
 import type { Order, OrderStatus, Supply, Tenant } from "@/lib/types";
 import { getIndustryModule, type IndustryModule } from "@/modules";
 import { HomeActions } from "./home-actions";
+import { ShiftHome } from "./shift-home";
 
 export const metadata = { title: "Inicio" };
 
@@ -39,11 +40,15 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   if (canFully(role, "view_finance")) {
     return ExecutivePanel({ session, tenant, mod });
   }
+  if (role === "tejedora") {
+    return ShiftHome({ session, tenant, mod });
+  }
   return SimpleHome({ session, tenant, mod, accion });
 }
 
 // =============================================================================
-// Vista simple (Ventas, Tejedora): tal cual la del MVP, sin datos financieros.
+// Vista simple (Ventas): tal cual la del MVP, sin datos financieros.
+// La tejedora tiene su propia vista "Mi turno" (ShiftHome, Fase 8).
 // =============================================================================
 
 const SPARK_DAYS = 14;

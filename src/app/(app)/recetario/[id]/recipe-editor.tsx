@@ -6,8 +6,8 @@ import { SubmitButton } from "@/components/submit-button";
 import { useTimer } from "@/components/timer";
 import { averageSecondsPerPiece, costBreakdown } from "@/lib/costing";
 import { UNIT_LABEL, clock, duration, money, unitMoney } from "@/lib/format";
-import type { Membership, Product, ProductSupply, ProductVersion, SalesChannel, Supply } from "@/lib/types";
-import { deleteProduct, removeRecipeLine, updateProduct, upsertRecipeLine } from "../actions";
+import type { Membership, Product, ProductStep, ProductSupply, ProductVersion, SalesChannel, Supply } from "@/lib/types";
+import { addProductStep, deleteProduct, removeProductStep, removeRecipeLine, updateProduct, upsertRecipeLine } from "../actions";
 import { CostingSimulator } from "./costing-simulator";
 
 type Props = {
@@ -24,10 +24,11 @@ type Props = {
   members: Membership[];
   soldLast90Days: number;
   timerSessions: { user_id: string; order_id: string | null; seconds: number }[];
+  steps: ProductStep[];
 };
 
 export function RecipeEditor(props: Props) {
-  const { product, lines, supplies, hourlyRate, toolWearPct, versions, members, soldLast90Days, timerSessions } = props;
+  const { product, lines, supplies, hourlyRate, toolWearPct, versions, members, soldLast90Days, timerSessions, steps } = props;
   const { timer, elapsed, running, start, pause, resume, stop } = useTimer();
   const isThis = timer?.productId === product.id;
   const liveSeconds = product.labor_seconds + (isThis ? elapsed : 0);
@@ -281,6 +282,43 @@ export function RecipeEditor(props: Props) {
             {supplies.length === 0 && (
               <p className="text-sm text-muted">Primero registra tus compras en Insumos para poder usarlas aquí.</p>
             )}
+          </section>
+
+          {/* Pasos del patrón: se tildan por pedido desde "Mi turno" (Fase 8) */}
+          <section className="flex flex-col gap-3">
+            <h2 className="font-display text-xl font-semibold">Pasos del patrón</h2>
+            <div className="card flex flex-col">
+              {steps.length === 0 && <p className="p-4 text-sm text-muted">Sin pasos todavía. Ayuda a que "Mi turno" guíe a tu equipo.</p>}
+              {steps.map((s) => (
+                <div key={s.id} className="flex items-center gap-3 border-b border-border px-4 py-3 last:border-0">
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-[15px] font-medium">{s.name}</span>
+                    {s.detail && <span className="truncate text-xs text-muted">{s.detail}</span>}
+                  </span>
+                  <form action={removeProductStep}>
+                    <input type="hidden" name="id" value={s.id} />
+                    <input type="hidden" name="product_id" value={product.id} />
+                    <button aria-label={`Quitar ${s.name}`} className="icon-btn size-10">
+                      <IconTrash size={18} />
+                    </button>
+                  </form>
+                </div>
+              ))}
+              <form action={addProductStep} className="flex flex-wrap items-end gap-2.5 p-3">
+                <input type="hidden" name="product_id" value={product.id} />
+                <label className="field min-w-32 flex-1">
+                  Nuevo paso
+                  <input className="input" name="name" placeholder="Ej. Cabeza" required />
+                </label>
+                <label className="field min-w-44 flex-[2]">
+                  Detalle (opcional)
+                  <input className="input" name="detail" placeholder="Ej. 6 vueltas en aumento" />
+                </label>
+                <SubmitButton className="btn-ghost" pendingText="…">
+                  Agregar
+                </SubmitButton>
+              </form>
+            </div>
           </section>
 
           {/* Tiempo real por tejedora */}

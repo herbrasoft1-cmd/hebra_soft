@@ -518,3 +518,54 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     en una sede específica era desproporcionado frente a lo que ya prueban esos tests.
   - `npm run lint`/`test` (56/56, +8 nuevas de `inventory.ts`)/`build` pasan limpio. Casilla de la
     Fase 5 marcada en `docs/ROADMAP.md`, entrada en `docs/CHANGELOG.md`.
+
+- **Fase 8 del roadmap Enterprise: móvil por rol y portal del cliente (mismo día).** Las Fases 6 y 7
+  siguen excluidas, así que tocaba saltar directo de la 5 a la 8.
+  - Antes de escribir código se investigó a fondo el esquema existente (agente Explore) para no
+    reinventar nada: `product_steps` no existía (había que crearla); el cronómetro
+    (`timer.tsx`/`TimerProvider`) y `OrderTimerButton` ya resolvían iniciar/pausar/parar, "Mi turno"
+    solo necesitaba leer su estado; `ordersAtRisk` de `analytics.ts` servía tal cual para la alerta de
+    riesgo de un solo pedido; `moveOrder`/`assignOrder`/`markPaid` de Pedidos ya cubrían "pasar a
+    calidad"/"sumar apoyo"/"marcar pagado", solo había que reutilizarlos en la pantalla nueva.
+  - **Tensión real encontrada:** los 3 mockups (`Ent-Movil-Turno`, `Ent-Movil-Pedido`, `Ent-Portal`)
+    asumen anticipos y una pasarela de pago real (Wompi/PSE/Nequi) — exactamente lo que excluyen las
+    Fases 6 y 7. Se le preguntó al usuario antes de inventar nada; eligió "saldo real sin pasarela":
+    el saldo sale de verdad de `precio×cantidad − Σ transacciones de ingreso ligadas al pedido`
+    (reutilizando `transactions.order_id`, que ya existía desde el MVP), y el botón de pago se volvió
+    un link de WhatsApp con el monto prellenado — honesto sobre que no hay pasarela todavía.
+  - **Migración `0013`:** `product_steps` + `order_step_progress` (esta última sin insert/update/
+    delete directo, solo vía RPC `toggle_order_step`, mismo patrón que `supply_lots` de la Fase 5).
+    `orders.tracking_token` (generado con `gen_random_uuid()`, no `gen_random_bytes` — ya documentado
+    que pgcrypto no está en el `search_path` de las funciones `security definer` de este proyecto) y
+    `orders.progress_photo_url`. RPC `get_order_tracking` (autoriza por token, no por sesión, mismo
+    mecanismo que `accept_invitation`; proyecta solo los campos mínimos del mockup, nunca `select *`)
+    y `get_order_balance`/`register_order_payment`. Bucket de Storage `avance`, mismo patrón que
+    `logos`.
+  - **Decisión de alcance deliberada:** no se construyó el bottom-nav de 4 pestañas del mockup para
+    tejedora (Mi turno/Tareas/Patrones/Perfil) — se reutiliza el actual (Insumos/Recetario/Pedidos ya
+    cubren "Patrones"/"Tareas"), mismo criterio de "evolucionar, no bifurcar" repetido toda la
+    sesión. El Inicio de tejedora (antes compartía `SimpleHome` con Ventas) se separó en su propio
+    `ShiftHome` ("Mi turno").
+  - **Gap real encontrado:** `product_steps` no tenía ninguna UI para crearse — se agregó un editor
+    simple de pasos en Recetario (lista + alta + borrado), mismo patrón que el gap de proveedores
+    encontrado en la Fase 5.
+  - **Bug real encontrado en la verificación con el servidor real:** el helper `revalidate()`
+    compartido de `pedidos/actions.ts` solo llamaba `revalidatePath("/pedidos")`, que en Next.js NO
+    revalida la ruta dinámica `/pedidos/[id]` — así que registrar un abono (o cualquier otra acción)
+    desde el propio detalle de un pedido guardaba bien el dato en la base pero la pantalla se quedaba
+    mostrando el saldo viejo hasta navegar a otra pantalla y volver. Se corrigió agregando
+    `revalidatePath("/pedidos/[id]", "page")` al helper.
+  - **Nota de proceso:** durante la verificación se encontraron varios pasos duplicados en el editor
+    de Recetario (p. ej. "Orejas y bordado" dos veces) — resultó ser un artefacto de los propios
+    scripts de prueba de Playwright (esperas insuficientes entre envíos de formulario, no un bug de
+    la app): se confirmó reproduciendo cada paso por separado con esperas explícitas por el contenido
+    esperado en pantalla, y se limpiaron los datos de prueba duplicados antes de seguir.
+  - **Verificado de punta a punta con datos reales:** cronómetro corriendo + barra de meta reactiva +
+    paso tildado sin interrumpir el cronómetro + foto de avance subida y persistida tras recargar, en
+    "Mi turno" con la cuenta tejedora real; dos abonos reales ($20.000 y $10.000) sobre un pedido de
+    $45.000 reflejados correctamente como saldo $15.000 en el detalle móvil; portal público abierto
+    en un contexto de Playwright **sin `storageState`** (visitante anónimo real, sin cuenta HEBRA)
+    mostrando el saldo exacto y nada más que los campos del mockup (sin costos, sin datos de otros
+    pedidos); un token inválido devuelve 404 limpio.
+  - `npm run lint`/`test` (64/64, +8 nuevas de `tracking.ts`)/`build` pasan limpio. Casilla de la
+    Fase 8 marcada en `docs/ROADMAP.md`, entrada en `docs/CHANGELOG.md`.

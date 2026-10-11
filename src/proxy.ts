@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/registro", "/offline", "/auth", "/invitar"];
+const PUBLIC_PATHS = ["/login", "/registro", "/offline", "/auth", "/invitar", "/seguimiento"];
 
 /**
  * Proxy (antes "middleware"): refresca la sesión de Supabase en cada request
