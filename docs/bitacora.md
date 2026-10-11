@@ -442,3 +442,40 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     (dato de prueba, se puede borrar). Capacidad del taller real, tejedora asignada a pedido, "sin
     asignar", "reasignar automáticamente" y `sales_channels` con comisiones quedan para la Fase 3/4,
     como estaba documentado en el plan.
+
+- **Fase 4 del roadmap Enterprise: recetario, costeo y simulador (día siguiente).** Antes de seguir,
+  el usuario pidió explícitamente excluir las Fases 6 y 7 por ahora (anotado en `docs/ROADMAP.md` y
+  `docs/pendientes.md`), luego pidió seguir con la Fase 4.
+  - A diferencia de mockups anteriores, `Ent-Costeo.dc.html` trae la fórmula exacta en su
+    `<script>` — se reprodujo a mano con los datos del criterio de aceptación (materiales 8.750,
+    200 min, $12.000/h, 5% desgaste, canal directo, margen 40%) y dio exactamente $85.400 antes de
+    escribir una sola línea de código, confirmando la fórmula sin adivinar nada:
+    `neto = ceil((costo + fijo_canal) / (1 − margen − %comisión) / 100) × 100`.
+  - **Decisiones de alcance:** se omitió la columna "Lote" de materiales (son lotes de inventario,
+    `supply_lots`, un concepto explícito de la Fase 5 que no existe); "gastos fijos de la sede" para
+    el punto de equilibrio se resolvió con un campo manual en el simulador, no un dato persistido
+    (eso es más de Finanzas — Fase 6, ya excluida); "tiempo real por tejedora" sí se pudo calcular de
+    verdad gracias a `timer_sessions.order_id` de la Fase 3 (solo cuentan sesiones vinculadas a un
+    pedido, las sueltas de Recetario son para afinar la receta).
+  - **Migración `0011`:** `sales_channels` (canales de venta configurables, con backfill de los 4
+    del mockup) y `product_versions` (+ RPC `publish_product_version`). De paso se corrigió
+    `create_tenant()`: los negocios nuevos no recibían la sede "Principal" — gap real de la Fase 1
+    que solo se backfilleó para los tenants que existían en ese momento, nunca para los nuevos.
+  - **`src/lib/costing.ts`:** `simulatorPrice()` (con prueba que verifica el valor exacto $85.400 del
+    criterio de aceptación) y `averageSecondsPerPiece()`, con pruebas.
+  - `CostingSimulator` nuevo conecta `ChoiceCard` y `Toggle`, construidos desde la Fase 0 y nunca
+    usados hasta ahora.
+  - **Bug real encontrado por la verificación con el servidor real, no por leer el código:** el
+    switch de IVA tenía un `<button>` anidado dentro de otro `<button>` (HTML inválido), causando un
+    error de hidratación de React que dejaba la pantalla trabada en el esqueleto de carga — se vio
+    en una captura de Playwright, no en ninguna prueba automatizada ni en el build. Se corrigió
+    cambiando el contenedor externo de `<button>` a `<div>`.
+  - **Verificado de punta a punta:** el simulador con los datos reales de un patrón del usuario
+    calculó exactamente lo mismo a mano ($15.800 con materiales $3.000, 30 min, $12.000/h, margen
+    40%); "Publicar precio" creó la versión y, tras recargar la página, "Versión 1 · vigente" seguía
+    ahí — confirma que quedó persistido de verdad, no solo en el estado del cliente.
+  - El usuario pidió avanzar a la fase siguiente antes de pedir la verificación completa de esta —
+    se hizo de todas formas una verificación real (no solo build/tests) porque fue así como se
+    encontró el bug del `<button>` anidado; quedó resuelto antes de cerrar la fase.
+  - `npm run lint`/`test` (49/49, +8 nuevas de `costing.ts`)/`build` pasan limpio. Casilla de la
+    Fase 4 marcada en `docs/ROADMAP.md`, entrada en `docs/CHANGELOG.md`.

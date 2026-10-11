@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
+import { canFully } from "@/lib/permissions";
 import { getSession } from "@/lib/tenant";
 
 export async function updateTenant(formData: FormData) {
@@ -51,5 +52,18 @@ export async function createLocation(formData: FormData) {
   const { error } = await supabase.from("locations").insert({ tenant_id: tenant.id, name });
   if (error) throw new Error("No se pudo crear la sede.");
   await logAudit(supabase, { tenantId: tenant.id, action: "create_location", entityType: "location", metadata: { name } });
+  revalidatePath("/", "layout");
+}
+
+export async function createSalesChannel(formData: FormData) {
+  const { supabase, tenant, role } = await getSession();
+  if (!canFully(role, "edit_recipes")) throw new Error("No tienes permiso para configurar canales de venta.");
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) throw new Error("Escribe un nombre para el canal.");
+  const commission_pct = Number(formData.get("commission_pct") ?? 0) || 0;
+  const fixed_fee = Number(formData.get("fixed_fee") ?? 0) || 0;
+  const { error } = await supabase.from("sales_channels").insert({ tenant_id: tenant.id, name, commission_pct, fixed_fee });
+  if (error) throw new Error("No se pudo crear el canal.");
+  await logAudit(supabase, { tenantId: tenant.id, action: "create_sales_channel", entityType: "sales_channel", metadata: { name } });
   revalidatePath("/", "layout");
 }

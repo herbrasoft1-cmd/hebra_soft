@@ -64,7 +64,7 @@ Estado: marca `[x]` al cerrar cada fase.
 
 ---
 
-## [ ] Fase 4 — Recetario, costeo y simulador
+## [x] Fase 4 — Recetario, costeo y simulador
 
 - Versiones de receta (`product_versions`): cada publicación de precio crea versión y queda en auditoría.
 - Lista de materiales por lote; tiempo real por tejedora (de `timer_sessions`) y su impacto en el costo.
@@ -88,7 +88,10 @@ Estado: marca `[x]` al cerrar cada fase.
 
 ---
 
-## [ ] Fase 6 — Finanzas y facturación
+## [ ] Fase 6 — Finanzas y facturación (excluida por ahora)
+
+> El usuario pidió explícitamente no hacer esta fase por el momento (2026-10-11). Se salta en el
+> orden del roadmap — seguir con la Fase 8 después de la 5 si esta sigue excluida.
 
 - Pagos parciales y anticipos (`payments`) con método; cartera por antigüedad (0–15, 16–30, 31–60, +60).
 - Estado de resultados: ingresos − materiales − mano de obra − comisiones − gastos fijos = utilidad neta (cascada).
@@ -101,7 +104,9 @@ Estado: marca `[x]` al cerrar cada fase.
 
 ---
 
-## [ ] Fase 7 — Integraciones, seguridad y plan
+## [ ] Fase 7 — Integraciones, seguridad y plan (excluida por ahora)
+
+> El usuario pidió explícitamente no hacer esta fase por el momento (2026-10-11).
 
 - Tabla `integrations` con estado por tenant y pantalla de tarjetas (Conectado / Disponible). Implementar primero: enlaces de pago (Wompi) y webhooks propios; el resto queda como "Disponible".
 - API keys por sede y webhooks de eventos (pedido creado/movido, pago recibido, stock bajo).

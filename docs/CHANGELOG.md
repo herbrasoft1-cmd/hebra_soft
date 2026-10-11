@@ -2,6 +2,41 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Fase 4 — Recetario, costeo y simulador (2026-10-11)
+
+Simulador de precio nuevo en Recetario, con margen **sobre precio de venta** (no sobre costo, como
+el anterior), usando la fórmula exacta de `Ent-Costeo.dc.html`: reproducida a mano con los datos de
+ejemplo del criterio de aceptación da exactamente $85.400, y quedó cubierta por una prueba que
+verifica ese número exacto.
+
+- Migración `0011`: tabla `sales_channels` (canales de venta configurables, con backfill de los 4
+  del mockup para tenants existentes), tabla `product_versions` (cada "Publicar precio" crea una
+  versión, con el desglose completo del costo) + RPC `publish_product_version`. De paso se corrigió
+  `create_tenant()`: los negocios nuevos no estaban recibiendo la sede "Principal" (gap real de la
+  Fase 1 que solo se backfilleó para los tenants que existían en ese momento) — ahora también siembra
+  los 4 canales de ejemplo.
+- `src/lib/costing.ts`: `simulatorPrice()` (la fórmula completa, con IVA aparte del margen — no es
+  ganancia del negocio) y `averageSecondsPerPiece()` (tiempo real por tejedora, solo cuenta sesiones
+  de cronómetro vinculadas a un pedido — las sueltas de Recetario son para afinar la receta, no
+  producción real). Con pruebas.
+- `CostingSimulator` nuevo reemplaza las secciones viejas de costo/precio en el editor de receta:
+  steppers de tiempo/valor-hora, canales (`ChoiceCard` de la Fase 0, por fin conectado), 4 botones de
+  margen, switch de IVA (`Toggle` de la Fase 0, también por fin conectado), barra de composición del
+  precio, punto de equilibrio con un campo manual de gastos fijos (no hay un lugar donde guardar eso
+  todavía — es más de Finanzas, Fase 6, excluida por ahora), y "Publicar precio".
+- Nueva sección "Tiempo real por tejedora" en Recetario, con el aviso de cuánto costaría la pieza si
+  todo el equipo tejiera al ritmo de la más rápida — calculado de verdad, no un texto fijo.
+- Canales de venta configurables en Configuración (`ChannelsSection`); el selector de canal del
+  formulario de pedidos pasa de una lista fija a estos mismos canales.
+- **Bug real encontrado y corregido durante la verificación con el servidor real:** el switch de
+  IVA tenía un `<button>` dentro de otro `<button>` (HTML inválido), causando un error de hidratación
+  en React que dejaba la pantalla en skeleton de carga. Se cambió el contenedor externo a `<div>`.
+- Verificado de punta a punta: el simulador con los datos reales de un patrón calculó exactamente lo
+  mismo que a mano; "Publicar precio" creó la versión, actualizó el precio vigente del patrón, y
+  "Versión N · vigente" se mantuvo después de recargar la página.
+- `npm run lint`/`test` (49/49, +8 nuevas de `costing.ts`)/`build` pasan limpio. Casilla de la
+  Fase 4 marcada en `docs/ROADMAP.md`.
+
 ## Fase 3 — Producción y capacidad (2026-10-10)
 
 Tejedora asignada a pedidos, horas estimadas, avance real y vista de Capacidad, usando

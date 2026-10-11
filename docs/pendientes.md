@@ -75,13 +75,23 @@
       punta a punta (incluida la sugerencia de reparto reasignando de verdad). Resuelve dos
       simplificaciones de fases anteriores (tejedora solo ve sus pedidos propios; 4 reglas completas
       de "Necesitan atención"). Ver `docs/CHANGELOG.md` y `docs/bitacora.md`.
+- [x] Fase 4 — Recetario, costeo y simulador. Migración `0011` corrida (`sales_channels`,
+      `product_versions`, y corrige que los negocios nuevos no recibían sede "Principal"). Simulador
+      con margen sobre precio de venta, probado contra el criterio de aceptación exacto ($85.400) y
+      con el servidor real. Un bug real encontrado y corregido (botón anidado en el switch de IVA).
+      Ver `docs/CHANGELOG.md` y `docs/bitacora.md`.
 - [ ] Reactivar "Confirm email" en Supabase (se desactivó para probar flujos con cuentas reales en
       las Fases 1-3).
 - [ ] Borrar si se quiere: cuentas de prueba `qa.tejedora.*@gmail.com`/`qa.ventas.*@gmail.com`, la
       sede "Bogotá" y varios pedidos de prueba ("Gorro canal-test", dos "Amigurumi Osito" con precio
       $0), creados durante la verificación de las Fases 1-3.
-- [ ] Fases 4-9: simulador de costeo, inventario multisede, finanzas/facturación, integraciones/
-      seguridad/plan, móvil por rol + portal de cliente, listo para producción.
+- [ ] Fase 5 — Inventario multisede (siguiente).
+- [ ] **Fase 6 — Finanzas y facturación: excluida por ahora** (pedido explícito del usuario,
+      2026-10-11). No empezar sin que lo pida de nuevo.
+- [ ] **Fase 7 — Integraciones, seguridad y plan: excluida por ahora** (mismo pedido). No empezar
+      sin que lo pida de nuevo.
+- [ ] Fase 8 — Móvil por rol y portal del cliente.
+- [ ] Fase 9 — Listo para producción.
 
 ## Roadmap sugerido (del README original)
 - [x] Invitar colaboradores a un negocio — ver "Versión enterprise" arriba.

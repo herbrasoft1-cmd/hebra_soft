@@ -70,6 +70,33 @@ export type Product = {
   sale_price: number | null;
 };
 
+export type SalesChannel = {
+  id: string;
+  tenant_id: string;
+  name: string;
+  commission_pct: number;
+  fixed_fee: number;
+};
+
+export type ProductVersion = {
+  id: string;
+  product_id: string;
+  version_number: number;
+  materials_cost: number;
+  labor_cost: number;
+  wear_cost: number;
+  hourly_rate: number;
+  labor_seconds: number;
+  channel_name: string | null;
+  commission_pct: number;
+  fixed_fee: number;
+  margin_pct: number;
+  iva_included: boolean;
+  net_price: number;
+  created_at: string;
+  created_by: string | null;
+};
+
 export type ProductSupply = {
   id: string;
   product_id: string;

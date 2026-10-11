@@ -5,10 +5,11 @@ import { SubmitButton } from "@/components/submit-button";
 import { ThemeToggle } from "@/components/theme";
 import { canFully } from "@/lib/permissions";
 import { getSession } from "@/lib/tenant";
-import type { Invitation, Location, Membership } from "@/lib/types";
+import type { Invitation, Location, Membership, SalesChannel } from "@/lib/types";
 import { INDUSTRY_OPTIONS } from "@/modules";
 import { ActivitySection } from "./activity-section";
 import { updateTenant } from "./actions";
+import { ChannelsSection } from "./channels-section";
 import { EquipoTabs } from "./equipo-tabs";
 import { LocationsSection } from "./locations-section";
 import { LogoUpload } from "./logo-upload";
@@ -19,7 +20,7 @@ export default async function SettingsPage() {
   const { supabase, tenant, user, role } = await getSession();
   if (!canFully(role, "view_finance")) redirect("/inicio");
 
-  const [{ data: members }, { data: invitations }, { data: activity }, { data: locations }] = await Promise.all([
+  const [{ data: members }, { data: invitations }, { data: activity }, { data: locations }, { data: channels }] = await Promise.all([
     supabase.rpc("list_members", { p_tenant_id: tenant.id }),
     supabase
       .from("invitations")
@@ -29,6 +30,7 @@ export default async function SettingsPage() {
       .order("created_at", { ascending: false }),
     supabase.rpc("list_audit_log", { p_tenant_id: tenant.id, p_limit: 50 }),
     supabase.from("locations").select("*").eq("tenant_id", tenant.id).order("name"),
+    supabase.from("sales_channels").select("*").eq("tenant_id", tenant.id).order("created_at"),
   ]);
 
   return (
@@ -84,8 +86,9 @@ export default async function SettingsPage() {
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <LocationsSection locations={(locations ?? []) as Location[]} />
+        <ChannelsSection channels={(channels ?? []) as SalesChannel[]} />
       </div>
 
       <div className="mt-6">

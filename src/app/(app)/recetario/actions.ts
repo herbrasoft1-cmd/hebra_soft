@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { logAudit } from "@/lib/audit";
 import { canFully } from "@/lib/permissions";
 import { getSession } from "@/lib/tenant";
+import type { ProductVersion } from "@/lib/types";
 
 export async function createProduct(formData: FormData) {
   const { supabase, tenant, role } = await getSession();
@@ -103,4 +104,42 @@ export async function logTimerSession(s: {
   if (s.orderId) revalidatePath("/pedidos");
   revalidatePath(`/recetario/${s.productId}`);
   revalidatePath("/recetario");
+}
+
+/** "Publicar precio" del simulador: crea una versión nueva y actualiza el precio vigente del patrón. */
+export async function publishProductVersion(input: {
+  productId: string;
+  materialsCost: number;
+  laborCost: number;
+  wearCost: number;
+  hourlyRate: number;
+  laborSeconds: number;
+  channelName: string | null;
+  commissionPct: number;
+  fixedFee: number;
+  marginPct: number;
+  ivaIncluded: boolean;
+  netPrice: number;
+}): Promise<ProductVersion> {
+  const { supabase, role } = await getSession();
+  if (!canFully(role, "edit_recipes")) throw new Error("No tienes permiso para publicar un precio.");
+  const { data, error } = await supabase.rpc("publish_product_version", {
+    p_product_id: input.productId,
+    p_materials_cost: input.materialsCost,
+    p_labor_cost: input.laborCost,
+    p_wear_cost: input.wearCost,
+    p_hourly_rate: input.hourlyRate,
+    p_labor_seconds: Math.round(input.laborSeconds),
+    p_channel_name: input.channelName,
+    p_commission_pct: input.commissionPct,
+    p_fixed_fee: input.fixedFee,
+    p_margin_pct: input.marginPct,
+    p_iva_included: input.ivaIncluded,
+    p_net_price: input.netPrice,
+  });
+  if (error || !data) throw new Error(error?.message ?? "No se pudo publicar el precio.");
+  revalidatePath(`/recetario/${input.productId}`);
+  revalidatePath("/recetario");
+  revalidatePath("/inicio");
+  return data as ProductVersion;
 }

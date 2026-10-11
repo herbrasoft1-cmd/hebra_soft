@@ -12,12 +12,11 @@ import { SegmentedControl } from "@/components/ui/segmented-control";
 import { dueLabel, money, whatsappLink } from "@/lib/format";
 import { canFully } from "@/lib/permissions";
 import { committedHours, dueUrgency, estimatedHours, progressPct, weeklyAvailableHours, type OrderForLoad } from "@/lib/production";
-import type { Availability, Customer, Membership, Order, OrderStatus, Role, Tenant } from "@/lib/types";
+import type { Availability, Customer, Membership, Order, OrderStatus, Role, SalesChannel, Tenant } from "@/lib/types";
 import { deleteOrder, markPaid, moveOrder, saveOrder } from "./actions";
 import { CapacityView } from "./capacity-view";
 import { OrderTimerButton } from "./order-timer-button";
 
-const CHANNELS = ["Instagram", "WhatsApp", "Tienda y ferias", "Tienda online", "Otro"];
 const STATUSES: OrderStatus[] = ["espera", "proceso", "calidad", "enviado"];
 const SHORT: Record<OrderStatus, string> = {
   espera: "En espera",
@@ -59,6 +58,7 @@ export function Board({
   availability,
   loggedSecondsByOrder,
   outOfStockByProduct,
+  channels,
 }: {
   orders: Order[];
   customers: Customer[];
@@ -72,6 +72,7 @@ export function Board({
   availability: Availability[];
   loggedSecondsByOrder: Record<string, number>;
   outOfStockByProduct: Record<string, string>;
+  channels: SalesChannel[];
 }) {
   const canIssueInvoices = canFully(role, "issue_invoices");
   const canAssign = canFully(role, "manage_orders");
@@ -179,9 +180,9 @@ export function Board({
             </select>
             <select className="input w-auto min-h-11" value={channelFilter} onChange={(e) => setChannelFilter(e.target.value)}>
               <option value="">Canal</option>
-              {CHANNELS.map((c) => (
-                <option key={c} value={c}>
-                  {c}
+              {channels.map((c) => (
+                <option key={c.id} value={c.name}>
+                  {c.name}
                 </option>
               ))}
             </select>
@@ -327,6 +328,7 @@ export function Board({
             customers={customers}
             products={products}
             crew={canAssign ? crew : []}
+            channels={channels}
             tenant={tenant}
             onDone={() => setEditing(null)}
           />
@@ -434,12 +436,14 @@ function OrderForm({
   customers,
   products,
   crew,
+  channels,
   onDone,
 }: {
   order: Order | null;
   customers: Customer[];
   products: ProductOpt[];
   crew: Crew[];
+  channels: SalesChannel[];
   tenant: Tenant;
   onDone: () => void;
 }) {
@@ -505,9 +509,9 @@ function OrderForm({
             Canal
             <select className="input" name="channel" defaultValue={order?.channel ?? ""}>
               <option value="">Sin especificar</option>
-              {CHANNELS.map((c) => (
-                <option key={c} value={c}>
-                  {c}
+              {channels.map((c) => (
+                <option key={c.id} value={c.name}>
+                  {c.name}
                 </option>
               ))}
             </select>

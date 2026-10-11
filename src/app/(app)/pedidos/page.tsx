@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { getActiveLocationId } from "@/lib/location";
 import { can, canFully } from "@/lib/permissions";
 import { getSession } from "@/lib/tenant";
-import type { Availability, Customer, Membership, Order } from "@/lib/types";
+import type { Availability, Customer, Membership, Order, SalesChannel } from "@/lib/types";
 import { getIndustryModule } from "@/modules";
 import { Board } from "./board";
 
@@ -26,16 +26,18 @@ export default async function OrdersPage() {
   // Tejedora: solo sus pedidos asignados + los que nadie ha tomado todavía.
   if (can(role, "manage_orders") === "own") ordersQuery = ordersQuery.or(`assigned_to.eq.${user.id},assigned_to.is.null`);
 
-  const [{ data: orders }, { data: customers }, { data: products }, { data: members }, { data: availability }] = await Promise.all([
-    ordersQuery.order("due_date", { ascending: true, nullsFirst: false }).limit(300),
-    supabase.from("customers").select("*").eq("tenant_id", tenant.id).order("name").limit(300),
-    supabase
-      .from("products")
-      .select("id, name, sale_price, labor_seconds, product_supplies(supplies(name, quantity_remaining))")
-      .eq("tenant_id", tenant.id),
-    supabase.rpc("list_members", { p_tenant_id: tenant.id }),
-    supabase.from("availability").select("*").eq("tenant_id", tenant.id),
-  ]);
+  const [{ data: orders }, { data: customers }, { data: products }, { data: members }, { data: availability }, { data: channels }] =
+    await Promise.all([
+      ordersQuery.order("due_date", { ascending: true, nullsFirst: false }).limit(300),
+      supabase.from("customers").select("*").eq("tenant_id", tenant.id).order("name").limit(300),
+      supabase
+        .from("products")
+        .select("id, name, sale_price, labor_seconds, product_supplies(supplies(name, quantity_remaining))")
+        .eq("tenant_id", tenant.id),
+      supabase.rpc("list_members", { p_tenant_id: tenant.id }),
+      supabase.from("availability").select("*").eq("tenant_id", tenant.id),
+      supabase.from("sales_channels").select("*").eq("tenant_id", tenant.id).order("created_at"),
+    ]);
 
   const list = (orders ?? []) as Order[];
   const orderIds = list.map((o) => o.id);
@@ -77,6 +79,7 @@ export default async function OrdersPage() {
         availability={(availability ?? []) as Availability[]}
         loggedSecondsByOrder={Object.fromEntries(loggedSecondsByOrder)}
         outOfStockByProduct={outOfStockByProduct}
+        channels={(channels ?? []) as SalesChannel[]}
       />
     </>
   );
