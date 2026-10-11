@@ -3,21 +3,23 @@ import { LogoutButton } from "@/components/logout-button";
 import { PageHeader } from "@/components/ui/page-header";
 import { SubmitButton } from "@/components/submit-button";
 import { ThemeToggle } from "@/components/theme";
+import { canFully } from "@/lib/permissions";
 import { getSession } from "@/lib/tenant";
-import type { Invitation, Membership } from "@/lib/types";
+import type { Invitation, Location, Membership } from "@/lib/types";
 import { INDUSTRY_OPTIONS } from "@/modules";
 import { ActivitySection } from "./activity-section";
 import { updateTenant } from "./actions";
+import { EquipoTabs } from "./equipo-tabs";
+import { LocationsSection } from "./locations-section";
 import { LogoUpload } from "./logo-upload";
-import { TeamSection } from "./team-section";
 
 export const metadata = { title: "Configuración" };
 
 export default async function SettingsPage() {
   const { supabase, tenant, user, role } = await getSession();
-  if (role === "staff") redirect("/inicio");
+  if (!canFully(role, "view_finance")) redirect("/inicio");
 
-  const [{ data: members }, { data: invitations }, { data: activity }] = await Promise.all([
+  const [{ data: members }, { data: invitations }, { data: activity }, { data: locations }] = await Promise.all([
     supabase.rpc("list_members", { p_tenant_id: tenant.id }),
     supabase
       .from("invitations")
@@ -26,6 +28,7 @@ export default async function SettingsPage() {
       .is("accepted_at", null)
       .order("created_at", { ascending: false }),
     supabase.rpc("list_audit_log", { p_tenant_id: tenant.id, p_limit: 50 }),
+    supabase.from("locations").select("*").eq("tenant_id", tenant.id).order("name"),
   ]);
 
   return (
@@ -81,13 +84,21 @@ export default async function SettingsPage() {
         </div>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <TeamSection
+      <div className="mt-6">
+        <LocationsSection locations={(locations ?? []) as Location[]} />
+      </div>
+
+      <div className="mt-6">
+        <EquipoTabs
           members={(members ?? []) as Membership[]}
           invitations={(invitations ?? []) as Invitation[]}
           viewerRole={role}
           viewerId={user.id}
+          locations={(locations ?? []) as Location[]}
         />
+      </div>
+
+      <div className="mt-6">
         <ActivitySection entries={activity ?? []} />
       </div>
 

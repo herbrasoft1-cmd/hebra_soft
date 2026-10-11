@@ -43,3 +43,13 @@ export async function uploadLogo(formData: FormData): Promise<{ error?: string }
   revalidatePath("/configuracion");
   return {};
 }
+
+export async function createLocation(formData: FormData) {
+  const { supabase, tenant } = await getSession();
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) throw new Error("Escribe un nombre para la sede.");
+  const { error } = await supabase.from("locations").insert({ tenant_id: tenant.id, name });
+  if (error) throw new Error("No se pudo crear la sede.");
+  await logAudit(supabase, { tenantId: tenant.id, action: "create_location", entityType: "location", metadata: { name } });
+  revalidatePath("/", "layout");
+}

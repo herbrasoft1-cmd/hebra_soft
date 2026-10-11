@@ -289,3 +289,62 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
   - Casilla de la Fase 0 marcada en `docs/ROADMAP.md`, entrada agregada en `docs/CHANGELOG.md`.
   - **Pendiente:** decidir qué hacer con el trabajo de equipo/roles (Fase 1 real todavía no
     empieza) — sigue siendo la pregunta abierta más importante de `docs/ESTADO.md`.
+
+- **Fase 1 del roadmap Enterprise: sedes, roles y equipo (mismo día, sesión siguiente).** El usuario
+  resolvió la pregunta abierta ("Evolucionar lo existente") y pidió seguir con la Fase 1. Antes de
+  planear se leyó el `<script>` de `docs/mockups/Ent-Equipo.dc.html` directamente (trae datos reales
+  de ejemplo, no solo plantillas `{{}}`) para sacar la matriz de permisos exacta en vez de adivinarla
+  — ahí salió un dato que corrigió una suposición de la sesión anterior: **solo la Propietaria
+  gestiona equipo**, ni siquiera Administración.
+  - **Migraciones `0006`-`0008`** (en archivos separados porque Postgres no deja usar un valor nuevo
+    de `ALTER TYPE ... ADD VALUE` en la misma transacción implícita del SQL Editor donde se agregó):
+    tabla `locations` + sede "Principal" por tenant (backfill); `location_id` nullable en
+    `supplies`/`orders`/`transactions`/`timer_sessions`/`memberships`/`invitations`; roles
+    `ventas`/`tejedora` agregados al enum, backfill de `staff`→`tejedora`; `create_invitation`/
+    `update_member_role`/`remove_member` apretados a solo `owner` (antes `admin` también podía);
+    `create_remission` restringido a owner/admin/ventas también a nivel de base, no solo en la UI.
+    Dos bugs reales de estas migraciones, encontrados al probar con cuentas reales (no por leer el
+    código): `list_members` no se podía `CREATE OR REPLACE` con columnas de salida nuevas (hubo que
+    `DROP FUNCTION` primero) y `create_invitation` usaba `gen_random_bytes()` de `pgcrypto`, que no
+    está en el `search_path` restringido a `public` de la función — se cambió el token a
+    `gen_random_uuid()` (nativo de Postgres, sin depender de ninguna extensión).
+  - **`src/lib/permissions.ts` nuevo:** la matriz de 8 permisos × 4 roles tal cual el mockup, como
+    datos tipados (`can(role, permission)`, valores `true`/`false`/`"own"`), con `permissions.test.ts`
+    cubriendo las 32 celdas una por una.
+  - **La fuga de costos real que había que cerrar:** Recetario le mandaba a cualquier miembro
+    (incluida la futura tejedora) el costo de materiales, el valor de la hora y el desgaste de
+    herramientas, en la lista y en el editor — vía props de Server Component a Client Component, así
+    que viajaba en el JSON igual aunque la UI lo escondiera. Se cortó en el origen: la consulta a
+    Supabase ni siquiera pide `unit_cost`/`hourly_rate` cuando el rol no tiene `view_costs`, y hay un
+    componente de solo lectura nuevo (`recipe-viewer.tsx`) para quien no tiene `edit_recipes` — sin
+    costo ni precio sugerido, pero con el cronómetro de talento completo (eso sí le toca a tejedora).
+  - Botón de Remisión en Pedidos gateado por `issue_invoices`; acceso a Caja/Analítica/Configuración
+    por `view_finance`; pestaña nueva "Roles y permisos" en Equipo (misma matriz, sin duplicar datos)
+    y sección "Sedes" para crear sedes nuevas.
+  - Selector de sede global en la barra superior, persistido en cookie (`hebra_location`), que sí
+    filtra Insumos/Pedidos/Caja de verdad — no es decorativo. Los insumos/pedidos/movimientos nuevos
+    heredan la sede activa al crearse.
+  - **Verificado de punta a punta con cuentas reales, no solo con el dueño:** se automatizó con
+    Playwright el flujo completo invitación → registro → aceptación para una cuenta `tejedora` y una
+    `ventas` (hubo que pedirle al usuario desactivar "Confirm email" en Supabase temporalmente, como
+    en la sesión de QA visual anterior). Confirmado: ninguna de las dos ve costos ni en la UI ni en
+    las respuestas de red de `/recetario`; tejedora no ve el botón de Remisión en ningún estado,
+    ventas sí lo ve al llegar el pedido a "Control de calidad"; ninguna de las dos puede entrar a
+    Caja/Analítica/Configuración ni por menú ni por URL directa; el filtro de sede deja Insumos vacío
+    al elegir una sede sin datos y los vuelve a mostrar con "Todas las sedes".
+  - **Dos bugs reales de código encontrados por esa verificación** (no por leer el código, por verlo
+    fallar): el enlace "Crea tu cuenta" de `/login` perdía el token de invitación al pasar por ahí
+    sin sesión (terminaría creando un negocio nuevo en vez de unirse al que invitó — se arregló
+    extrayendo el token de `next` y pasándolo también como `invite`); y el selector de sede de
+    `TopBar` no se resincronizaba visualmente tras revalidar (es un `<select>` no controlado con
+    `defaultValue` — se arregló con un `key={activeLocationId}` que fuerza el remount). También se
+    encontró y corrigió en el camino un `<form action={fn}>` con una función inline no serializable
+    en un Server Component (`locations-section.tsx`).
+  - `npm run lint`/`test`/`build` pasan limpio. Casilla de la Fase 1 marcada en `docs/ROADMAP.md`,
+    entrada agregada en `docs/CHANGELOG.md`.
+  - **Pendiente:** reactivar "Confirm email" en Supabase (se desactivó de nuevo para esta prueba);
+    las cuentas de prueba `qa.tejedora.*@gmail.com`/`qa.ventas.*@gmail.com` y la sede "Bogotá" de
+    prueba quedaron en la base de datos real del usuario, se pueden borrar si no se quieren dejar.
+    "Tejedora solo ve sus pedidos propios" no se aplicó de verdad (no hay columna de asignación
+    todavía, es de la Fase 3) — por ahora tejedora tiene el mismo acceso a Pedidos que ventas, documen-
+    tado como simplificación intencional en el plan de la fase.

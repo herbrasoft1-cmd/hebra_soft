@@ -4,6 +4,7 @@ import { RankingBars, TrendBars } from "@/components/charts";
 import { EmptyState, PageHeader } from "@/components/ui/page-header";
 import { costBreakdown } from "@/lib/costing";
 import { money, shortMonth } from "@/lib/format";
+import { canFully } from "@/lib/permissions";
 import { getSession } from "@/lib/tenant";
 
 export const metadata = { title: "Analítica" };
@@ -23,7 +24,7 @@ const monthKey = (iso: string) => {
 
 export default async function AnalyticsPage() {
   const { supabase, tenant, role } = await getSession();
-  if (role === "staff") redirect("/inicio");
+  if (!canFully(role, "view_finance")) redirect("/inicio");
 
   const now = new Date();
   const periodStart = new Date(now.getFullYear(), now.getMonth() - 5, 1);

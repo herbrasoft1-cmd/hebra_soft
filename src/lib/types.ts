@@ -1,13 +1,22 @@
 export type Unit = "g" | "m" | "u" | "ml";
 export type OrderStatus = "espera" | "proceso" | "calidad" | "enviado";
 export type TransactionType = "ingreso" | "gasto";
-export type Role = "owner" | "admin" | "staff";
+export type Role = "owner" | "admin" | "ventas" | "tejedora";
+
+export type Location = {
+  id: string;
+  tenant_id: string;
+  name: string;
+  created_at: string;
+};
 
 export type Membership = {
   user_id: string;
   email: string;
   role: Role;
   joined_at: string;
+  location_id: string | null;
+  location_name: string | null;
 };
 
 export type Invitation = {
@@ -15,6 +24,7 @@ export type Invitation = {
   tenant_id: string;
   email: string;
   role: Role;
+  location_id: string | null;
   token: string;
   invited_by: string | null;
   created_at: string;
@@ -46,6 +56,7 @@ export type Supply = {
   total_cost: number;
   unit_cost: number;
   low_stock_threshold: number;
+  location_id: string | null;
 };
 
 export type Product = {
@@ -88,6 +99,7 @@ export type Order = {
   status: OrderStatus;
   due_date: string | null;
   paid: boolean;
+  location_id: string | null;
   customers?: Pick<Customer, "name" | "whatsapp" | "instagram" | "address"> | null;
 };
 
@@ -99,4 +111,5 @@ export type Transaction = {
   amount: number;
   payment_method: string | null;
   occurred_on: string;
+  location_id: string | null;
 };

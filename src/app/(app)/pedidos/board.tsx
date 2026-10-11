@@ -7,7 +7,8 @@ import { Sheet } from "@/components/sheet";
 import { SubmitButton } from "@/components/submit-button";
 import { Avatar } from "@/components/ui/avatar";
 import { dueLabel, money, whatsappLink } from "@/lib/format";
-import type { Customer, Order, OrderStatus, Tenant } from "@/lib/types";
+import { canFully } from "@/lib/permissions";
+import type { Customer, Order, OrderStatus, Role, Tenant } from "@/lib/types";
 import { deleteOrder, markPaid, moveOrder, saveOrder } from "./actions";
 
 const STATUSES: OrderStatus[] = ["espera", "proceso", "calidad", "enviado"];
@@ -38,13 +39,16 @@ export function Board({
   products,
   statusLabels,
   tenant,
+  role,
 }: {
   orders: Order[];
   customers: Customer[];
   products: ProductOpt[];
   statusLabels: Record<OrderStatus, string>;
   tenant: Tenant;
+  role: Role;
 }) {
+  const canIssueInvoices = canFully(role, "issue_invoices");
   const [, startTransition] = useTransition();
   const [optimistic, setOptimistic] = useOptimistic(
     orders,
@@ -105,7 +109,7 @@ export function Board({
       <div className="flex flex-col gap-3 md:hidden" role="tabpanel">
         {byStatus(tab).length === 0 && <p className="py-8 text-center text-sm text-muted">Nada en esta etapa.</p>}
         {byStatus(tab).map((o) => (
-          <OrderCard key={o.id} order={o} onMove={move} onEdit={() => setEditing(o)} />
+          <OrderCard key={o.id} order={o} onMove={move} onEdit={() => setEditing(o)} canIssueInvoices={canIssueInvoices} />
         ))}
       </div>
 
@@ -152,7 +156,7 @@ export function Board({
                   onDragStart={(e) => e.dataTransfer.setData("text/order-id", o.id)}
                   className="cursor-grab transition-transform active:cursor-grabbing active:scale-[0.98]"
                 >
-                  <OrderCard order={o} onMove={move} onEdit={() => setEditing(o)} compact />
+                  <OrderCard order={o} onMove={move} onEdit={() => setEditing(o)} canIssueInvoices={canIssueInvoices} compact />
                 </div>
               ))}
             </section>
@@ -180,11 +184,13 @@ function OrderCard({
   order: o,
   onMove,
   onEdit,
+  canIssueInvoices,
   compact = false,
 }: {
   order: Order;
   onMove: (id: string, s: OrderStatus) => void;
   onEdit: () => void;
+  canIssueInvoices: boolean;
   compact?: boolean;
 }) {
   const next = STATUSES[STATUSES.indexOf(o.status) + 1];
@@ -221,7 +227,7 @@ function OrderCard({
             WhatsApp
           </a>
         )}
-        {(o.status === "calidad" || o.status === "enviado") && (
+        {canIssueInvoices && (o.status === "calidad" || o.status === "enviado") && (
           <RemissionButton orderId={o.id} className="btn-ghost min-h-11 flex-1 px-3 text-sm" />
         )}
         {next && (

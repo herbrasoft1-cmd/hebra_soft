@@ -10,13 +10,15 @@ export type InviteState = { error?: string; invitation?: Invitation };
 export async function createInvitation(_: InviteState, formData: FormData): Promise<InviteState> {
   const { supabase, tenant } = await getSession();
   const email = String(formData.get("email") ?? "").trim();
-  const role = String(formData.get("role") ?? "staff") as Role;
+  const role = String(formData.get("role") ?? "tejedora") as Role;
+  const locationId = String(formData.get("location_id") ?? "") || null;
   if (!email) return { error: "Escribe un correo." };
 
   const { data, error } = await supabase.rpc("create_invitation", {
     p_tenant_id: tenant.id,
     p_email: email,
     p_role: role,
+    p_location_id: locationId,
   });
   if (error) return { error: error.message };
   await logAudit(supabase, { tenantId: tenant.id, action: "invite_member", entityType: "invitation", metadata: { email, role } });

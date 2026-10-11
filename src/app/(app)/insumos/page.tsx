@@ -1,5 +1,6 @@
 import { Pager } from "@/components/pager";
 import { PageHeader } from "@/components/ui/page-header";
+import { getActiveLocationId } from "@/lib/location";
 import { getSession } from "@/lib/tenant";
 import type { Supply } from "@/lib/types";
 import { getIndustryModule } from "@/modules";
@@ -16,12 +17,13 @@ export default async function SuppliesPage({ searchParams }: { searchParams: Pro
   const to = from + PAGE_SIZE - 1;
 
   const { supabase, tenant } = await getSession();
-  const { data, count } = await supabase
+  const activeLocationId = await getActiveLocationId();
+  let query = supabase
     .from("supplies")
     .select("*", { count: "exact" })
-    .eq("tenant_id", tenant.id)
-    .order("name")
-    .range(from, to);
+    .eq("tenant_id", tenant.id);
+  if (activeLocationId) query = query.eq("location_id", activeLocationId);
+  const { data, count } = await query.order("name").range(from, to);
 
   const mod = getIndustryModule(tenant.industry);
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));

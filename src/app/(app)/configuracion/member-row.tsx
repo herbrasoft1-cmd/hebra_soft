@@ -15,11 +15,11 @@ export function MemberRow({
   viewerId: string;
 }) {
   const isSelf = member.user_id === viewerId;
-  const canManage = viewerRole === "owner" || viewerRole === "admin";
-  const canTouchTarget = member.role !== "owner" || viewerRole === "owner";
-  const roleOptions: Role[] = viewerRole === "owner" ? ["owner", "admin", "staff"] : ["admin", "staff"];
-  const canEditRole = canManage && canTouchTarget && !isSelf;
-  const canRemove = isSelf ? true : canManage && canTouchTarget;
+  // Solo la Propietaria gestiona equipo (matriz de roles de Ent-Equipo.dc.html).
+  const canManage = viewerRole === "owner";
+  const canEditRole = canManage && member.role !== "owner" && !isSelf;
+  const canRemove = isSelf ? true : canManage && member.role !== "owner";
+  const roleOptions: Role[] = ["admin", "ventas", "tejedora"];
 
   return (
     <li className="flex items-center gap-3 border-b border-border px-4 py-3.5 last:border-0">
@@ -28,7 +28,9 @@ export function MemberRow({
           {member.email}
           {isSelf && <span className="ml-1.5 text-xs font-normal text-muted">(tú)</span>}
         </span>
-        <span className="text-xs text-muted">Desde {new Date(member.joined_at).toLocaleDateString("es-CO")}</span>
+        <span className="text-xs text-muted">
+          {member.location_name ?? "Todas"} · desde {new Date(member.joined_at).toLocaleDateString("es-CO")}
+        </span>
       </span>
 
       {canEditRole ? (

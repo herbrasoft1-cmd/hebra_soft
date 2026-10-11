@@ -62,13 +62,18 @@
 
 ## Roadmap Enterprise (kit nuevo, ver `docs/ROADMAP.md`/`docs/ESTADO.md`)
 - [x] Fase 0 — Sistema de diseño y nuevo layout. Verificado con Playwright, `lint`/`test`/`build`
-      en verde. Sin commitear/pushear todavía.
-- [ ] **Decisión pendiente antes de la Fase 1:** qué hacer con el trabajo de equipo/roles ya hecho
-      (commit `c3b8a12`, 3 roles sin sedes) frente al modelo del roadmap (4 roles + sedes) — ver
-      "Preguntas" en `docs/ESTADO.md`.
-- [ ] Fases 1-9: sedes/roles reales, panel ejecutivo, producción/capacidad, simulador de costeo,
-      inventario multisede, finanzas/facturación, integraciones/seguridad/plan, móvil por rol +
-      portal de cliente, listo para producción.
+      en verde.
+- [x] Fase 1 — Sedes, roles y equipo. Migraciones `0006`-`0008` corridas; matriz de permisos real
+      (`src/lib/permissions.ts`) verificada con cuentas tejedora/ventas de verdad (invitación →
+      registro → aceptación), no solo con el dueño. Ver entrada en `docs/CHANGELOG.md` y
+      `docs/bitacora.md` para el detalle y los bugs reales que se encontraron y corrigieron.
+- [ ] Reactivar "Confirm email" en Supabase (se desactivó otra vez para probar el flujo de
+      invitación de la Fase 1 con cuentas reales).
+- [ ] Borrar si se quiere: cuentas de prueba `qa.tejedora.*@gmail.com`/`qa.ventas.*@gmail.com` y la
+      sede "Bogotá" de prueba, creadas durante la verificación de la Fase 1.
+- [ ] Fases 2-9: panel ejecutivo, producción/capacidad, simulador de costeo, inventario multisede,
+      finanzas/facturación, integraciones/seguridad/plan, móvil por rol + portal de cliente, listo
+      para producción.
 
 ## Roadmap sugerido (del README original)
 - [x] Invitar colaboradores a un negocio — ver "Versión enterprise" arriba.

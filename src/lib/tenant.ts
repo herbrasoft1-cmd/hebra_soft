@@ -29,7 +29,7 @@ export const getSession = cache(async () => {
 
   const tenant = (membership?.tenants ?? null) as unknown as Tenant | null;
   if (!tenant) redirect("/bienvenida");
-  const role = (membership?.role ?? "staff") as Role;
+  const role = (membership?.role ?? "tejedora") as Role;
 
   return { supabase, user, tenant, role };
 });

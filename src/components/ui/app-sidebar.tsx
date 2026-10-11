@@ -14,6 +14,7 @@ import {
   IconRecetario,
 } from "@/components/icons";
 import { MiniTimer } from "@/components/timer";
+import { canFully } from "@/lib/permissions";
 import { ROLE_LABEL } from "@/lib/roles";
 import type { Role } from "@/lib/types";
 
@@ -37,7 +38,7 @@ function useItems(recipeLabel: string, role: Role, activeOrders: number): Item[]
     { href: "/analitica", label: "Analítica", icon: IconChart, group: "NEGOCIO", adminOnly: true },
     { href: "/configuracion", label: "Configuración", icon: IconAgujas, group: "NEGOCIO", adminOnly: true },
   ];
-  return items.filter((it) => !it.adminOnly || role !== "staff");
+  return items.filter((it) => !it.adminOnly || canFully(role, "view_finance"));
 }
 
 function isActive(path: string, href: string) {

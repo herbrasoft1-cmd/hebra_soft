@@ -5,6 +5,8 @@ import { EmptyState, PageHeader } from "@/components/ui/page-header";
 import { RemissionButton } from "@/components/remission-button";
 import { SubmitButton } from "@/components/submit-button";
 import { money } from "@/lib/format";
+import { getActiveLocationId } from "@/lib/location";
+import { canFully } from "@/lib/permissions";
 import { getSession } from "@/lib/tenant";
 import type { Transaction } from "@/lib/types";
 import { deleteTransaction } from "./actions";
@@ -14,18 +16,16 @@ export const metadata = { title: "Caja" };
 
 export default async function CashPage() {
   const { supabase, tenant, role } = await getSession();
-  if (role === "staff") redirect("/inicio");
+  if (!canFully(role, "view_finance")) redirect("/inicio");
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+  const activeLocationId = await getActiveLocationId();
+
+  let txQuery = supabase.from("transactions").select("*").eq("tenant_id", tenant.id).gte("occurred_on", monthStart);
+  if (activeLocationId) txQuery = txQuery.eq("location_id", activeLocationId);
 
   const [{ data: tx }, { data: remissions }, { data: readyOrders }] = await Promise.all([
-    supabase
-      .from("transactions")
-      .select("*")
-      .eq("tenant_id", tenant.id)
-      .gte("occurred_on", monthStart)
-      .order("occurred_on", { ascending: false })
-      .order("created_at", { ascending: false }),
+    txQuery.order("occurred_on", { ascending: false }).order("created_at", { ascending: false }),
     supabase
       .from("remissions")
       .select("id, number, total, payment_method, created_at, orders(title, customers(name))")

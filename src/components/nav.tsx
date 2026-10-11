@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
+import { canFully } from "@/lib/permissions";
 import type { Role } from "@/lib/types";
 import { IconCaja, IconHebra, IconInicio, IconOvillo, IconRecetario } from "./icons";
 
@@ -22,7 +23,7 @@ export function useNavItems(recipeLabel: string, role: Role): Item[] {
     { href: "/pedidos", label: "Pedidos", icon: IconHebra, mobile: true },
     { href: "/caja", label: "Caja", icon: IconCaja, mobile: true, adminOnly: true },
   ];
-  return items.filter((it) => !it.adminOnly || role !== "staff");
+  return items.filter((it) => !it.adminOnly || canFully(role, "view_finance"));
 }
 
 function isActive(path: string, href: string) {

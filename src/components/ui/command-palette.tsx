@@ -14,6 +14,7 @@ import {
   IconPlus,
   IconRecetario,
 } from "@/components/icons";
+import { canFully } from "@/lib/permissions";
 import type { Role } from "@/lib/types";
 
 type Item = { label: string; hint?: string; href: string; icon: ComponentType<{ size?: number }> };
@@ -26,7 +27,7 @@ function useItems(recipeLabel: string, role: Role): Item[] {
     { label: "Pedidos", href: "/pedidos", icon: IconHebra },
     { label: "Clientes", href: "/clientes", icon: IconClientes },
   ];
-  if (role !== "staff") {
+  if (canFully(role, "view_finance")) {
     screens.push(
       { label: "Caja", href: "/caja", icon: IconCaja },
       { label: "Analítica", href: "/analitica", icon: IconChart },

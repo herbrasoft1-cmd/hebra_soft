@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
+import { getActiveLocationId } from "@/lib/location";
 import { getSession } from "@/lib/tenant";
 import type { OrderStatus } from "@/lib/types";
 
@@ -51,9 +52,10 @@ export async function saveOrder(formData: FormData) {
     const { error } = await supabase.from("orders").update(record).eq("id", id).eq("tenant_id", tenant.id);
     if (error) throw new Error("No se pudo guardar el pedido.");
   } else {
+    const location_id = await getActiveLocationId();
     const { error } = await supabase
       .from("orders")
-      .insert({ ...record, tenant_id: tenant.id, status: "espera" });
+      .insert({ ...record, tenant_id: tenant.id, status: "espera", location_id });
     if (error) throw new Error("No se pudo crear el pedido.");
   }
   revalidate();

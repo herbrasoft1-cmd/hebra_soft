@@ -9,7 +9,14 @@ function LoginForm() {
   const [state, action, pending] = useActionState<AuthState, FormData>(signIn, {});
   const params = useSearchParams();
   const next = params.get("next");
-  const registerHref = next ? `/registro?next=${encodeURIComponent(next)}` : "/registro";
+  // Si next es /invitar/<token> (así llega quien sigue un enlace de invitación sin sesión),
+  // hay que pasar el token también como "invite" o /registro pedirá nombre de negocio y
+  // crearía uno nuevo en vez de unir a la persona al que la invitó.
+  const inviteToken = next?.match(/^\/invitar\/(.+)$/)?.[1];
+  const registerQuery = new URLSearchParams();
+  if (next) registerQuery.set("next", next);
+  if (inviteToken) registerQuery.set("invite", inviteToken);
+  const registerHref = registerQuery.size > 0 ? `/registro?${registerQuery.toString()}` : "/registro";
 
   return (
     <form action={action} className="flex flex-col gap-4">

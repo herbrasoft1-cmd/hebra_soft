@@ -22,7 +22,7 @@ Estado: marca `[x]` al cerrar cada fase.
 
 ---
 
-## [ ] Fase 1 — Sedes, roles y equipo
+## [x] Fase 1 — Sedes, roles y equipo
 
 **Datos (migración `0002`):**
 - `locations` (sedes) por tenant; `location_id` en `supplies`, `orders`, `transactions`, `timer_sessions`.

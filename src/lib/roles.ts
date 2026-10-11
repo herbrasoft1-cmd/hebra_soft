@@ -1,9 +1,10 @@
 import type { Role } from "./types";
 
 export const ROLE_LABEL: Record<Role, string> = {
-  owner: "Dueño",
-  admin: "Administrador",
-  staff: "Personal",
+  owner: "Propietaria",
+  admin: "Administración",
+  ventas: "Ventas",
+  tejedora: "Tejedora",
 };
 
-export const ROLE_OPTIONS: Role[] = ["admin", "staff"];
+export const ROLE_OPTIONS: Role[] = ["admin", "ventas", "tejedora"];

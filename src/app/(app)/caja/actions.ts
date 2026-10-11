@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
+import { getActiveLocationId } from "@/lib/location";
 import { getSession } from "@/lib/tenant";
 
 /** Registro rápido de ingreso o gasto (un toque desde Inicio). */
@@ -9,6 +10,7 @@ export async function addTransaction(formData: FormData): Promise<{ ok: boolean;
   const { supabase, tenant } = await getSession();
   const amount = Number(formData.get("amount") ?? 0);
   if (!(amount > 0)) return { ok: false, error: "Escribe un valor mayor a cero." };
+  const location_id = await getActiveLocationId();
   const { error } = await supabase.from("transactions").insert({
     tenant_id: tenant.id,
     type: formData.get("type") === "gasto" ? "gasto" : "ingreso",
@@ -17,6 +19,7 @@ export async function addTransaction(formData: FormData): Promise<{ ok: boolean;
     amount,
     payment_method: String(formData.get("payment_method") ?? "") || null,
     occurred_on: String(formData.get("occurred_on") ?? "") || new Date().toISOString().slice(0, 10),
+    location_id,
   });
   if (error) return { ok: false, error: "No se pudo guardar el movimiento." };
   revalidatePath("/caja");

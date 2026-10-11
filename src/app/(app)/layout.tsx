@@ -4,18 +4,24 @@ import { TopBar } from "@/components/ui/top-bar";
 import { BottomNav } from "@/components/nav";
 import { InstallPrompt, OfflineBanner } from "@/components/pwa";
 import { FloatingTimer, TimerProvider } from "@/components/timer";
+import { getActiveLocationId } from "@/lib/location";
 import { getSession } from "@/lib/tenant";
 import { getIndustryModule } from "@/modules";
+import { setActiveLocation } from "./location-actions";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { supabase, user, tenant, role } = await getSession();
   const mod = getIndustryModule(tenant.industry);
 
-  const { count } = await supabase
-    .from("orders")
-    .select("id", { count: "exact", head: true })
-    .eq("tenant_id", tenant.id)
-    .neq("status", "enviado");
+  const [{ count }, { data: locations }, activeLocationId] = await Promise.all([
+    supabase
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tenant.id)
+      .neq("status", "enviado"),
+    supabase.from("locations").select("id, name").eq("tenant_id", tenant.id).order("name"),
+    getActiveLocationId(),
+  ]);
 
   const userName = (user.user_metadata?.full_name as string | undefined) || user.email || "Tú";
 
@@ -32,7 +38,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         />
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="pt-safe" />
-          <TopBar businessName={tenant.name} recipeLabel={mod.recipe.menuLabel} />
+          <TopBar
+            businessName={tenant.name}
+            recipeLabel={mod.recipe.menuLabel}
+            locations={locations ?? []}
+            activeLocationId={activeLocationId}
+            onSetLocation={setActiveLocation}
+          />
           <OfflineBanner />
           <main className="mx-auto w-full max-w-6xl flex-1 px-5 pt-5 pb-40 md:px-8 md:pb-10">{children}</main>
         </div>

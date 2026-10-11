@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
+import { getActiveLocationId } from "@/lib/location";
 import { getSession } from "@/lib/tenant";
 import type { Unit } from "@/lib/types";
 
@@ -37,9 +38,10 @@ export async function saveSupply(formData: FormData) {
       .eq("tenant_id", tenant.id);
     if (error) throw new Error("No se pudo guardar el insumo.");
   } else {
+    const location_id = await getActiveLocationId();
     const { error } = await supabase
       .from("supplies")
-      .insert({ ...data, quantity_remaining: remaining, tenant_id: tenant.id });
+      .insert({ ...data, quantity_remaining: remaining, tenant_id: tenant.id, location_id });
     if (error) throw new Error("No se pudo crear el insumo.");
   }
   revalidatePath("/insumos");

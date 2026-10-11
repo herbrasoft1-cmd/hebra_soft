@@ -2,6 +2,33 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Fase 1 — Sedes, roles y equipo (2026-10-10)
+
+Evolucionó el equipo/roles del MVP (owner/admin/staff) hacia el modelo de 4 roles del roadmap
+(Propietaria/Administración/Ventas/Tejedora) con la matriz exacta de `Ent-Equipo.dc.html`, en vez de
+reescribirlo — ver `docs/ESTADO.md`. Migraciones `0006`–`0008`: tabla `locations` (sede "Principal"
+por tenant, backfill), `location_id` en supplies/orders/transactions/timer_sessions/memberships/
+invitations, roles `ventas`/`tejedora` nuevos, gestión de equipo apretada a solo Propietaria (antes
+también Administración podía — corregido contra la matriz real del mockup), remisiones restringidas
+a owner/admin/ventas a nivel de base, y un fix al token de invitación que usaba una función de
+`pgcrypto` no disponible en el `search_path` de la función.
+
+`src/lib/permissions.ts` nuevo: la matriz de 8 permisos × 4 roles como código, con pruebas (las 32
+celdas). Recetario deja de mandar costo/margen/valor-hora a quien no tiene `view_costs`/
+`edit_recipes` — ni en la UI ni en la consulta a la base, con una vista de solo lectura
+(`RecipeViewer`) para ventas/tejedora que conserva el cronómetro de talento. El botón de Remisión en
+Pedidos y el acceso a Caja/Analítica/Configuración ahora se gatean con la misma matriz. Selector de
+sede global en la barra superior (persistido en cookie) que filtra Insumos/Pedidos/Caja de verdad,
+con una pantalla "Sedes" para crear sedes nuevas y una pestaña "Roles y permisos" en Equipo que
+muestra la misma matriz.
+
+Verificado de punta a punta con Playwright: invitación → registro → aceptación real para una cuenta
+tejedora y una ventas, confirmando que ninguna ve costos/finanzas por UI ni en las respuestas de red,
+que ventas sí puede emitir remisión y tejedora no, y que el filtro de sede funciona con una segunda
+sede real. En el camino se corrigieron dos bugs reales encontrados por esa verificación (no solo por
+lectura de código): el enlace "Crea tu cuenta" en `/login` perdía el token de invitación al pasar por
+ahí sin sesión, y el selector de sede no se resincronizaba visualmente tras elegir una sede.
+
 ## Fase 0 — Sistema de diseño y nuevo layout (2026-10-10)
 
 Las 7 pantallas del MVP (Inicio, Insumos, Recetario, Pedidos, Clientes, Caja, Configuración) ya

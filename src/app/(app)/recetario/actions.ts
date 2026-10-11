@@ -3,10 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { logAudit } from "@/lib/audit";
+import { canFully } from "@/lib/permissions";
 import { getSession } from "@/lib/tenant";
 
 export async function createProduct(formData: FormData) {
-  const { supabase, tenant } = await getSession();
+  const { supabase, tenant, role } = await getSession();
+  if (!canFully(role, "edit_recipes")) throw new Error("No tienes permiso para crear patrones.");
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
   const { data, error } = await supabase
@@ -20,7 +22,8 @@ export async function createProduct(formData: FormData) {
 }
 
 export async function updateProduct(formData: FormData) {
-  const { supabase, tenant } = await getSession();
+  const { supabase, tenant, role } = await getSession();
+  if (!canFully(role, "edit_recipes")) throw new Error("No tienes permiso para editar este patrón.");
   const id = String(formData.get("id"));
   const patch: Record<string, unknown> = {};
   for (const key of ["name", "category", "notes"] as const) {
@@ -37,7 +40,8 @@ export async function updateProduct(formData: FormData) {
 }
 
 export async function deleteProduct(formData: FormData) {
-  const { supabase, tenant } = await getSession();
+  const { supabase, tenant, role } = await getSession();
+  if (!canFully(role, "edit_recipes")) throw new Error("No tienes permiso para eliminar este patrón.");
   const id = String(formData.get("id"));
   const { error } = await supabase.from("products").delete().eq("id", id).eq("tenant_id", tenant.id);
   if (error) throw new Error("No se pudo eliminar el patrón.");
@@ -48,7 +52,8 @@ export async function deleteProduct(formData: FormData) {
 
 /** Agrega (o actualiza) un insumo dentro del patrón. */
 export async function upsertRecipeLine(formData: FormData) {
-  const { supabase, tenant } = await getSession();
+  const { supabase, tenant, role } = await getSession();
+  if (!canFully(role, "edit_recipes")) throw new Error("No tienes permiso para editar este patrón.");
   const productId = String(formData.get("product_id"));
   const supplyId = String(formData.get("supply_id"));
   const quantity = Number(String(formData.get("quantity") ?? "").replace(",", "."));
@@ -63,7 +68,8 @@ export async function upsertRecipeLine(formData: FormData) {
 }
 
 export async function removeRecipeLine(formData: FormData) {
-  const { supabase, tenant } = await getSession();
+  const { supabase, tenant, role } = await getSession();
+  if (!canFully(role, "edit_recipes")) throw new Error("No tienes permiso para editar este patrón.");
   const productId = String(formData.get("product_id"));
   const { error } = await supabase
     .from("product_supplies")
@@ -82,7 +88,8 @@ export async function logTimerSession(s: {
   startedAt: string;
   endedAt: string;
 }) {
-  const { supabase } = await getSession();
+  const { supabase, role } = await getSession();
+  if (!canFully(role, "use_timer")) throw new Error("No tienes permiso para usar el cronómetro.");
   const { error } = await supabase.rpc("log_timer_session", {
     p_product_id: s.productId,
     p_seconds: s.seconds,

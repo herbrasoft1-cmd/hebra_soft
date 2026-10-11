@@ -5,9 +5,10 @@ import { IconCheck, IconPlus } from "@/components/icons";
 import { Sheet } from "@/components/sheet";
 import { SubmitButton } from "@/components/submit-button";
 import { ROLE_LABEL, ROLE_OPTIONS } from "@/lib/roles";
+import type { Location } from "@/lib/types";
 import { createInvitation, type InviteState } from "./team-actions";
 
-export function InviteSheet() {
+export function InviteSheet({ locations }: { locations: Location[] }) {
   const [open, setOpen] = useState(false);
   const [state, action] = useActionState<InviteState, FormData>(createInvitation, {});
   const [copied, setCopied] = useState(false);
@@ -56,7 +57,7 @@ export function InviteSheet() {
             </label>
             <label className="field">
               Rol
-              <select className="input" name="role" defaultValue="staff">
+              <select className="input" name="role" defaultValue="tejedora">
                 {ROLE_OPTIONS.map((r) => (
                   <option key={r} value={r}>
                     {ROLE_LABEL[r]}
@@ -64,6 +65,19 @@ export function InviteSheet() {
                 ))}
               </select>
             </label>
+            {locations.length > 0 && (
+              <label className="field">
+                Sede
+                <select className="input" name="location_id" defaultValue="">
+                  <option value="">Todas</option>
+                  {locations.map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             {state.error && (
               <p role="alert" className="rounded-xl bg-primary-soft p-3 text-sm text-primary-hover">
                 {state.error}
