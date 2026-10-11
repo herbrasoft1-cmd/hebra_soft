@@ -348,3 +348,44 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     "Tejedora solo ve sus pedidos propios" no se aplicó de verdad (no hay columna de asignación
     todavía, es de la Fase 3) — por ahora tejedora tiene el mismo acceso a Pedidos que ventas, documen-
     tado como simplificación intencional en el plan de la fase.
+
+- **Fase 2 del roadmap Enterprise: panel ejecutivo (mismo día, sesión siguiente).** El usuario pidió
+  seguir. Leí `docs/mockups/Ent-Dashboard.dc.html` completo (su `<script>` trae la lógica real del
+  gráfico de ingresos/utilidad) y encontré que varias secciones del mockup dependen de conceptos que
+  todavía no existen en el esquema — "Capacidad del taller"/horas disponibles y dos de las cuatro
+  reglas de "Necesitan atención" necesitan disponibilidad y tejedora-asignada-a-pedido, que son
+  explícitamente de la Fase 3 ("Producción y capacidad"), aunque `docs/ROADMAP.md` los pide en su
+  lista de la Fase 2. Mismo criterio que en la Fase 1: construir lo real, documentar lo que falta, no
+  inventar números — "Capacidad del taller" se reemplazó por "Cartera pendiente" (dato real que ya se
+  calculaba en `inicio/page.tsx`); se omitieron las 2 reglas de riesgo sin datos y el botón "Reasignar
+  automáticamente".
+  - **Decisión de arquitectura:** en vez de una ruta nueva, `/inicio` se bifurca por
+    `canFully(role, "view_finance")` — Propietaria/Administración ven el panel ejecutivo nuevo,
+    Ventas/Tejedora ven exactamente el inicio simple de siempre (mismo patrón ya usado en Recetario:
+    una ruta, contenido distinto por permiso). `/analitica` no se tocó — sigue siendo un complemento
+    válido (desglose de gastos por categoría, que el panel ejecutivo no cubre).
+  - **Migración `0009_order_channel.sql`:** agrega `orders.channel` (texto, nullable, sin backfill)
+    para poder calcular "Ventas por canal" — campo nuevo en el mismo `OrderForm` de Pedidos.
+  - **`src/lib/analytics.ts` nuevo** (con pruebas, tal como pide `docs/ROADMAP.md`): variación %,
+    las 2 reglas reales de "Necesitan atención", rentabilidad por producto (reutiliza
+    `costBreakdown` de `costing.ts`), ventas por canal, y el reagrupado de la serie diaria de
+    ingresos/utilidad en 7 días/12 semanas/12 meses para el gráfico nuevo.
+  - **`RevenueProfitChart`** (nuevo en `src/components/charts.tsx`): dos series del mismo matiz
+    (ingresos en tono claro, utilidad como capa anidada dentro de la barra, con su alto expresado
+    como % de esa barra — así siempre representa el margen real, nunca un número inventado), con
+    pestañas de período, tooltip y vista de tabla. Usa `SegmentedControl` para las pestañas — estaba
+    construido desde la Fase 0 pero nunca conectado a nada hasta ahora.
+  - El panel ejecutivo también terminó de conectar varios componentes de la Fase 0 que llevaban
+    "construidos pero sin usar": `KpiCard`, `Panel`, `AlertRow`, `DataTable`.
+  - **Verificado con el servidor real, con datos reales de prueba** (no solo revisando que compile):
+    el panel carga sin errores con datos escasos, cada sección muestra su estado vacío correcto
+    cuando no hay datos suficientes (margen "—", "Pon precio a tus patrones...", etc.); se creó un
+    pedido nuevo con canal "Instagram", se marcó pagado, y apareció correctamente en "Ventas por
+    canal" (100% · $60K); se confirmó que la cuenta tejedora de prueba de la Fase 1 sigue viendo el
+    inicio simple de siempre, sin ninguna fuga de dato financiero.
+  - `npm run lint`/`test` (30/30, 15 pruebas nuevas de `analytics.ts`)/`build` pasan limpio. Casilla
+    de la Fase 2 marcada en `docs/ROADMAP.md`, entrada en `docs/CHANGELOG.md`.
+  - **Pendiente:** el pedido de prueba "Gorro canal-test" quedó en la base de datos real del usuario
+    (dato de prueba, se puede borrar). Capacidad del taller real, tejedora asignada a pedido, "sin
+    asignar", "reasignar automáticamente" y `sales_channels` con comisiones quedan para la Fase 3/4,
+    como estaba documentado en el plan.

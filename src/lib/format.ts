@@ -32,7 +32,7 @@ export const UNIT_LABEL: Record<Unit, { short: string; long: string }> = {
 };
 
 const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-const DAYS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+export const DAYS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
 /** "ene", "feb"… para ejes de gráficos y etiquetas cortas. */
 export function shortMonth(d: Date): string {

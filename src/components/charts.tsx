@@ -1,7 +1,9 @@
 "use client";
 
 import { useId, useState } from "react";
+import { bucketSeries, type ChartPeriod, type DailyPoint } from "@/lib/analytics";
 import { compactMoney, money } from "@/lib/format";
+import { SegmentedControl } from "./ui/segmented-control";
 
 /**
  * Gráficos de HEBRA: siempre una sola serie (color secuencial, nunca categórico),
@@ -172,6 +174,127 @@ export function RankingBars({
             </li>
           ))}
         </ul>
+      )}
+    </div>
+  );
+}
+
+const PERIOD_LABEL: Record<ChartPeriod, string> = { "7d": "7 días", "12s": "12 semanas", "12m": "12 meses" };
+const PERIODS: ChartPeriod[] = ["7d", "12s", "12m"];
+
+/**
+ * Ingresos y utilidad con pestañas de período: dos series del mismo matiz (secuencial, no
+ * categórico — "ingresos" y "utilidad" son la misma magnitud en dos profundidades), la barra
+ * de utilidad es una capa interna anidada dentro de la de ingresos, con su alto expresado como
+ * % de esa barra (así la capa oscura siempre representa el margen real de ese período).
+ */
+export function RevenueProfitChart({ daily, todayIso }: { daily: DailyPoint[]; todayIso: string }) {
+  const [period, setPeriod] = useState<ChartPeriod>("12s");
+  const [hover, setHover] = useState<number | null>(null);
+  const [showTable, setShowTable] = useState(false);
+  const titleId = useId();
+  const today = new Date(todayIso + "T00:00:00");
+  const points = bucketSeries(daily, period, today);
+  const hasData = points.some((p) => p.income > 0);
+  const max = Math.max(1, ...points.map((p) => p.income));
+  const totalIncome = points.reduce((s, p) => s + p.income, 0);
+  const totalProfit = points.reduce((s, p) => s + p.profit, 0);
+  const marginPct = totalIncome > 0 ? Math.round((totalProfit / totalIncome) * 100) : 0;
+
+  return (
+    <div className="card p-5">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <h3 id={titleId} className="text-base font-semibold">
+            Ingresos y utilidad
+          </h3>
+          <p className="text-[13px] text-muted">
+            Ingresos {compactMoney(totalIncome)} · Utilidad {compactMoney(totalProfit)} · Margen {marginPct}%
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <SegmentedControl
+            options={PERIODS.map((p) => ({ value: p, label: PERIOD_LABEL[p] }))}
+            value={period}
+            onChange={setPeriod}
+          />
+          {hasData && <TableToggle on={showTable} onClick={() => setShowTable((v) => !v)} />}
+        </div>
+      </div>
+
+      <div className="mb-4 flex gap-5 text-xs text-ink-2">
+        <span className="flex items-center gap-1.5">
+          <span className="size-2.5 rounded-sm bg-primary/25" />
+          Ingresos
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="size-2.5 rounded-sm bg-primary" />
+          Utilidad
+        </span>
+      </div>
+
+      {!hasData ? (
+        <p className="py-10 text-center text-sm text-muted">Todavía no hay datos para este período.</p>
+      ) : showTable ? (
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border text-left text-xs text-muted">
+              <th className="py-2 font-medium">Período</th>
+              <th className="py-2 text-right font-medium">Ingresos</th>
+              <th className="py-2 text-right font-medium">Utilidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            {points.map((p) => (
+              <tr key={p.label} className="border-b border-border last:border-0">
+                <td className="py-2.5 text-ink-2">{p.label}</td>
+                <td className="py-2.5 text-right font-semibold tabular-nums">{money(p.income)}</td>
+                <td className="py-2.5 text-right font-semibold tabular-nums">{money(p.profit)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <div className="relative flex h-52 items-stretch gap-1.5 pb-6" role="img" aria-labelledby={titleId}>
+          <div className="pointer-events-none absolute inset-x-0 top-0 bottom-6 flex flex-col justify-between">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="border-t border-border" />
+            ))}
+          </div>
+          {points.map((p, i) => {
+            const incomeH = p.income > 0 ? Math.max(3, Math.round((p.income / max) * 100)) : 0;
+            const profitShare = p.income > 0 ? Math.round((p.profit / p.income) * 100) : 0;
+            const active = hover === i;
+            return (
+              <div
+                key={`${p.label}-${i}`}
+                className="relative z-10 flex flex-1 flex-col items-stretch justify-end rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                tabIndex={0}
+                onMouseEnter={() => setHover(i)}
+                onMouseLeave={() => setHover(null)}
+                onFocus={() => setHover(i)}
+                onBlur={() => setHover(null)}
+              >
+                {active && (
+                  <div className="absolute -top-14 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-lg bg-night px-2.5 py-1.5 text-xs font-semibold text-on-night">
+                    {p.label}: {money(p.income)} · utilidad {money(p.profit)}
+                  </div>
+                )}
+                <div
+                  style={{ height: `${incomeH}%`, minHeight: incomeH > 0 ? 3 : 0 }}
+                  className={`flex flex-col justify-end overflow-hidden rounded-t-[4px] bg-primary/25 transition-opacity ${
+                    active || hover === null ? "opacity-100" : "opacity-55"
+                  }`}
+                >
+                  <div style={{ height: `${profitShare}%` }} className="bg-primary" />
+                </div>
+                <span className="absolute bottom-[-22px] left-0 right-0 text-center text-[11px] font-medium text-muted">
+                  {p.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );

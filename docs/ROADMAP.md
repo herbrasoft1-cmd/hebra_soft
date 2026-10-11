@@ -40,7 +40,7 @@ Estado: marca `[x]` al cerrar cada fase.
 
 ---
 
-## [ ] Fase 2 — Panel ejecutivo
+## [x] Fase 2 — Panel ejecutivo
 
 - KPIs: ventas del periodo con variación, margen bruto, pedidos activos por estado y en riesgo, capacidad del taller.
 - Gráfico de ingresos y utilidad con periodos 7 días / 12 semanas / 12 meses.

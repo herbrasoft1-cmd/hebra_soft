@@ -100,6 +100,8 @@ export type Order = {
   due_date: string | null;
   paid: boolean;
   location_id: string | null;
+  channel: string | null;
+  created_at: string;
   customers?: Pick<Customer, "name" | "whatsapp" | "instagram" | "address"> | null;
 };
 

@@ -2,6 +2,33 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Fase 2 — Panel ejecutivo (2026-10-10)
+
+`/inicio` se bifurca por permiso (`view_finance`): Propietaria y Administración ven el panel
+ejecutivo nuevo; Ventas y Tejedora siguen viendo exactamente el inicio simple del MVP, sin ningún
+dato financiero nuevo. El mockup `Ent-Dashboard.dc.html` pide varias cosas
+que dependen de datos de la Fase 3 (capacidad del taller con disponibilidad real, tejedora asignada,
+"reasignar automáticamente") — se documentaron como fuera de alcance en vez de simularlas; la tarjeta
+"Capacidad del taller" se reemplazó por "Cartera pendiente" (dato real que ya existía).
+
+- Migración `0009`: `orders.channel` (texto, nullable) para "Ventas por canal" — selector nuevo en el
+  formulario de pedido (Instagram/WhatsApp/Tienda y ferias/Tienda online/Otro).
+- `src/lib/analytics.ts` nuevo: variación %, reglas de "Necesitan atención" (vence pronto, insumo
+  agotado — las otras dos reglas del mockup necesitan la Fase 3), rentabilidad por producto con
+  alerta de margen objetivo, ventas por canal, reagrupado de la serie diaria por período (7d/12s/12m).
+  Con pruebas.
+- `RevenueProfitChart` nuevo en `src/components/charts.tsx`: ingresos y utilidad con pestañas de
+  período (usa el `SegmentedControl` de la Fase 0, que seguía sin conectar a nada).
+- 4 KPIs con variación real, "Necesitan atención", "Rentabilidad por producto" (tabla con
+  `DataTable`, también sin usar desde la Fase 0), "Ventas por canal" e "Inventario crítico" —
+  reutilizan `KpiCard`, `Panel`, `AlertRow`, `ProgressBar` de la Fase 0.
+- Todo respeta el selector de sede global de la Fase 1 (cookie `hebra_location`), sin un selector
+  nuevo en esta pantalla.
+- Verificado con el servidor real: el panel carga sin errores con datos escasos (estados vacíos
+  correctos en cada sección), un pedido nuevo con canal aparece en "Ventas por canal" al marcarlo
+  pagado, y la cuenta tejedora de prueba de la Fase 1 sigue viendo el inicio simple sin fuga de datos
+  financieros.
+
 ## Fase 1 — Sedes, roles y equipo (2026-10-10)
 
 Evolucionó el equipo/roles del MVP (owner/admin/staff) hacia el modelo de 4 roles del roadmap

@@ -11,6 +11,7 @@ import { canFully } from "@/lib/permissions";
 import type { Customer, Order, OrderStatus, Role, Tenant } from "@/lib/types";
 import { deleteOrder, markPaid, moveOrder, saveOrder } from "./actions";
 
+const CHANNELS = ["Instagram", "WhatsApp", "Tienda y ferias", "Tienda online", "Otro"];
 const STATUSES: OrderStatus[] = ["espera", "proceso", "calidad", "enviado"];
 const SHORT: Record<OrderStatus, string> = {
   espera: "En espera",
@@ -305,10 +306,23 @@ function OrderForm({
             <input className="input" name="price" type="number" inputMode="numeric" min="0" value={price} onChange={(e) => setPrice(e.target.value)} />
           </label>
         </div>
-        <label className="field">
-          Fecha de entrega
-          <input className="input" name="due_date" type="date" defaultValue={order?.due_date ?? ""} />
-        </label>
+        <div className="grid grid-cols-2 gap-3">
+          <label className="field">
+            Fecha de entrega
+            <input className="input" name="due_date" type="date" defaultValue={order?.due_date ?? ""} />
+          </label>
+          <label className="field">
+            Canal
+            <select className="input" name="channel" defaultValue={order?.channel ?? ""}>
+              <option value="">Sin especificar</option>
+              {CHANNELS.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
 
         <label className="field">
           Cliente

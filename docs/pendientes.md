@@ -67,13 +67,17 @@
       (`src/lib/permissions.ts`) verificada con cuentas tejedora/ventas de verdad (invitación →
       registro → aceptación), no solo con el dueño. Ver entrada en `docs/CHANGELOG.md` y
       `docs/bitacora.md` para el detalle y los bugs reales que se encontraron y corrigieron.
-- [ ] Reactivar "Confirm email" en Supabase (se desactivó otra vez para probar el flujo de
-      invitación de la Fase 1 con cuentas reales).
-- [ ] Borrar si se quiere: cuentas de prueba `qa.tejedora.*@gmail.com`/`qa.ventas.*@gmail.com` y la
-      sede "Bogotá" de prueba, creadas durante la verificación de la Fase 1.
-- [ ] Fases 2-9: panel ejecutivo, producción/capacidad, simulador de costeo, inventario multisede,
-      finanzas/facturación, integraciones/seguridad/plan, móvil por rol + portal de cliente, listo
-      para producción.
+- [x] Fase 2 — Panel ejecutivo. Migración `0009` corrida (`orders.channel`); KPIs/gráfico/alertas
+      reales en `/inicio` para Propietaria y Administración, con `src/lib/analytics.ts` probado.
+      Ver entrada en `docs/CHANGELOG.md` y `docs/bitacora.md`.
+- [ ] Reactivar "Confirm email" en Supabase (se desactivó para probar flujos con cuentas reales en
+      las Fases 1 y 2).
+- [ ] Borrar si se quiere: cuentas de prueba `qa.tejedora.*@gmail.com`/`qa.ventas.*@gmail.com`, la
+      sede "Bogotá" y el pedido "Gorro canal-test", creados durante la verificación de las Fases 1 y 2.
+- [ ] Fases 3-9: producción/capacidad, simulador de costeo, inventario multisede, finanzas/
+      facturación, integraciones/seguridad/plan, móvil por rol + portal de cliente, listo para
+      producción. La Fase 3 además resuelve dos simplificaciones ya documentadas (tejedora solo ve
+      sus pedidos propios; capacidad del taller en el panel ejecutivo).
 
 ## Roadmap sugerido (del README original)
 - [x] Invitar colaboradores a un negocio — ver "Versión enterprise" arriba.

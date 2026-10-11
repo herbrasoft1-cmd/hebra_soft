@@ -44,6 +44,7 @@ export async function saveOrder(formData: FormData) {
     quantity: Math.max(1, Number(formData.get("quantity") ?? 1)),
     price: Number(formData.get("price") ?? 0),
     due_date: String(formData.get("due_date") ?? "") || null,
+    channel: String(formData.get("channel") ?? "").trim() || null,
     paid: formData.get("paid") === "on",
   };
   if (!record.title) return;
