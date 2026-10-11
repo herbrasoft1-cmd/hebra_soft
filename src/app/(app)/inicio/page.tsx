@@ -20,6 +20,7 @@ import { costBreakdown } from "@/lib/costing";
 import { compactMoney, dueLabel, money, todayLong } from "@/lib/format";
 import { getActiveLocationId } from "@/lib/location";
 import { canFully } from "@/lib/permissions";
+import { committedHours, estimatedHours, weeklyAvailableHours } from "@/lib/production";
 import { getSession } from "@/lib/tenant";
 import type { Order, OrderStatus, Supply, Tenant } from "@/lib/types";
 import { getIndustryModule, type IndustryModule } from "@/modules";
@@ -239,10 +240,10 @@ function Stat({
 // =============================================================================
 // Panel ejecutivo (Propietaria, Administración): KPIs reales, tendencias,
 // necesitan atención, rentabilidad por producto, ventas por canal, inventario
-// crítico — ver docs/mockups/Ent-Dashboard.dc.html. Lo que ese mockup pide y
-// que todavía no se puede calcular con datos reales (capacidad del taller,
-// horas disponibles, tejedora asignada, reasignar automáticamente) queda para
-// la Fase 3, no se simula.
+// crítico — ver docs/mockups/Ent-Dashboard.dc.html. "Necesitan atención" ya usa
+// las 4 reglas del mockup (tejedora asignada y disponibilidad llegaron en la
+// Fase 3). La tarjeta "Capacidad del taller" se queda como "Cartera pendiente"
+// — ese dato pertenece a la vista Capacidad de /pedidos, no se duplica aquí.
 // =============================================================================
 
 const SERIES_DAYS = 365;
@@ -253,7 +254,10 @@ const STATUS_DOT: Record<OrderStatus, string> = {
   enviado: "bg-ink",
 };
 
-type OrderRow = Pick<Order, "id" | "title" | "quantity" | "price" | "status" | "due_date" | "paid" | "product_id" | "channel" | "created_at">;
+type OrderRow = Pick<
+  Order,
+  "id" | "title" | "quantity" | "price" | "status" | "due_date" | "paid" | "product_id" | "channel" | "created_at" | "assigned_to"
+>;
 type ProductRow = {
   id: string;
   name: string;
@@ -281,7 +285,7 @@ async function ExecutivePanel({ session, tenant, mod }: { session: Session; tena
     .gte("occurred_on", seriesStart);
   let ordersQuery = supabase
     .from("orders")
-    .select("id, title, quantity, price, status, due_date, paid, product_id, channel, created_at, customers(name)")
+    .select("id, title, quantity, price, status, due_date, paid, product_id, channel, created_at, assigned_to, customers(name)")
     .eq("tenant_id", tenant.id)
     .gte("created_at", seriesStart);
   let suppliesQuery = supabase
@@ -294,7 +298,7 @@ async function ExecutivePanel({ session, tenant, mod }: { session: Session; tena
     suppliesQuery = suppliesQuery.eq("location_id", activeLocationId);
   }
 
-  const [{ data: tx }, { data: orders }, { data: products }, { data: supplies }] = await Promise.all([
+  const [{ data: tx }, { data: orders }, { data: products }, { data: supplies }, { data: availability }] = await Promise.all([
     txQuery,
     ordersQuery,
     supabase
@@ -302,6 +306,7 @@ async function ExecutivePanel({ session, tenant, mod }: { session: Session; tena
       .select("id, name, sale_price, target_margin_pct, labor_seconds, product_supplies(quantity, supplies(unit_cost, quantity_remaining, name))")
       .eq("tenant_id", tenant.id),
     suppliesQuery,
+    supabase.from("availability").select("user_id, hours").eq("tenant_id", tenant.id),
   ]);
 
   const txRows = tx ?? [];
@@ -356,7 +361,30 @@ async function ExecutivePanel({ session, tenant, mod }: { session: Session; tena
     const empty = p.product_supplies.find((l) => Number(l.supplies?.quantity_remaining ?? 0) <= 0);
     if (empty?.supplies) outOfStockByProduct.set(p.id, empty.supplies.name);
   }
-  const riskItems = ordersAtRisk(activeOrders, outOfStockByProduct, now);
+
+  // Quién está sobrecargada esta semana (comprometido > disponible), para la regla de
+  // "Necesitan atención" — totales reales, no un reparto día a día inventado.
+  const productLaborById = new Map(productRows.map((p) => [p.id, p.labor_seconds]));
+  const assignedUserIds = new Set(orderRows.map((o) => o.assigned_to).filter((id): id is string => Boolean(id)));
+  const overloadedUserIds = new Set(
+    Array.from(assignedUserIds).filter((userId) => {
+      const available = weeklyAvailableHours(availability ?? [], userId);
+      const committed = committedHours(
+        orderRows.map((o) => ({
+          id: o.id,
+          title: o.title,
+          assigned_to: o.assigned_to,
+          status: o.status,
+          estimatedHoursValue: o.product_id ? estimatedHours(productLaborById.get(o.product_id) ?? 0, o.quantity) : 0,
+          loggedSeconds: 0, // el panel compara comprometido total, no lo ya avanzado por pedido
+        })),
+        userId,
+      );
+      return committed > available;
+    }),
+  );
+
+  const riskItems = ordersAtRisk(activeOrders, outOfStockByProduct, now, { overloadedUserIds });
   const riskyOrderIds = new Set(riskItems.map((r) => r.orderId));
 
   // --- KPI 4: cartera pendiente (reemplaza "Capacidad del taller": no hay
@@ -494,7 +522,7 @@ async function ExecutivePanel({ session, tenant, mod }: { session: Session; tena
               ) : (
                 <div className="flex flex-col gap-2.5">
                   {riskItems.slice(0, 6).map((r, i) => (
-                    <AlertRow key={`${r.orderId}-${i}`} tone="danger" title={r.title} detail={r.text} />
+                    <AlertRow key={`${r.orderId}-${i}`} tone={r.severity === "alta" ? "danger" : "warning"} title={r.title} detail={r.text} />
                   ))}
                 </div>
               )}

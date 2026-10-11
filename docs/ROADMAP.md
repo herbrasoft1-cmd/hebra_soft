@@ -53,7 +53,7 @@ Estado: marca `[x]` al cerrar cada fase.
 
 ---
 
-## [ ] Fase 3 — Producción y capacidad
+## [x] Fase 3 — Producción y capacidad
 
 - Pedidos con: tejedora asignada, horas estimadas (tiempo promedio del producto × cantidad), avance (horas del cronómetro / estimadas), canal, prioridad por vencimiento.
 - Tablero Kanban del mockup (4 columnas, contadores, horas por columna, "Ver N más"), arrastrar y soltar en escritorio; filtros (búsqueda, tejedora, canal, "en riesgo").

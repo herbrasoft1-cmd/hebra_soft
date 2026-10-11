@@ -102,7 +102,16 @@ export type Order = {
   location_id: string | null;
   channel: string | null;
   created_at: string;
+  assigned_to: string | null;
   customers?: Pick<Customer, "name" | "whatsapp" | "instagram" | "address"> | null;
+};
+
+export type Availability = {
+  id: string;
+  tenant_id: string;
+  user_id: string;
+  weekday: number; // 0 = lunes .. 6 = domingo
+  hours: number;
 };
 
 export type Transaction = {

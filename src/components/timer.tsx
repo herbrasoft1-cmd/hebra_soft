@@ -17,6 +17,7 @@ import { IconPause, IconPlay, IconStop } from "./icons";
 type TimerState = {
   productId: string;
   productName: string;
+  orderId?: string; // presente cuando el cronómetro se inició desde un pedido (Producción)
   sessionStartedAt: string; // ISO, inicio de la sesión
   runningSince: number | null; // ms; null = en pausa
   accumulated: number; // segundos acumulados antes del último play
@@ -25,6 +26,7 @@ type TimerState = {
 type PendingSession = {
   clientId: string;
   productId: string;
+  orderId?: string;
   seconds: number;
   startedAt: string;
   endedAt: string;
@@ -60,7 +62,7 @@ type Ctx = {
   elapsed: number;
   running: boolean;
   pending: number;
-  start: (productId: string, productName: string) => void;
+  start: (productId: string, productName: string, orderId?: string) => void;
   pause: () => void;
   resume: () => void;
   stop: () => Promise<void>;
@@ -125,6 +127,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       queue.push({
         clientId: crypto.randomUUID(),
         productId: current.productId,
+        orderId: current.orderId,
         seconds,
         startedAt: current.sessionStartedAt,
         endedAt: new Date().toISOString(),
@@ -136,9 +139,9 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   }, [flush, persist]);
 
   const start = useCallback(
-    (productId: string, productName: string) => {
+    (productId: string, productName: string, orderId?: string) => {
       const current = read<TimerState | null>(TIMER_KEY, null);
-      if (current && current.productId === productId) {
+      if (current && current.productId === productId && current.orderId === orderId) {
         if (!current.runningSince) persist({ ...current, runningSince: Date.now() });
         return;
       }
@@ -146,6 +149,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
         persist({
           productId,
           productName,
+          orderId,
           sessionStartedAt: new Date().toISOString(),
           runningSince: Date.now(),
           accumulated: 0,
@@ -194,7 +198,7 @@ export function MiniTimer() {
   return (
     <div className="flex flex-col gap-3 rounded-2xl bg-night p-4 text-on-night">
       <Link
-        href={`/recetario/${timer.productId}`}
+        href={timer.orderId ? "/pedidos" : `/recetario/${timer.productId}`}
         className="truncate text-xs font-medium text-on-night-muted transition-colors hover:text-on-night"
       >
         <span className={`mr-1.5 inline-block size-1.5 rounded-full ${running ? "bg-accent" : "bg-on-night-muted"}`} />
@@ -229,7 +233,7 @@ export function FloatingTimer() {
   if (!timer) return null;
   return (
     <div className="fixed inset-x-3 bottom-[calc(76px+env(safe-area-inset-bottom))] z-30 flex items-center gap-3 rounded-2xl bg-night px-4 py-2.5 text-on-night md:hidden">
-      <Link href={`/recetario/${timer.productId}`} className="flex min-w-0 flex-1 flex-col">
+      <Link href={timer.orderId ? "/pedidos" : `/recetario/${timer.productId}`} className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-xs font-medium text-on-night-muted">{timer.productName}</span>
         <span className="font-display text-lg tabular-nums">{clock(elapsed)}</span>
       </Link>

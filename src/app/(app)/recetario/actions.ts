@@ -84,6 +84,7 @@ export async function removeRecipeLine(formData: FormData) {
 export async function logTimerSession(s: {
   clientId: string;
   productId: string;
+  orderId?: string;
   seconds: number;
   startedAt: string;
   endedAt: string;
@@ -96,8 +97,10 @@ export async function logTimerSession(s: {
     p_started_at: s.startedAt,
     p_ended_at: s.endedAt,
     p_client_id: s.clientId,
+    p_order_id: s.orderId ?? null,
   });
   if (error) throw new Error(error.message);
+  if (s.orderId) revalidatePath("/pedidos");
   revalidatePath(`/recetario/${s.productId}`);
   revalidatePath("/recetario");
 }

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
 import { getActiveLocationId } from "@/lib/location";
+import { canFully } from "@/lib/permissions";
 import { getSession } from "@/lib/tenant";
 import type { OrderStatus } from "@/lib/types";
 
@@ -45,6 +46,7 @@ export async function saveOrder(formData: FormData) {
     price: Number(formData.get("price") ?? 0),
     due_date: String(formData.get("due_date") ?? "") || null,
     channel: String(formData.get("channel") ?? "").trim() || null,
+    assigned_to: String(formData.get("assigned_to") ?? "") || null,
     paid: formData.get("paid") === "on",
   };
   if (!record.title) return;
@@ -88,4 +90,30 @@ export async function markPaid(formData: FormData) {
   if (error) throw new Error("No se pudo registrar el pago.");
   revalidate();
   revalidatePath("/caja");
+}
+
+export async function assignOrder(orderId: string, userId: string | null) {
+  const { supabase, tenant, role } = await getSession();
+  if (!canFully(role, "manage_orders")) throw new Error("No tienes permiso para asignar pedidos.");
+  const { error } = await supabase.from("orders").update({ assigned_to: userId }).eq("id", orderId).eq("tenant_id", tenant.id);
+  if (error) throw new Error("No se pudo asignar el pedido.");
+  revalidate();
+}
+
+/** La sugerencia de reparto de la vista Capacidad: mismo camino que asignar a mano. */
+export async function applySuggestion(orderId: string, userId: string) {
+  await assignOrder(orderId, userId);
+}
+
+/** Cada quien edita su propia disponibilidad; Propietaria/Administración, cualquiera (RLS lo refuerza). */
+export async function upsertAvailability(userId: string, weekday: number, hoursValue: number) {
+  const { supabase, tenant, user, role } = await getSession();
+  if (userId !== user.id && role !== "owner" && role !== "admin") {
+    throw new Error("No tienes permiso para editar la disponibilidad de otra persona.");
+  }
+  const { error } = await supabase
+    .from("availability")
+    .upsert({ tenant_id: tenant.id, user_id: userId, weekday, hours: Math.max(0, hoursValue) }, { onConflict: "tenant_id,user_id,weekday" });
+  if (error) throw new Error("No se pudo guardar la disponibilidad.");
+  revalidatePath("/pedidos");
 }

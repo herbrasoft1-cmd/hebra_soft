@@ -2,6 +2,38 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Fase 3 — Producción y capacidad (2026-10-10)
+
+Tejedora asignada a pedidos, horas estimadas, avance real y vista de Capacidad, usando
+`Ent-Produccion.dc.html` como referencia. Se construyó dentro de `/pedidos` (su tablero Kanban ya
+existía desde el MVP) en vez de una ruta `/produccion` separada, con un toggle "Tablero / Capacidad"
+— el propio mockup ya modela esto como una sola pantalla con dos vistas, no dos rutas.
+
+- Migración `0010`: `orders.assigned_to`, `timer_sessions.order_id` (el cronómetro ahora se puede
+  vincular a un pedido específico), tabla `availability` (disponibilidad semanal recurrente por
+  persona y día, cada quien edita la suya, Propietaria/Administración cualquiera). `log_timer_session`
+  solo suma al costo del patrón (`products.labor_seconds`) cuando la sesión **no** tiene pedido
+  asociado — si sumara también con pedido, el costo se inflaría cada vez que se produce, no solo al
+  afinar la receta. Verificado con el servidor real: 25 min de trabajo del patrón, antes y después de
+  correr el cronómetro vinculado a un pedido desde el tablero, sin cambiar.
+- `src/lib/production.ts` nuevo (con pruebas): horas estimadas, % de avance, urgencia de vencimiento,
+  totales semanales de disponibilidad/carga, y una heurística simple de reparto (la persona más
+  sobrecargada → la más holgada, su pedido más grande que quepa y no haya empezado).
+- Tablero: tarjetas con código corto, avance real, tejedora asignada, y filtros (buscador, tejedora,
+  canal, "en riesgo" — reutiliza `ordersAtRisk` de la Fase 2). Vista Capacidad: grilla de
+  disponibilidad editable, "Capacidad semanal" y tarjeta de sugerencia con "Aplicar cambio".
+- Se resolvieron dos simplificaciones documentadas en fases anteriores precisamente porque dependían
+  de esto: tejedora ahora solo ve en el tablero sus pedidos asignados + los sin asignar (Fase 1,
+  verificado con la cuenta de prueba); "Necesitan atención" ahora tiene las 4 reglas del mockup, no
+  solo 2 (Fase 2) — "sin asignar · vence pronto" y sobrecarga semanal, sin inventar un reparto día a
+  día (ver nota en `docs/bitacora.md` sobre por qué la grilla de Capacidad no simula eso).
+- Verificado de punta a punta con el servidor real: asignar una tejedora, iniciar/detener el
+  cronómetro de un pedido desde el tablero (avance sube, costo del patrón intacto), configurar
+  disponibilidad para dos personas, ver aparecer la sugerencia de reparto con el texto correcto, y
+  confirmar con una navegación nueva que "Aplicar cambio" reasignó el pedido de verdad.
+- `npm run lint`/`test` (44/44)/`build` pasan limpio. Casilla de la Fase 3 marcada en
+  `docs/ROADMAP.md`.
+
 ## Fase 2 — Panel ejecutivo (2026-10-10)
 
 `/inicio` se bifurca por permiso (`view_finance`): Propietaria y Administración ven el panel

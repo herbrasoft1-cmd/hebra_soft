@@ -349,6 +349,59 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     todavía, es de la Fase 3) — por ahora tejedora tiene el mismo acceso a Pedidos que ventas, documen-
     tado como simplificación intencional en el plan de la fase.
 
+- **Fase 3 del roadmap Enterprise: producción y capacidad (mismo día, sesión siguiente).** El usuario
+  pidió seguir y, al ver que esta fase era bastante más grande que las anteriores, eligió
+  explícitamente hacerla completa de una vez (no partirla) cuando se le preguntó.
+  - **Decisión de arquitectura explicada en el plan:** no se creó una ruta `/produccion` separada —
+    el mockup `Ent-Produccion.dc.html` la muestra como nav item distinto de "Pedidos", pero su propio
+    `<script>` modela "Tablero" y "Capacidad" como dos vistas de **una sola pantalla** (`state.view`),
+    no dos rutas. Se extendió el Kanban que ya existía en `/pedidos` desde el MVP, con un toggle
+    "Tablero / Capacidad" (`SegmentedControl`, ya conectado desde la Fase 2).
+  - **El problema real que había que resolver con criterio, no adivinando:** "avance" necesita que el
+    cronómetro se pueda vincular a un pedido específico, pero el cronómetro de Recetario ya existente
+    SIEMPRE suma el tiempo a `products.labor_seconds` (el costo del patrón). Si una sesión vinculada a
+    un pedido también sumara ahí, el costo se inflaría cada vez que se produce el pedido, no solo al
+    afinar la receta la primera vez. Se resolvió con `log_timer_session` aceptando un `p_order_id`
+    opcional: solo toca `labor_seconds` cuando la sesión **no** tiene pedido asociado — el flujo de
+    Recetario sigue exactamente igual, el del tablero de Producción no toca el costo.
+  - **Otra decisión documentada:** la grilla "Carga por tejedora" del mockup, revisando su script,
+    en realidad colorea por umbrales fijos sobre un número por celda — no simula un reparto real de
+    horas de pedidos día por día (nadie pidió esa precisión, y repartir inventaría datos). Se
+    construyó `availability` como disponibilidad semanal **recurrente** por persona y día de la
+    semana (se configura una vez, aplica cada semana), y "Capacidad semanal"/la sugerencia de reparto
+    comparan totales reales de la semana, no una distribución día a día inventada.
+  - **Migración `0010`:** `orders.assigned_to`, `timer_sessions.order_id`, tabla `availability` con
+    RLS (cada quien edita la suya, Propietaria/Administración cualquiera).
+  - **`src/lib/production.ts` nuevo con pruebas:** horas estimadas, % de avance, urgencia de
+    vencimiento (mismos umbrales que `ordersAtRisk` de la Fase 2, para que tablero y panel ejecutivo
+    digan lo mismo), totales semanales, y `suggestReassignment` — heurística simple y explicable
+    (la persona más sobrecargada → la más holgada, su pedido más grande que quepa y que no haya
+    empezado todavía; `null` si no hay una sugerencia razonable, nunca se inventa una).
+  - **Se resolvieron dos simplificaciones documentadas a propósito en fases anteriores**, ahora que
+    había datos reales para hacerlo: tejedora solo ve en el tablero sus pedidos asignados + los sin
+    asignar (prometido en la Fase 1); "Necesitan atención" del panel ejecutivo pasó de 2 a las 4
+    reglas del mockup — "sin asignar · vence pronto" y sobrecarga semanal (prometido en la Fase 2).
+    `ordersAtRisk` de `analytics.ts` ganó un 4º parámetro opcional (`overloadedUserIds`) sin romper
+    a quien la llamaba sin él.
+  - **Verificado de punta a punta con el servidor real, no solo con las pruebas unitarias:** se leyó
+    el tiempo de trabajo del patrón "Amigurumi Osito" en Recetario (25 min), se asignó el pedido a una
+    cuenta, se inició y detuvo el cronómetro desde el tablero de Pedidos, y se confirmó que el tiempo
+    del patrón en Recetario **seguía siendo 25 min** — la separación costo-del-patrón vs.
+    avance-del-pedido funciona de verdad, no solo en teoría. Se confirmó con la cuenta tejedora de
+    prueba que el tablero ahora solo le muestra sus pedidos asignados + los sin asignar. Se configuró
+    disponibilidad para dos cuentas (una con 0,1 h, otra con 10 h) y apareció la sugerencia de reparto
+    con el texto exacto del pedido/horas/personas correctas; se aplicó con "Aplicar cambio" y, tras
+    navegar de nuevo a la página, el pedido había quedado reasignado de verdad.
+  - Durante la verificación, dos scripts de prueba fallaron por errores del propio script (selector
+    de botón ambiguo, carrera de tiempo tras crear un pedido) — no eran bugs de la app; se ajustaron y
+    se confirmó el comportamiento correcto.
+  - `npm run lint`/`test` (44/44, +3 nuevas de `production.ts` y variantes de `ordersAtRisk`)/`build`
+    pasan limpio. Casilla de la Fase 3 marcada en `docs/ROADMAP.md`, entrada en `docs/CHANGELOG.md`.
+  - **Pendiente:** quedaron varios pedidos de prueba adicionales ("Gorro canal-test" y dos
+    "Amigurumi Osito" nuevos con precio $0) en la base de datos real del usuario por las pruebas de
+    esta fase — se pueden borrar si no se quieren dejar, igual que las cuentas/sede de prueba de
+    fases anteriores. Fases 4-9 del roadmap siguen sin empezar.
+
 - **Fase 2 del roadmap Enterprise: panel ejecutivo (mismo día, sesión siguiente).** El usuario pidió
   seguir. Leí `docs/mockups/Ent-Dashboard.dc.html` completo (su `<script>` trae la lógica real del
   gráfico de ingresos/utilidad) y encontré que varias secciones del mockup dependen de conceptos que

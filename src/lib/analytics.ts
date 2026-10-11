@@ -14,9 +14,8 @@ export function periodChangePct(current: number, previous: number): number | nul
 }
 
 // ---------------------------------------------------------------------------
-// Necesitan atención: solo las 2 reglas calculables con los datos de hoy.
-// "Horas > disponibles" y "sin asignar" necesitan datos de la Fase 3 (tejedora
-// asignada, disponibilidad) y no se simulan.
+// Necesitan atención. Las 4 reglas del mockup, todas con datos reales desde la
+// Fase 3 (antes solo había 2: no existía tejedora asignada ni disponibilidad).
 // ---------------------------------------------------------------------------
 
 export type OrderForRisk = {
@@ -25,6 +24,7 @@ export type OrderForRisk = {
   due_date: string | null;
   status: OrderStatus;
   product_id: string | null;
+  assigned_to?: string | null;
 };
 
 export type RiskItem = {
@@ -38,10 +38,12 @@ export function ordersAtRisk(
   orders: OrderForRisk[],
   outOfStockByProduct: Map<string, string>,
   today: Date,
+  capacity?: { overloadedUserIds: Set<string> },
 ): RiskItem[] {
   const iso = (d: Date) => d.toISOString().slice(0, 10);
   const todayIso = iso(today);
   const tomorrowIso = iso(new Date(today.getTime() + 86400000));
+  const in2DaysIso = iso(new Date(today.getTime() + 2 * 86400000));
   const items: RiskItem[] = [];
 
   for (const o of orders) {
@@ -53,6 +55,12 @@ export function ordersAtRisk(
     const supplyName = o.product_id ? outOfStockByProduct.get(o.product_id) : undefined;
     if (supplyName) {
       items.push({ orderId: o.id, title: o.title, text: `Insumo agotado: ${supplyName}`, severity: "alta" });
+    }
+    if (!o.assigned_to && o.due_date && o.due_date <= in2DaysIso) {
+      items.push({ orderId: o.id, title: o.title, text: "Sin asignar · vence pronto", severity: "media" });
+    }
+    if (o.assigned_to && capacity?.overloadedUserIds.has(o.assigned_to)) {
+      items.push({ orderId: o.id, title: o.title, text: "Tejedora con más horas comprometidas que disponibles esta semana", severity: "media" });
     }
   }
   return items;

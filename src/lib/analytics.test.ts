@@ -22,7 +22,7 @@ describe("ordersAtRisk", () => {
 
   it("marca un pedido que vence mañana y no está enviado", () => {
     const items = ordersAtRisk(
-      [{ id: "1", title: "Manta para bebé", due_date: "2026-10-11", status: "proceso", product_id: null }],
+      [{ id: "1", title: "Manta para bebé", due_date: "2026-10-11", status: "proceso", product_id: null, assigned_to: "lina" }],
       new Map(),
       today,
     );
@@ -65,13 +65,43 @@ describe("ordersAtRisk", () => {
     expect(items).toEqual([{ orderId: "2", title: "Gorro de lana x2", text: "Insumo agotado: Lana mostaza", severity: "alta" }]);
   });
 
-  it("un mismo pedido puede aparecer por las dos reglas a la vez", () => {
+  it("un mismo pedido puede aparecer por varias reglas a la vez", () => {
     const items = ordersAtRisk(
-      [{ id: "3", title: "Bolso", due_date: "2026-10-10", status: "proceso", product_id: "p1" }],
+      [{ id: "3", title: "Bolso", due_date: "2026-10-10", status: "proceso", product_id: "p1", assigned_to: "lina" }],
       new Map([["p1", "Lana café"]]),
       today,
     );
-    expect(items).toHaveLength(2);
+    expect(items).toHaveLength(2); // vence hoy + insumo agotado (está asignada, no dispara "sin asignar")
+  });
+
+  it("marca sin asignar cuando vence en 2 días o menos y nadie lo tiene", () => {
+    const items = ordersAtRisk(
+      [{ id: "4", title: "Bolso tote x3", due_date: "2026-10-12", status: "espera", product_id: null, assigned_to: null }],
+      new Map(),
+      today,
+    );
+    expect(items).toEqual([{ orderId: "4", title: "Bolso tote x3", text: "Sin asignar · vence pronto", severity: "media" }]);
+  });
+
+  it("no marca sin asignar si vence en más de 2 días", () => {
+    const items = ordersAtRisk(
+      [{ id: "4", title: "Bolso tote x3", due_date: "2026-10-20", status: "espera", product_id: null, assigned_to: null }],
+      new Map(),
+      today,
+    );
+    expect(items).toEqual([]);
+  });
+
+  it("marca sobrecarga cuando la tejedora asignada está en la lista de sobrecargadas", () => {
+    const items = ordersAtRisk(
+      [{ id: "5", title: "Amigurumis x12", due_date: null, status: "proceso", product_id: null, assigned_to: "lina" }],
+      new Map(),
+      today,
+      { overloadedUserIds: new Set(["lina"]) },
+    );
+    expect(items).toEqual([
+      { orderId: "5", title: "Amigurumis x12", text: "Tejedora con más horas comprometidas que disponibles esta semana", severity: "media" },
+    ]);
   });
 });
 

@@ -70,14 +70,18 @@
 - [x] Fase 2 — Panel ejecutivo. Migración `0009` corrida (`orders.channel`); KPIs/gráfico/alertas
       reales en `/inicio` para Propietaria y Administración, con `src/lib/analytics.ts` probado.
       Ver entrada en `docs/CHANGELOG.md` y `docs/bitacora.md`.
+- [x] Fase 3 — Producción y capacidad. Migración `0010` corrida (`assigned_to`, `timer_sessions.
+      order_id`, `availability`); tablero con filtros, avance real y vista Capacidad, probados de
+      punta a punta (incluida la sugerencia de reparto reasignando de verdad). Resuelve dos
+      simplificaciones de fases anteriores (tejedora solo ve sus pedidos propios; 4 reglas completas
+      de "Necesitan atención"). Ver `docs/CHANGELOG.md` y `docs/bitacora.md`.
 - [ ] Reactivar "Confirm email" en Supabase (se desactivó para probar flujos con cuentas reales en
-      las Fases 1 y 2).
+      las Fases 1-3).
 - [ ] Borrar si se quiere: cuentas de prueba `qa.tejedora.*@gmail.com`/`qa.ventas.*@gmail.com`, la
-      sede "Bogotá" y el pedido "Gorro canal-test", creados durante la verificación de las Fases 1 y 2.
-- [ ] Fases 3-9: producción/capacidad, simulador de costeo, inventario multisede, finanzas/
-      facturación, integraciones/seguridad/plan, móvil por rol + portal de cliente, listo para
-      producción. La Fase 3 además resuelve dos simplificaciones ya documentadas (tejedora solo ve
-      sus pedidos propios; capacidad del taller en el panel ejecutivo).
+      sede "Bogotá" y varios pedidos de prueba ("Gorro canal-test", dos "Amigurumi Osito" con precio
+      $0), creados durante la verificación de las Fases 1-3.
+- [ ] Fases 4-9: simulador de costeo, inventario multisede, finanzas/facturación, integraciones/
+      seguridad/plan, móvil por rol + portal de cliente, listo para producción.
 
 ## Roadmap sugerido (del README original)
 - [x] Invitar colaboradores a un negocio — ver "Versión enterprise" arriba.
