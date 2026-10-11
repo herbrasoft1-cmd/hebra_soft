@@ -1,6 +1,6 @@
 /** Bloque base: pulso suave, nunca layout-shift porque ocupa el tamaño final. */
 export function Skeleton({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-surface-2 ${className}`} aria-hidden="true" />;
+  return <div className={`animate-pulse rounded-lg bg-surface-muted ${className}`} aria-hidden="true" />;
 }
 
 export function SkeletonHeader() {
@@ -28,7 +28,7 @@ export function SkeletonStat() {
 
 export function SkeletonRow() {
   return (
-    <div className="flex items-center gap-3 border-b border-line px-4 py-3.5 last:border-0">
+    <div className="flex items-center gap-3 border-b border-border px-4 py-3.5 last:border-0">
       <Skeleton className="size-10 shrink-0 rounded-full" />
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <Skeleton className="h-4 w-2/3" />

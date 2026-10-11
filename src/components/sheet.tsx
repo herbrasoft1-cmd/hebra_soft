@@ -35,10 +35,10 @@ export function Sheet({
         if (e.target === ref.current) onClose();
       }}
       aria-label={title}
-      className="m-0 mt-auto w-full max-w-none rounded-t-[28px] bg-bg p-0 text-ink shadow-lg md:m-auto md:max-w-lg md:rounded-2xl"
+      className="m-0 mt-auto w-full max-w-none rounded-t-[28px] bg-bg p-0 text-ink md:m-auto md:max-w-lg md:rounded-2xl"
     >
       <div className="pb-safe flex flex-col gap-5 px-6 pt-4 md:pb-6">
-        <div className="h-1.5 w-10 self-center rounded-full bg-line-strong md:hidden" />
+        <div className="h-1.5 w-10 self-center rounded-full bg-border-strong md:hidden" />
         <div className="flex items-center justify-between gap-3">
           <h2 className="font-display text-xl font-semibold">{title}</h2>
           <button onClick={onClose} className="icon-btn -mr-1.5 size-9" aria-label="Cerrar">

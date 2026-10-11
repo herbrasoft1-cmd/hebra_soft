@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { IconClientes, IconPlus } from "@/components/icons";
-import { EmptyState } from "@/components/page-header";
+import { Avatar } from "@/components/ui/avatar";
+import { EmptyState } from "@/components/ui/page-header";
 import { Sheet } from "@/components/sheet";
 import { SubmitButton } from "@/components/submit-button";
-import { initials, money, whatsappLink } from "@/lib/format";
+import { money, whatsappLink } from "@/lib/format";
 import type { Customer } from "@/lib/types";
 import { deleteCustomer, saveCustomer } from "./actions";
 
@@ -40,9 +41,7 @@ export function CustomersView({ customers }: { customers: Row[] }) {
             const wa = whatsappLink(c.whatsapp);
             return (
               <li key={c.id} className="card flex items-center gap-3 p-4">
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-sage-soft text-sm font-semibold text-sage-ink">
-                  {initials(c.name)}
-                </span>
+                <Avatar id={c.id} name={c.name} size={44} />
                 <button onClick={() => setEditing(c)} className="flex min-w-0 flex-1 flex-col text-left">
                   <span className="truncate text-[15px] font-semibold">{c.name}</span>
                   <span className="truncate text-xs text-muted">

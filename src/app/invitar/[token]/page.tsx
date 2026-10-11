@@ -17,7 +17,7 @@ type InvitationRow = {
 
 function Shell({ title, text, action }: { title: string; text: string; action?: React.ReactNode }) {
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-surface-2 px-5 py-10">
+    <main className="flex min-h-dvh items-center justify-center bg-surface-muted px-5 py-10">
       <div className="flex w-full max-w-sm flex-col gap-7">
         <div className="flex flex-col items-center gap-3 text-center">
           <Logo size={48} />
@@ -26,7 +26,7 @@ function Shell({ title, text, action }: { title: string; text: string; action?: 
             <p className="text-ink-2">{text}</p>
           </div>
         </div>
-        {action && <div className="card p-7 shadow-md">{action}</div>}
+        {action && <div className="card p-7">{action}</div>}
       </div>
     </main>
   );

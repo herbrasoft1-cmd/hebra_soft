@@ -58,7 +58,7 @@ export function RecipeEditor(props: Props) {
         {/* Encabezado editable */}
         <form action={updateProduct} className="flex flex-col gap-2">
           <input type="hidden" name="id" value={product.id} />
-          <span className="chip self-start bg-sage-soft text-sage-ink">
+          <span className="chip self-start bg-success-soft text-success-ink">
             {props.itemLabel}
             {product.category ? ` · ${product.category}` : ""}
           </span>
@@ -90,7 +90,7 @@ export function RecipeEditor(props: Props) {
               <button
                 onClick={() => (isThis ? (running ? pause() : resume()) : start(product.id, product.name))}
                 aria-label={isThis && running ? "Pausar cronómetro" : "Iniciar cronómetro"}
-                className="flex size-15 cursor-pointer items-center justify-center rounded-full bg-accent text-night shadow-md transition-all duration-150 hover:brightness-95 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+                className="flex size-15 cursor-pointer items-center justify-center rounded-full bg-accent text-night transition-all duration-150 hover:brightness-95 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
               >
                 {isThis && running ? <IconPause size={24} /> : <IconPlay size={24} />}
               </button>
@@ -160,7 +160,7 @@ export function RecipeEditor(props: Props) {
             {lines.map((l) => {
               const u = UNIT_LABEL[l.supplies.unit];
               return (
-                <div key={l.id} className="flex items-center gap-3 border-b border-line px-4 py-3">
+                <div key={l.id} className="flex items-center gap-3 border-b border-border px-4 py-3">
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate text-[15px] font-medium">
                       {l.supplies.name}
@@ -237,7 +237,7 @@ export function RecipeEditor(props: Props) {
                   draggable
                   onDragStart={(e) => e.dataTransfer.setData("text/supply-id", s.id)}
                   onClick={() => pickSupply(s.id)}
-                  className="chip cursor-grab gap-1.5 border border-line-strong bg-surface py-2 text-ink-2"
+                  className="chip cursor-grab gap-1.5 border border-border-strong bg-surface py-2 text-ink-2"
                 >
                   <IconOvillo size={14} /> {s.name}
                 </button>
@@ -258,7 +258,7 @@ export function RecipeEditor(props: Props) {
             <Row label="Materiales" value={money(breakdown.materials)} />
             <Row label={`Mano de obra (${duration(liveSeconds)})`} value={money(breakdown.labor)} />
             <Row label={`Desgaste de herramientas (${toolWearPct}%)`} value={money(breakdown.wear)} />
-            <div className="h-px bg-line" />
+            <div className="h-px bg-border" />
             <div className="flex justify-between text-base font-semibold">
               <span>Costo total</span>
               <span className="tabular-nums">{money(breakdown.total)}</span>
@@ -277,10 +277,10 @@ export function RecipeEditor(props: Props) {
                   onClick={() => setMargin(p.margin)}
                   aria-pressed={active}
                   className={`flex min-h-18 flex-col items-center justify-center gap-0.5 rounded-2xl ${
-                    active ? "border-2 border-primary bg-primary-soft" : "border border-line bg-surface"
+                    active ? "border-2 border-primary bg-primary-soft" : "border border-border bg-surface"
                   }`}
                 >
-                  <span className={`text-xs ${active ? "font-semibold text-primary-ink" : "text-muted"}`}>
+                  <span className={`text-xs ${active ? "font-semibold text-primary-hover" : "text-muted"}`}>
                     Margen {p.margin}%
                   </span>
                   <span className="text-base font-semibold tabular-nums">{money(p.price)}</span>

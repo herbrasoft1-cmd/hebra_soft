@@ -9,11 +9,11 @@ export function Pager({ page, totalPages, basePath }: { page: number; totalPages
   return (
     <nav aria-label="Paginación" className="mt-4 flex items-center justify-center gap-3">
       {page > 1 ? (
-        <Link href={href(page - 1)} className="icon-btn size-9 border border-line-strong bg-surface">
+        <Link href={href(page - 1)} className="icon-btn size-9 border border-border-strong bg-surface">
           <IconBack size={16} />
         </Link>
       ) : (
-        <span className="icon-btn size-9 border border-line-strong bg-surface opacity-40">
+        <span className="icon-btn size-9 border border-border-strong bg-surface opacity-40">
           <IconBack size={16} />
         </span>
       )}
@@ -21,11 +21,11 @@ export function Pager({ page, totalPages, basePath }: { page: number; totalPages
         Página {page} de {totalPages}
       </span>
       {page < totalPages ? (
-        <Link href={href(page + 1)} className="icon-btn size-9 border border-line-strong bg-surface">
+        <Link href={href(page + 1)} className="icon-btn size-9 border border-border-strong bg-surface">
           <IconBack size={16} className="rotate-180" />
         </Link>
       ) : (
-        <span className="icon-btn size-9 border border-line-strong bg-surface opacity-40">
+        <span className="icon-btn size-9 border border-border-strong bg-surface opacity-40">
           <IconBack size={16} className="rotate-180" />
         </span>
       )}

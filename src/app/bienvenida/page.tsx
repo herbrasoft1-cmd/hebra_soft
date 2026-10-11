@@ -22,7 +22,7 @@ export default async function WelcomePage() {
   const meta = user.user_metadata as { business_name?: string; industry?: string; full_name?: string };
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-surface-2 px-5 py-10">
+    <main className="flex min-h-dvh items-center justify-center bg-surface-muted px-5 py-10">
       <div className="flex w-full max-w-sm flex-col gap-7">
         <div className="flex flex-col items-center gap-3 text-center">
           <Logo size={48} />
@@ -31,7 +31,7 @@ export default async function WelcomePage() {
             <p className="text-ink-2">Último paso: confirma los datos de tu negocio.</p>
           </div>
         </div>
-        <div className="card p-7 shadow-md">
+        <div className="card p-7">
           <BusinessForm defaultName={meta.business_name ?? ""} defaultIndustry={meta.industry ?? "crochet"} />
         </div>
       </div>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { IconRecetario } from "@/components/icons";
-import { EmptyState, PageHeader } from "@/components/page-header";
+import { EmptyState, PageHeader } from "@/components/ui/page-header";
 import { SubmitButton } from "@/components/submit-button";
 import { costBreakdown } from "@/lib/costing";
 import { duration, money } from "@/lib/format";
@@ -69,13 +69,13 @@ export default async function RecipesPage() {
           {products.map((p) => (
             <li key={p.id} className="card flex flex-col gap-3 p-4">
               <Link href={`/recetario/${p.id}`} className="flex flex-col gap-1">
-                {p.category && <span className="chip self-start bg-sage-soft text-sage-ink">{p.category}</span>}
+                {p.category && <span className="chip self-start bg-success-soft text-success-ink">{p.category}</span>}
                 <span className="font-display text-xl">{p.name}</span>
                 <span className="text-sm text-muted">
                   {p.product_supplies.length} insumos · {duration(p.labor_seconds)} de trabajo
                 </span>
               </Link>
-              <div className="flex items-end justify-between border-t border-line pt-3">
+              <div className="flex items-end justify-between border-t border-border pt-3">
                 <div className="flex flex-col text-sm">
                   <span className="text-muted">Costo {money(p.cost)}</span>
                   <span className="text-[17px] font-semibold">

@@ -1,5 +1,9 @@
 # Pendientes
 
+> Desde que llegó el kit "HEBRA Enterprise", el roadmap grande vive en `docs/ROADMAP.md` (fase por
+> fase) y el estado detallado en `docs/ESTADO.md`. Este archivo sigue para lo operativo del día a
+> día (migraciones por correr, cuentas externas pendientes) — no se descontinúa, se complementan.
+
 ## Para poder desplegar a producción
 - [x] Completar `.env.local` con las credenciales reales del proyecto Supabase.
 - [x] Correr `supabase/migrations/0001_hebra_schema.sql` en Supabase (SQL Editor).
@@ -55,6 +59,16 @@
 - [ ] Búsqueda de clientes/insumos ahora solo filtra dentro de la página actual (50 resultados) —
       antes de paginar buscaba en todo el listado. Si hace falta buscar en todo el histórico, se
       necesitaría mover la búsqueda al servidor.
+
+## Roadmap Enterprise (kit nuevo, ver `docs/ROADMAP.md`/`docs/ESTADO.md`)
+- [x] Fase 0 — Sistema de diseño y nuevo layout. Verificado con Playwright, `lint`/`test`/`build`
+      en verde. Sin commitear/pushear todavía.
+- [ ] **Decisión pendiente antes de la Fase 1:** qué hacer con el trabajo de equipo/roles ya hecho
+      (commit `c3b8a12`, 3 roles sin sedes) frente al modelo del roadmap (4 roles + sedes) — ver
+      "Preguntas" en `docs/ESTADO.md`.
+- [ ] Fases 1-9: sedes/roles reales, panel ejecutivo, producción/capacidad, simulador de costeo,
+      inventario multisede, finanzas/facturación, integraciones/seguridad/plan, móvil por rol +
+      portal de cliente, listo para producción.
 
 ## Roadmap sugerido (del README original)
 - [x] Invitar colaboradores a un negocio — ver "Versión enterprise" arriba.

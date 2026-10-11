@@ -22,7 +22,7 @@ export function MemberRow({
   const canRemove = isSelf ? true : canManage && canTouchTarget;
 
   return (
-    <li className="flex items-center gap-3 border-b border-line px-4 py-3.5 last:border-0">
+    <li className="flex items-center gap-3 border-b border-border px-4 py-3.5 last:border-0">
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-[15px] font-medium">
           {member.email}
@@ -42,7 +42,7 @@ export function MemberRow({
             name="role"
             defaultValue={member.role}
             onChange={(e) => e.currentTarget.form?.requestSubmit()}
-            className="rounded-lg border border-line-strong bg-surface px-2.5 py-1.5 text-sm"
+            className="rounded-lg border border-border-strong bg-surface px-2.5 py-1.5 text-sm"
           >
             {roleOptions.map((r) => (
               <option key={r} value={r}>
@@ -52,7 +52,7 @@ export function MemberRow({
           </select>
         </form>
       ) : (
-        <span className="chip bg-surface-2 text-ink-2">{ROLE_LABEL[member.role]}</span>
+        <span className="chip bg-surface-muted text-ink-2">{ROLE_LABEL[member.role]}</span>
       )}
 
       {canRemove && (

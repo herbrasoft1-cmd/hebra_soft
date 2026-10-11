@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { IconChart, IconTrendUp } from "@/components/icons";
 import { RankingBars, TrendBars } from "@/components/charts";
-import { EmptyState, PageHeader } from "@/components/page-header";
+import { EmptyState, PageHeader } from "@/components/ui/page-header";
 import { costBreakdown } from "@/lib/costing";
 import { money, shortMonth } from "@/lib/format";
 import { getSession } from "@/lib/tenant";
@@ -149,7 +149,7 @@ export default async function AnalyticsPage() {
             <ul className="grid gap-3 sm:grid-cols-2">
               {insights.map((text) => (
                 <li key={text} className="card flex items-start gap-3 p-4">
-                  <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-sage-soft text-sage-ink">
+                  <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-success-soft text-success-ink">
                     <IconTrendUp size={14} />
                   </span>
                   <p className="text-sm text-ink-2">{text}</p>

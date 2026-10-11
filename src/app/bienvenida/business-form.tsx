@@ -23,7 +23,7 @@ export function BusinessForm({ defaultName, defaultIndustry }: { defaultName: st
         </select>
       </label>
       {state.error && (
-        <p role="alert" className="rounded-xl bg-primary-soft p-3 text-sm text-primary-ink">
+        <p role="alert" className="rounded-xl bg-primary-soft p-3 text-sm text-primary-hover">
           {state.error}
         </p>
       )}

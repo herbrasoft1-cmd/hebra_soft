@@ -47,7 +47,7 @@ export function ActivitySection({ entries }: { entries: AuditEntry[] }) {
       </div>
       <ul className="flex flex-col gap-0.5">
         {entries.map((e) => (
-          <li key={e.id} className="flex items-baseline justify-between gap-3 border-b border-line py-2.5 last:border-0">
+          <li key={e.id} className="flex items-baseline justify-between gap-3 border-b border-border py-2.5 last:border-0">
             <span className="text-sm text-ink-2">{describe(e)}</span>
             <span className="shrink-0 text-xs text-muted tabular-nums">
               {new Date(e.created_at).toLocaleDateString("es-CO", { day: "numeric", month: "short" })}

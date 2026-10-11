@@ -4,102 +4,157 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ---------------------------------------------------------------------------
-   Paleta orgánica HEBRA
-   - Fondo lino #FDFBF7 · Texto carbón #2D312E · Terracota #C97A63 · Eucalipto #5F7D6B
-   - El terracota de botones se oscurece a #A85B45 para que el texto blanco
-     cumpla contraste AA; #C97A63 queda para acentos e ilustraciones.
+   HEBRA Enterprise — tokens extraídos de docs/DESIGN.md (mockups aprobados).
+   Profesional y cálido: lienzo lino, superficies blancas de borde fino, menú
+   lateral oscuro tipo espresso, Fraunces para títulos, Geist para interfaz.
+   Sin degradados, sin sombras fuertes, sin bordes de color a la izquierda.
    --------------------------------------------------------------------------- */
 :root {
-  --c-bg: #fdfbf7;
+  --c-bg: #f8f5ef;
   --c-surface: #ffffff;
-  --c-surface-2: #f7f2ea;
-  --c-line: #efe8de;
-  --c-line-strong: #e2d8cc;
-  --c-ink: #2d312e;
-  --c-ink-2: #4a4f4b;
-  --c-muted: #6b6f6c;
-  --c-primary: #a85b45;
+  --c-surface-muted: #f4efe7;
+  --c-track: #f1ece4;
+  --c-border: #eae3d8;
+  --c-border-strong: #e2d9cc;
+  --c-divider: #f2ede5;
+  --c-ink: #26221f;
+  --c-ink-2: #4d4741;
+  --c-muted: #7a7168;
+  --c-primary: #a4533d;
+  --c-primary-hover: #7e3d2c;
   --c-on-primary: #ffffff;
-  --c-primary-soft: #f8ede6;
-  --c-primary-ink: #8a4836;
+  --c-primary-soft: #f6e9e2;
   --c-accent: #c97a63;
-  --c-sage: #5f7d6b;
-  --c-on-sage: #ffffff;
-  --c-sage-soft: #eaf1ec;
-  --c-sage-ink: #3f5a4a;
-  --c-night: #2d312e;
-  --c-on-night: #fdfbf7;
-  --c-on-night-muted: #d8cfc3;
+  --c-accent-light: #e2a285;
+  --c-income: #ebcdbf;
+  --c-success: #4e6e5b;
+  --c-success-ink: #3f5a4a;
+  --c-success-soft: #e7efe9;
+  --c-warning: #b7791f;
+  --c-warning-ink: #7a4f0e;
+  --c-warning-soft: #fbf0dc;
+  --c-danger: #b23a2e;
+  --c-danger-ink: #8c2e24;
+  --c-danger-soft: #fbe7e4;
+  --c-danger-tint: #fdf6f4;
+  --c-danger-tint-border: #f3dcd7;
+  --c-warning-tint: #fefaf1;
+  --c-warning-tint-border: #f3e4c4;
+  --c-night: #26221f;
+  --c-on-night: #f3eae0;
+  --c-on-night-muted: #bfb2a4;
   color-scheme: light;
 
-  /* Elevación: sombras en capas (umbra ajustada + penumbra difusa), como Stripe/Linear */
-  --c-shadow-xs: 0 1px 2px rgb(45 49 46 / 0.05);
-  --c-shadow-sm: 0 1px 2px rgb(45 49 46 / 0.04), 0 3px 8px rgb(45 49 46 / 0.06);
-  --c-shadow-md: 0 2px 6px rgb(45 49 46 / 0.05), 0 12px 28px rgb(45 49 46 / 0.09);
-  --c-shadow-lg: 0 8px 16px rgb(45 49 46 / 0.06), 0 28px 56px rgb(45 49 46 / 0.16);
-  --c-shadow-up: 0 -1px 2px rgb(45 49 46 / 0.03), 0 -10px 24px rgb(45 49 46 / 0.07);
+  /* Sin sombra en casi nada: la única excepción es la pestaña activa de un SegmentedControl. */
+  --shadow-tab: 0 1px 2px rgba(38, 34, 31, 0.08);
 }
 
 .dark {
+  /* Superficies: se conservan del MVP (DESIGN.md lo pide explícitamente). Los colores de estado
+     se aclaran a mano aquí para mantener contraste AA sobre --c-surface (#2E2622); DESIGN.md no
+     da hex exactos para esta parte, solo el criterio. */
   --c-bg: #231c19;
   --c-surface: #2e2622;
-  --c-surface-2: #2a221f;
-  --c-line: #3a302b;
-  --c-line-strong: #4a3d36;
+  --c-surface-muted: #2a221f;
+  --c-track: #362d28;
+  --c-border: #3a302b;
+  --c-border-strong: #4a3d36;
+  --c-divider: #352b26;
   --c-ink: #efe5d8;
   --c-ink-2: #d8caba;
   --c-muted: #bdae9c;
   --c-primary: #d9a77f;
+  --c-primary-hover: #e8c1a0;
   --c-on-primary: #231c19;
   --c-primary-soft: #3a2b23;
-  --c-primary-ink: #e8c1a0;
   --c-accent: #d9a77f;
-  --c-sage: #8fb09b;
-  --c-on-sage: #1c2620;
-  --c-sage-soft: #2c3530;
-  --c-sage-ink: #cfe0d4;
+  --c-accent-light: #e8c1a0;
+  --c-income: #8a6a58;
+  --c-success: #7fb08f;
+  --c-success-ink: #cfe0d4;
+  --c-success-soft: #2c3530;
+  --c-warning: #e0a542;
+  --c-warning-ink: #f3d9a0;
+  --c-warning-soft: #3a2f1a;
+  --c-danger: #e0786a;
+  --c-danger-ink: #f3c2ba;
+  --c-danger-soft: #3a2420;
+  --c-danger-tint: #2e2420;
+  --c-danger-tint-border: #4a332c;
+  --c-warning-tint: #2e2a1c;
+  --c-warning-tint-border: #4a3f28;
   --c-night: #171210;
   --c-on-night: #f3dcc6;
   --c-on-night-muted: #bdae9c;
   color-scheme: dark;
 
-  /* En oscuro las sombras casi no se ven contra el fondo: se apoyan en negro puro y más opacidad */
-  --c-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.3);
-  --c-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3), 0 3px 10px rgb(0 0 0 / 0.35);
-  --c-shadow-md: 0 2px 6px rgb(0 0 0 / 0.32), 0 14px 32px rgb(0 0 0 / 0.42);
-  --c-shadow-lg: 0 10px 20px rgb(0 0 0 / 0.38), 0 32px 64px rgb(0 0 0 / 0.55);
-  --c-shadow-up: 0 -1px 2px rgb(0 0 0 / 0.25), 0 -12px 28px rgb(0 0 0 / 0.38);
+  --shadow-tab: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* Menú lateral: igual en claro y oscuro (DESIGN.md §2). */
+:root,
+.dark {
+  --c-sidebar-bg: #1e1916;
+  --c-sidebar-raised: #261f1b;
+  --c-sidebar-border: #332a25;
+  --c-sidebar-active: #2f2723;
+  --c-sidebar-text: #ede3d6;
+  --c-sidebar-text-active: #fff5ec;
+  --c-sidebar-text-2: #cdbfaf;
+  --c-sidebar-muted: #a8988a;
+  --c-sidebar-label: #7d6f63;
+  --c-sidebar-icon-active: #e2a285;
 }
 
 @theme inline {
   --color-bg: var(--c-bg);
   --color-surface: var(--c-surface);
-  --color-surface-2: var(--c-surface-2);
-  --color-line: var(--c-line);
-  --color-line-strong: var(--c-line-strong);
+  --color-surface-muted: var(--c-surface-muted);
+  --color-track: var(--c-track);
+  --color-border: var(--c-border);
+  --color-border-strong: var(--c-border-strong);
+  --color-divider: var(--c-divider);
   --color-ink: var(--c-ink);
   --color-ink-2: var(--c-ink-2);
   --color-muted: var(--c-muted);
   --color-primary: var(--c-primary);
+  --color-primary-hover: var(--c-primary-hover);
   --color-on-primary: var(--c-on-primary);
   --color-primary-soft: var(--c-primary-soft);
-  --color-primary-ink: var(--c-primary-ink);
   --color-accent: var(--c-accent);
-  --color-sage: var(--c-sage);
-  --color-on-sage: var(--c-on-sage);
-  --color-sage-soft: var(--c-sage-soft);
-  --color-sage-ink: var(--c-sage-ink);
+  --color-accent-light: var(--c-accent-light);
+  --color-income: var(--c-income);
+  --color-success: var(--c-success);
+  --color-success-ink: var(--c-success-ink);
+  --color-success-soft: var(--c-success-soft);
+  --color-warning: var(--c-warning);
+  --color-warning-ink: var(--c-warning-ink);
+  --color-warning-soft: var(--c-warning-soft);
+  --color-danger: var(--c-danger);
+  --color-danger-ink: var(--c-danger-ink);
+  --color-danger-soft: var(--c-danger-soft);
+  --color-danger-tint: var(--c-danger-tint);
+  --color-danger-tint-border: var(--c-danger-tint-border);
+  --color-warning-tint: var(--c-warning-tint);
+  --color-warning-tint-border: var(--c-warning-tint-border);
   --color-night: var(--c-night);
   --color-on-night: var(--c-on-night);
   --color-on-night-muted: var(--c-on-night-muted);
 
-  --font-display: "Fraunces", Georgia, serif;
-  --font-sans: "DM Sans", system-ui, -apple-system, sans-serif;
+  --color-sidebar-bg: var(--c-sidebar-bg);
+  --color-sidebar-raised: var(--c-sidebar-raised);
+  --color-sidebar-border: var(--c-sidebar-border);
+  --color-sidebar-active: var(--c-sidebar-active);
+  --color-sidebar-text: var(--c-sidebar-text);
+  --color-sidebar-text-active: var(--c-sidebar-text-active);
+  --color-sidebar-text-2: var(--c-sidebar-text-2);
+  --color-sidebar-muted: var(--c-sidebar-muted);
+  --color-sidebar-label: var(--c-sidebar-label);
+  --color-sidebar-icon-active: var(--c-sidebar-icon-active);
 
-  --shadow-xs: var(--c-shadow-xs);
-  --shadow-sm: var(--c-shadow-sm);
-  --shadow-md: var(--c-shadow-md);
-  --shadow-lg: var(--c-shadow-lg);
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Geist", system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
 }
 
 html,
@@ -115,7 +170,7 @@ body {
 }
 
 .font-display {
-  letter-spacing: -0.015em;
+  letter-spacing: -0.5px;
 }
 
 /* Respeta las zonas seguras del celular cuando la PWA está instalada */
@@ -126,35 +181,37 @@ body {
   padding-top: env(safe-area-inset-top);
 }
 
-/* Utilidades de componentes (Tailwind v4: @utility permite usarlas con @apply) */
+/* Utilidades de componentes (Tailwind v4: @utility permite usarlas con @apply).
+   DESIGN.md §4: paneles 16px, tarjetas internas 12px, botones/inputs 10px,
+   controles pequeños 8px, chips 999px. Sin sombra salvo --shadow-tab. */
 @utility field {
   @apply flex flex-col gap-1.5 text-sm font-medium text-ink-2;
 }
 @utility input {
-  @apply min-h-12 w-full rounded-xl border border-line-strong bg-surface px-3.5 text-[15px] text-ink shadow-xs outline-none transition focus:border-primary focus:shadow-none focus:ring-[3px] focus:ring-primary/15;
+  @apply min-h-10 w-full rounded-[10px] border border-border-strong bg-surface px-3.5 text-[14px] text-ink outline-none transition focus:border-primary focus:ring-[3px] focus:ring-primary/15;
 }
 @utility btn {
-  @apply inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl px-5 text-[15px] font-semibold tracking-[-0.01em] transition-all duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30;
+  @apply inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] px-5 text-[14px] font-medium transition-colors duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30 md:min-h-10;
 }
 @utility btn-primary {
-  @apply btn bg-primary text-on-primary shadow-sm hover:shadow-md hover:brightness-95;
+  @apply btn bg-primary text-on-primary hover:bg-primary-hover;
 }
 @utility btn-sage {
-  @apply btn bg-sage text-on-sage shadow-sm hover:shadow-md hover:brightness-95;
+  @apply btn bg-success text-on-primary hover:brightness-95;
 }
 @utility btn-ghost {
-  @apply btn border border-line-strong bg-surface text-ink shadow-xs hover:bg-surface-2 hover:shadow-sm;
+  @apply btn border border-border-strong bg-surface text-ink hover:bg-surface-muted;
 }
 @utility card {
-  @apply rounded-2xl border border-line bg-surface shadow-sm;
+  @apply rounded-2xl border border-border bg-surface;
 }
 @utility chip {
   @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap;
 }
 @utility icon-btn {
-  @apply inline-flex cursor-pointer items-center justify-center rounded-full text-ink-2 transition-all duration-150 hover:bg-surface-2 hover:text-ink active:scale-90 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30;
+  @apply inline-flex cursor-pointer items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-muted hover:text-ink active:scale-90 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30;
 }
 
 dialog::backdrop {
-  background: rgb(45 49 46 / 0.45);
+  background: rgb(38 34 31 / 0.45);
 }

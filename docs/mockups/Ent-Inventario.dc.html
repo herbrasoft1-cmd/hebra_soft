@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>HEBRA Enterprise · Inventario</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#A4533D}a:hover{color:#7E3D2C}
+</style>
+</helmet>
+<div style="width: 100%; min-height: 1120px; display: flex; flex-wrap: wrap; background: #F8F5EF; color: #26221F; font-family: 'Geist', system-ui, sans-serif; font-size: 14px">
+
+  <aside style="flex: 1 1 248px; max-width: 100%; box-sizing: border-box; background: #1E1916; color: #EDE3D6; padding: 20px 14px; display: flex; flex-direction: column; gap: 20px">
+    <button style="display: flex; align-items: center; gap: 12px; padding: 8px; border: 1px solid #332A25; border-radius: 14px; background: #261F1B; color: inherit; font-family: inherit; text-align: left; cursor: pointer">
+      <span style="width: 38px; height: 38px; border-radius: 10px; background: #A4533D; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FDFBF7" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="11" r="7"></circle><path d="M7.5 8c3.5 1 6.5 4.4 7.3 9.6"></path><path d="M5.6 12.4c2.7 0 5.8 1.7 6.8 5.6"></path><path d="M10 4.6c2.6 1.8 5 5.3 5.6 9.6"></path></svg>
+      </span>
+      <span style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 14px; font-weight: 600">Ovillo Studio</span><span style="font-size: 12px; color: #A8988A">Enterprise · 3 sedes</span></span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A8988A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"></path></svg>
+    </button>
+    <button style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border: 1px solid #332A25; border-radius: 10px; background: transparent; color: #A8988A; font-family: inherit; font-size: 13px; cursor: pointer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.2-4.2"></path></svg>
+      <span style="flex: 1; text-align: left">Buscar o ejecutar…</span>
+      <span style="font-family: 'Geist Mono', monospace; font-size: 11px; padding: 2px 6px; border: 1px solid #3D332D; border-radius: 6px">⌘K</span>
+    </button>
+    <nav aria-label="Principal" style="display: flex; flex-direction: column; gap: 2px">
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 1px; color: #7D6F63; padding: 8px 12px 6px">OPERACIÓN</div>
+      <a href="Ent-Dashboard.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect></svg>Panel</a>
+      <a href="Ent-Produccion.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M2 14c3-6 5 4 8-2s5 4 8-2 3 2 4 1"></path><circle cx="6" cy="12" r="1.2"></circle><circle cx="18" cy="11" r="1.2"></circle></svg>
+        <span style="flex: 1">Producción</span><span style="font-size: 11px; font-weight: 600; background: #A4533D; color: #FFF; padding: 1px 7px; border-radius: 999px">5</span></a>
+      <a href="Ent-Costeo.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M9 8h6M9 12h6M9 16h3"></path></svg>Recetario y costeo</a>
+      <a href="Ent-Inventario.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; background: #2F2723; color: #FFF5EC; font-weight: 600; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E2A285" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M6.5 7.5c4 1.2 7.6 5 8.6 11"></path><path d="M4.6 13c3.2 0 7 2 8.2 6.6"></path><path d="M9.5 4.4c3 2 5.8 6 6.4 11"></path></svg>Inventario</a>
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 1px; color: #7D6F63; padding: 16px 12px 6px">NEGOCIO</div>
+      <a href="Ent-Finanzas.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"></rect><path d="M3 10h18M15.5 14.5h2.5"></path></svg>Finanzas y facturación</a>
+      <a href="Ent-Movil-Pedido.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"></circle><path d="M3 19c.8-3.4 3.2-5 6-5s5.2 1.6 6 5"></path><path d="M16 5.5a3 3 0 0 1 0 5.6M18 14.5c1.6.6 2.6 2 3 4.5"></path></svg>Clientes y pedidos</a>
+      <a href="Ent-Equipo.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M5 19L19 5M5 5l14 14"></path><circle cx="19.6" cy="4.4" r="1.4"></circle><circle cx="4.4" cy="4.4" r="1.4"></circle></svg>Equipo y ajustes</a>
+    </nav>
+    <div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 4px">
+      <span style="width: 34px; height: 34px; border-radius: 17px; background: #C97A63; color: #1E1916; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center">MR</span>
+      <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 600">Mariana Ríos</span><span style="font-size: 12px; color: #A8988A">Propietaria</span></span>
+    </div>
+  </aside>
+
+  <main style="flex: 999 1 640px; min-width: 0; box-sizing: border-box; padding: 20px 32px 40px; display: flex; flex-direction: column; gap: 22px">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid #EAE3D8">
+      <div style="font-size: 13px; color: #7A7168">Ovillo Studio <span style="margin: 0 6px">/</span> <span style="color: #26221F; font-weight: 500">Inventario</span></div>
+      <span style="font-size: 12px; color: #7A7168">Valorado por costo promedio ponderado</span>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <h1 style="margin: 0; font-family: 'Fraunces', serif; font-size: 36px; font-weight: 400; letter-spacing: -0.5px">Inventario</h1>
+        <p style="margin: 0; font-size: 15px; color: #4D4741">Insumos por sede y lote, con reorden automático.</p>
+      </div>
+      <div style="display: flex; gap: 8px">
+        <button style="min-height: 40px; padding: 0 16px; border: 1px solid #E2D9CC; border-radius: 10px; background: #FFFFFF; color: #26221F; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer">Transferir entre sedes</button>
+        <button style="min-height: 40px; padding: 0 16px; border: none; border-radius: 10px; background: #A4533D; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer">+ Registrar compra</button>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px">
+      <div style="background: #FFFFFF; border: 1px solid #EAE3D8; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; color: #7A7168">Valor del inventario</span><span style="font-family: 'Fraunces', serif; font-size: 28px; font-weight: 500">$14,8 M</span><span style="font-size: 12px; color: #7A7168">en 3 sedes · 64 referencias</span></div>
+      <div style="background: #FFFFFF; border: 1px solid #EAE3D8; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; color: #7A7168">Bajo punto de reorden</span><span style="font-family: 'Fraunces', serif; font-size: 28px; font-weight: 500; color: #8C2E24">7</span><span style="font-size: 12px; color: #7A7168">1 agotado · 6 por agotarse</span></div>
+      <div style="background: #FFFFFF; border: 1px solid #EAE3D8; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; color: #7A7168">Órdenes de compra abiertas</span><span style="font-family: 'Fraunces', serif; font-size: 28px; font-weight: 500">3</span><span style="font-size: 12px; color: #7A7168">$2,46 M por recibir</span></div>
+      <div style="background: #FFFFFF; border: 1px solid #EAE3D8; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; color: #7A7168">Rotación promedio</span><span style="font-family: 'Fraunces', serif; font-size: 28px; font-weight: 500">28 días</span><span style="font-size: 12px; color: #3F5A4A">4 días más rápido que agosto</span></div>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+      <section style="flex: 3 1 640px; min-width: 0; background: #FFFFFF; border: 1px solid #EAE3D8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px">
+          <div role="tablist" aria-label="Sede" style="display: flex; padding: 3px; background: #F4EFE7; border-radius: 10px; gap: 2px">
+            <sc-for list="{{sites}}" as="s" hint-placeholder-count="4">
+              <sc-if value="{{s.active}}" hint-placeholder-val="{{ false }}">
+                <button role="tab" aria-selected="true" onClick="{{s.pick}}" style="min-height: 32px; padding: 0 12px; border: none; border-radius: 8px; background: #FFFFFF; color: #26221F; font-family: inherit; font-size: 13px; font-weight: 600; box-shadow: 0 1px 2px rgba(38,34,31,0.08); cursor: pointer">{{s.label}}</button>
+              </sc-if>
+              <sc-if value="{{s.inactive}}" hint-placeholder-val="{{ true }}">
+                <button role="tab" aria-selected="false" onClick="{{s.pick}}" style="min-height: 32px; padding: 0 12px; border: none; border-radius: 8px; background: transparent; color: #7A7168; font-family: inherit; font-size: 13px; cursor: pointer">{{s.label}}</button>
+              </sc-if>
+            </sc-for>
+          </div>
+          <span style="font-size: 13px; color: #7A7168">{{countLabel}}</span>
+        </div>
+        <div style="overflow-x: auto">
+          <div role="table" aria-label="Insumos" style="min-width: 760px; display: flex; flex-direction: column; font-size: 13px">
+            <div role="row" style="display: grid; grid-template-columns: minmax(180px, 2fr) 90px 70px minmax(150px, 1.6fr) 80px 90px 96px; gap: 12px; padding: 8px 0; border-bottom: 1px solid #EAE3D8; color: #7A7168">
+              <span role="columnheader">Insumo</span><span role="columnheader">Sede</span><span role="columnheader">Lote</span><span role="columnheader">Stock vs. reorden</span><span role="columnheader" style="text-align: right">Costo u.</span><span role="columnheader" style="text-align: right">Valor</span><span role="columnheader">Estado</span>
+            </div>
+            <sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+              <div role="row" style="display: grid; grid-template-columns: minmax(180px, 2fr) 90px 70px minmax(150px, 1.6fr) 80px 90px 96px; gap: 12px; align-items: center; padding: 11px 0; border-bottom: 1px solid #F2EDE5; font-variant-numeric: tabular-nums">
+                <span role="cell" style="display: flex; align-items: center; gap: 10px; min-width: 0"><span style="width: 12px; height: 12px; border-radius: 6px; background: {{r.swatch}}; border: 1px solid #E2D9CC; box-sizing: border-box; flex-shrink: 0"></span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.name}}</span><span style="font-size: 11px; color: #7A7168">{{r.supplier}}</span></span></span>
+                <span role="cell">{{r.site}}</span>
+                <span role="cell" style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #7A7168">{{r.lot}}</span>
+                <span role="cell" style="display: flex; flex-direction: column; gap: 4px"><span style="position: relative; height: 6px; border-radius: 3px; background: #F1ECE4; display: block"><span style="position: absolute; left: 0; top: 0; height: 6px; border-radius: 3px; width: {{r.pct}}; background: {{r.bar}}; display: block"></span><span style="position: absolute; left: 50%; top: -3px; width: 2px; height: 12px; background: #26221F; opacity: 0.35; display: block"></span></span><span style="font-size: 11px; color: #4D4741">{{r.stock}} · mín. {{r.min}}</span></span>
+                <span role="cell" style="text-align: right; color: #4D4741">{{r.unit}}</span>
+                <span role="cell" style="text-align: right; font-weight: 500">{{r.value}}</span>
+                <span role="cell"><span style="font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: {{r.chipBg}}; color: {{r.chipFg}}">{{r.status}}</span></span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+        <div style="background: #FFFFFF; border: 1px solid #EAE3D8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600">Órdenes de compra</h2>
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px">
+            <div style="border: 1px solid #EAE3D8; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px">
+              <div style="display: flex; justify-content: space-between"><span style="font-family: 'Geist Mono', monospace; font-size: 12px">OC-0042</span><span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #E7EFE9; color: #3F5A4A">En tránsito</span></div>
+              <span style="font-weight: 500">Hilos del Valle · lanas x6 colores</span>
+              <span style="color: #7A7168">Llega mar 14 a Bogotá · $1.280.000</span>
+            </div>
+            <div style="border: 1px solid #EAE3D8; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px">
+              <div style="display: flex; justify-content: space-between"><span style="font-family: 'Geist Mono', monospace; font-size: 12px">OC-0043</span><span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #FBF0DC; color: #7A4F0E">Por aprobar</span></div>
+              <span style="font-weight: 500">Mercería Central · ojos y broches</span>
+              <span style="color: #7A7168">Medellín · $640.000</span>
+              <div style="display: flex; gap: 6px; margin-top: 4px"><button style="flex: 1; min-height: 34px; border: none; border-radius: 8px; background: #26221F; color: #FFFFFF; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer">Aprobar</button><button style="flex: 1; min-height: 34px; border: 1px solid #E2D9CC; border-radius: 8px; background: #FFFFFF; color: #26221F; font-family: inherit; font-size: 12px; cursor: pointer">Revisar</button></div>
+            </div>
+            <div style="border: 1px solid #EAE3D8; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px">
+              <div style="display: flex; justify-content: space-between"><span style="font-family: 'Geist Mono', monospace; font-size: 12px">OC-0044</span><span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #F1ECE4; color: #4D4741">Borrador</span></div>
+              <span style="font-weight: 500">Algodones Andinos · algodón milk</span>
+              <span style="color: #7A7168">Cali · $540.000 · creada por reorden automático</span>
+            </div>
+          </div>
+        </div>
+        <div style="background: #26221F; color: #F3EAE0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+          <span style="font-size: 13px; font-weight: 600; color: #E2A285">Transferencia sugerida</span>
+          <span style="font-size: 14px; line-height: 1.5">Medellín tiene 1.250 g de lana mostaza sin pedidos asignados. Enviar 500 g a Bogotá desbloquea el pedido #1270 hoy.</span>
+          <button style="min-height: 40px; border: none; border-radius: 10px; background: #E2A285; color: #26221F; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Crear transferencia</button>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1120}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { site: 'all' };
+  }
+  renderVals() {
+    const money = (n) => '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const num = (n) => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const data = [
+      ['Lana Pima café', 'Hilos del Valle', '#7A5038', 'MED', 'L-204', 380, 500, 'g', 150],
+      ['Lana mostaza', 'Hilos del Valle', '#C9952F', 'BOG', 'L-198', 0, 400, 'g', 148],
+      ['Lana mostaza', 'Hilos del Valle', '#C9952F', 'MED', 'L-199', 1250, 400, 'g', 148],
+      ['Algodón milk crema', 'Algodones Andinos', '#F1E6D2', 'MED', 'A-118', 2900, 1000, 'g', 112],
+      ['Algodón milk crema', 'Algodones Andinos', '#F1E6D2', 'CAL', 'A-117', 650, 800, 'g', 112],
+      ['Ojos de seguridad 12 mm', 'Mercería Central', '#26221F', 'MED', 'O-031', 34, 100, 'u', 800],
+      ['Relleno siliconado', 'Fibras del Norte', '#FFFFFF', 'BOG', 'R-118', 4200, 1500, 'g', 40],
+      ['Hilo de bordar negro', 'Mercería Central', '#4D4741', 'CAL', 'H-022', 46, 20, 'm', 300],
+      ['Asas de cuero (par)', 'Talabartería Sur', '#8A5A3B', 'MED', 'C-007', 18, 10, 'u', 9500]
+    ];
+    const siteName = { MED: 'Medellín', BOG: 'Bogotá', CAL: 'Cali' };
+    const s = this.state.site;
+    const rows = data.filter((r) => s === 'all' || r[3] === s).map(([name, supplier, swatch, site, lot, stock, min, unit, cost]) => {
+      const ratio = stock / min;
+      const st = stock === 0 ? ['Agotado', '#FBE7E4', '#8C2E24', '#B23A2E'] : ratio < 1 ? ['Reordenar', '#FBF0DC', '#7A4F0E', '#B7791F'] : ['Disponible', '#E7EFE9', '#3F5A4A', '#4E6E5B'];
+      return {
+        name, supplier, swatch, site: siteName[site], lot,
+        stock: num(stock) + ' ' + unit, min: num(min) + ' ' + unit,
+        pct: Math.min(100, Math.round((stock / (min * 2)) * 100)) + '%',
+        unit: money(cost), value: money(stock * cost),
+        status: st[0], chipBg: st[1], chipFg: st[2], bar: st[3]
+      };
+    });
+    const sites = [['all', 'Todas'], ['MED', 'Medellín'], ['BOG', 'Bogotá'], ['CAL', 'Cali']].map(([k, label]) => ({ label, active: k === s, inactive: k !== s, pick: () => this.setState({ site: k }) }));
+    return { rows, sites, countLabel: rows.length + ' de ' + data.length + ' lotes visibles · la línea marca el punto de reorden' };
+  }
+}
+</script>
+</body>
+</html>

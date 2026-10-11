@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { IconOvillo, IconPlus, IconTrash } from "@/components/icons";
-import { EmptyState } from "@/components/page-header";
+import { EmptyState } from "@/components/ui/page-header";
+import { ProgressBar } from "@/components/ui/progress-bar";
 import { Sheet } from "@/components/sheet";
 import { SubmitButton } from "@/components/submit-button";
 import { unitCost } from "@/lib/costing";
@@ -40,8 +41,8 @@ export function SuppliesView({ supplies, units, examples }: { supplies: Supply[]
         </button>
       </div>
 
-      <div className="flex flex-col gap-2.5 rounded-[18px] bg-sage-soft p-4">
-        <span className="text-[13px] font-semibold text-sage-ink">Así calcula HEBRA tu costo</span>
+      <div className="flex flex-col gap-2.5 rounded-[18px] bg-success-soft p-4">
+        <span className="text-[13px] font-semibold text-success-ink">Así calcula HEBRA tu costo</span>
         <p className="text-sm text-ink-2">
           Registras lo que compraste (ej. 100 g por $15.000) y HEBRA guarda cuánto vale cada gramo ($150).
           Así el recetario sabe el costo exacto de cada pieza.
@@ -70,7 +71,7 @@ export function SuppliesView({ supplies, units, examples }: { supplies: Supply[]
               <li key={s.id}>
                 <button
                   onClick={() => setEditing(s)}
-                  className="card flex w-full flex-col gap-2.5 px-4 py-3.5 text-left transition-all hover:-translate-y-0.5 hover:border-line-strong hover:shadow-md"
+                  className="card flex w-full flex-col gap-2.5 px-4 py-3.5 text-left transition-all hover:-translate-y-0.5 hover:border-border-strong"
                 >
                   <div className="flex items-center gap-3">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
@@ -87,16 +88,11 @@ export function SuppliesView({ supplies, units, examples }: { supplies: Supply[]
                       <span className="text-[11px] text-muted">por {u.long}</span>
                     </span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-surface-2">
-                    <div
-                      className={`h-1.5 rounded-full ${low ? "bg-primary" : "bg-sage"}`}
-                      style={{ width: `${Math.min(100, Math.round(ratio * 100))}%` }}
-                    />
-                  </div>
+                  <ProgressBar value={Math.round(ratio * 100)} tone={low ? "warning" : "success"} />
                   <div className="flex justify-between text-xs text-ink-2">
                     <span>
                       Quedan {Number(s.quantity_remaining)} {u.short}
-                      {low && <strong className="ml-1 text-primary-ink">· por agotarse</strong>}
+                      {low && <strong className="ml-1 text-primary-hover">· por agotarse</strong>}
                     </span>
                     <span>
                       Compra: {Number(s.quantity_purchased)} {u.short} · {money(s.total_cost)}
@@ -225,9 +221,9 @@ function SupplyForm({ supply, units, onDone }: { supply: Supply | null; units: U
           />
         </label>
 
-        <div className="flex items-center justify-between rounded-xl bg-sage-soft px-4 py-3">
-          <span className="text-sm text-sage-ink">Cada {UNIT_LABEL[unit].long} te cuesta</span>
-          <span className="font-display text-2xl font-semibold text-sage-ink">{unitMoney(perUnit)}</span>
+        <div className="flex items-center justify-between rounded-xl bg-success-soft px-4 py-3">
+          <span className="text-sm text-success-ink">Cada {UNIT_LABEL[unit].long} te cuesta</span>
+          <span className="font-display text-2xl font-semibold text-success-ink">{unitMoney(perUnit)}</span>
         </div>
 
         <SubmitButton>{supply ? "Guardar cambios" : "Guardar insumo"}</SubmitButton>
@@ -242,7 +238,7 @@ function SupplyForm({ supply, units, onDone }: { supply: Supply | null; units: U
           }}
         >
           <input type="hidden" name="id" value={supply.id} />
-          <SubmitButton className="btn w-full text-primary-ink" pendingText="Eliminando…">
+          <SubmitButton className="btn w-full text-primary-hover" pendingText="Eliminando…">
             <IconTrash size={18} /> Eliminar insumo
           </SubmitButton>
         </form>

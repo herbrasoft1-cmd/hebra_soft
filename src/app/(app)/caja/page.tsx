@@ -1,7 +1,7 @@
 import type { ComponentType } from "react";
 import { redirect } from "next/navigation";
 import { IconCaja, IconTrendDown, IconTrendUp, IconWallet } from "@/components/icons";
-import { EmptyState, PageHeader } from "@/components/page-header";
+import { EmptyState, PageHeader } from "@/components/ui/page-header";
 import { RemissionButton } from "@/components/remission-button";
 import { SubmitButton } from "@/components/submit-button";
 import { money } from "@/lib/format";
@@ -71,8 +71,8 @@ export default async function CashPage() {
           ) : (
             <ul className="card flex flex-col">
               {list.map((t) => (
-                <li key={t.id} className="flex items-center gap-3 border-b border-line px-4 py-3 last:border-0">
-                  <span className={`size-2.5 shrink-0 rounded-full ${t.type === "ingreso" ? "bg-sage" : "bg-primary"}`} />
+                <li key={t.id} className="flex items-center gap-3 border-b border-border px-4 py-3 last:border-0">
+                  <span className={`size-2.5 shrink-0 rounded-full ${t.type === "ingreso" ? "bg-success" : "bg-primary"}`} />
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate text-[15px] font-medium">{t.description || t.category}</span>
                     <span className="text-xs text-muted">
@@ -80,7 +80,7 @@ export default async function CashPage() {
                       {t.payment_method ? ` · ${t.payment_method}` : ""} · {t.occurred_on}
                     </span>
                   </span>
-                  <span className={`text-[15px] font-semibold tabular-nums ${t.type === "gasto" ? "text-primary-ink" : ""}`}>
+                  <span className={`text-[15px] font-semibold tabular-nums ${t.type === "gasto" ? "text-primary-hover" : ""}`}>
                     {t.type === "gasto" ? "−" : "+"}
                     {money(t.amount)}
                   </span>
@@ -119,7 +119,7 @@ export default async function CashPage() {
               <h3 className="text-sm font-semibold text-ink-2">Últimas remisiones</h3>
               <ul className="card flex flex-col text-sm">
                 {((remissions ?? []) as unknown as RemRow[]).map((r) => (
-                  <li key={r.id} className="flex justify-between gap-2 border-b border-line px-4 py-2.5 last:border-0">
+                  <li key={r.id} className="flex justify-between gap-2 border-b border-border px-4 py-2.5 last:border-0">
                     <span className="truncate">
                       N.º {String(r.number).padStart(4, "0")} · {r.orders?.customers?.name ?? r.orders?.title}
                     </span>
@@ -136,9 +136,9 @@ export default async function CashPage() {
 }
 
 const STAT_TONE = {
-  sage: { badge: "bg-sage-soft text-sage-ink", text: "text-sage-ink" },
-  primary: { badge: "bg-primary-soft text-primary-ink", text: "text-primary-ink" },
-  ink: { badge: "bg-surface-2 text-ink-2", text: "text-ink" },
+  sage: { badge: "bg-success-soft text-success-ink", text: "text-success-ink" },
+  primary: { badge: "bg-primary-soft text-primary-hover", text: "text-primary-hover" },
+  ink: { badge: "bg-surface-muted text-ink-2", text: "text-ink" },
 } as const;
 
 function Stat({

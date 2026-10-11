@@ -60,7 +60,7 @@ function RegisterForm() {
         <input className="input" name="password" type="password" autoComplete="new-password" minLength={8} required />
       </label>
       {state.error && (
-        <p role="alert" className="rounded-xl bg-primary-soft p-3 text-sm text-primary-ink">
+        <p role="alert" className="rounded-xl bg-primary-soft p-3 text-sm text-primary-hover">
           {state.error}
         </p>
       )}

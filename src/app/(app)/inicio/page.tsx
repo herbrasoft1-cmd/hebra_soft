@@ -2,7 +2,9 @@ import Link from "next/link";
 import type { ComponentType } from "react";
 import { Sparkline } from "@/components/charts";
 import { IconAgujas, IconHebra, IconOvillo, IconTrendUp, IconWallet } from "@/components/icons";
-import { dueLabel, initials, money, todayLong } from "@/lib/format";
+import { Avatar } from "@/components/ui/avatar";
+import { ProgressBar } from "@/components/ui/progress-bar";
+import { dueLabel, money, todayLong } from "@/lib/format";
 import { getSession } from "@/lib/tenant";
 import type { Order, Supply } from "@/lib/types";
 import { getIndustryModule } from "@/modules";
@@ -80,7 +82,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         <Link
           href="/configuracion"
           aria-label="Configuración"
-          className="icon-btn size-11 shrink-0 border border-line bg-surface shadow-xs md:hidden"
+          className="icon-btn size-11 shrink-0 border border-border bg-surface md:hidden"
         >
           <IconAgujas size={22} />
         </Link>
@@ -98,7 +100,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         <section className="flex flex-col gap-3.5">
           <div className="flex items-baseline justify-between">
             <h2 className="font-display text-xl font-semibold">Próximas entregas</h2>
-            <Link href="/pedidos" className="text-sm font-semibold text-primary-ink hover:underline">
+            <Link href="/pedidos" className="text-sm font-semibold text-primary-hover hover:underline">
               Ver tablero
             </Link>
           </div>
@@ -109,18 +111,16 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               {active.slice(0, 5).map((o) => (
                 <li
                   key={o.id}
-                  className="flex items-center gap-3 border-b border-line px-4 py-3.5 transition-colors last:border-0 hover:bg-surface-2"
+                  className="flex items-center gap-3 border-b border-border px-4 py-3.5 transition-colors last:border-0 hover:bg-surface-muted"
                 >
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-sm font-semibold text-primary-ink">
-                    {initials(o.customers?.name ?? "?")}
-                  </span>
+                  <Avatar id={o.id} name={o.customers?.name ?? "?"} size={40} />
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate text-[15px] font-medium">{o.title}</span>
                     <span className="truncate text-[13px] text-muted">
                       {o.customers?.name ?? "Sin cliente"} · {mod.statusLabels[o.status]}
                     </span>
                   </span>
-                  <span className="chip bg-primary-soft text-primary-ink">{dueLabel(o.due_date)}</span>
+                  <span className="chip bg-primary-soft text-primary-hover">{dueLabel(o.due_date)}</span>
                 </li>
               ))}
             </ul>
@@ -137,16 +137,14 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                   <Link
                     key={s.id}
                     href="/insumos"
-                    className="card flex items-center gap-3.5 border-primary/15 bg-primary-soft/60 p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
+                    className="card flex items-center gap-3.5 border-primary/15 bg-primary-soft/60 p-4 transition-all hover:-translate-y-0.5"
                   >
-                    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface text-primary shadow-xs">
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface text-primary">
                       <IconOvillo size={22} />
                     </span>
                     <span className="flex flex-1 flex-col gap-1.5">
                       <span className="text-sm font-semibold">{s.name}</span>
-                      <span className="h-1.5 overflow-hidden rounded-full bg-surface">
-                        <span className="block h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
-                      </span>
+                      <ProgressBar value={pct} tone="warning" />
                       <span className="text-xs text-ink-2">
                         Quedan {Number(s.quantity_remaining)} {s.unit}
                       </span>
@@ -163,9 +161,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 }
 
 const STAT_TONE = {
-  sage: "bg-sage-soft text-sage-ink",
-  primary: "bg-primary-soft text-primary-ink",
-  ink: "bg-surface-2 text-ink-2",
+  sage: "bg-success-soft text-success-ink",
+  primary: "bg-primary-soft text-primary-hover",
+  ink: "bg-surface-muted text-ink-2",
 } as const;
 
 function Stat({
@@ -187,7 +185,7 @@ function Stat({
         <span className={`flex size-7 shrink-0 items-center justify-center rounded-full md:size-9 ${STAT_TONE[tone]}`}>
           <Icon size={15} />
         </span>
-        {spark && <Sparkline data={spark} className="h-6 w-14 text-sage md:w-16" />}
+        {spark && <Sparkline data={spark} className="h-6 w-14 text-success md:w-16" />}
       </div>
       <span className="flex flex-col gap-0.5">
         <span className="truncate font-display text-base leading-tight font-semibold md:text-[26px]">{value}</span>

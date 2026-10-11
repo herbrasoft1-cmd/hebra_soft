@@ -1,5 +1,5 @@
 import { Pager } from "@/components/pager";
-import { PageHeader } from "@/components/page-header";
+import { PageHeader } from "@/components/ui/page-header";
 import { getSession } from "@/lib/tenant";
 import type { Customer } from "@/lib/types";
 import { CustomersView } from "./customers-view";

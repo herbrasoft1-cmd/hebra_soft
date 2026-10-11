@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/page-header";
+import { PageHeader } from "@/components/ui/page-header";
 import { getSession } from "@/lib/tenant";
 import type { Customer, Order } from "@/lib/types";
 import { getIndustryModule } from "@/modules";

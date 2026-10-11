@@ -41,7 +41,7 @@ export function OfflineBanner() {
   const { pending } = useTimer();
   if (online && pending === 0) return null;
   return (
-    <div role="status" className="flex items-center gap-3 border-b border-line-strong bg-surface-2 px-5 py-3">
+    <div role="status" className="flex items-center gap-3 border-b border-border-strong bg-surface-muted px-5 py-3">
       <IconWifiOff size={20} className="shrink-0 text-ink-2" />
       <div className="flex flex-col">
         <span className="text-sm font-semibold">{online ? "Sincronizando…" : "Estás sin internet"}</span>
@@ -130,11 +130,11 @@ export function InstallPrompt() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="install-title"
-            className="pb-safe flex w-full max-w-md flex-col gap-5 rounded-t-3xl bg-bg px-6 pt-4 shadow-lg md:rounded-2xl md:pb-6"
+            className="pb-safe flex w-full max-w-md flex-col gap-5 rounded-t-3xl bg-bg px-6 pt-4 md:rounded-2xl md:pb-6"
           >
-            <div className="h-1.5 w-10 self-center rounded-full bg-line-strong md:hidden" />
+            <div className="h-1.5 w-10 self-center rounded-full bg-border-strong md:hidden" />
             <div className="flex items-center gap-3.5">
-              <img src="/icons/icon-192.png" alt="" width={56} height={56} className="rounded-2xl shadow-sm" />
+              <img src="/icons/icon-192.png" alt="" width={56} height={56} className="rounded-2xl" />
               <div className="flex flex-col gap-0.5">
                 <h2 id="install-title" className="font-display text-xl font-semibold">
                   Instala HEBRA
@@ -145,7 +145,7 @@ export function InstallPrompt() {
             <ul className="flex flex-col gap-2.5">
               {INSTALL_BENEFITS.map((text) => (
                 <li key={text} className="flex items-center gap-2.5 text-sm text-ink-2">
-                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-sage-soft text-sage-ink">
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-success-soft text-success-ink">
                     <IconCheck size={12} />
                   </span>
                   {text}
@@ -153,7 +153,7 @@ export function InstallPrompt() {
               ))}
             </ul>
             {isIos ? (
-              <p className="rounded-xl bg-surface-2 p-3.5 text-sm text-ink-2">
+              <p className="rounded-xl bg-surface-muted p-3.5 text-sm text-ink-2">
                 En iPhone: toca el botón <strong>Compartir</strong> de Safari y luego{" "}
                 <strong>“Agregar a pantalla de inicio”</strong>.
               </p>
@@ -162,7 +162,7 @@ export function InstallPrompt() {
                 Instalar app
               </button>
             )}
-            <button onClick={dismiss} className="btn text-ink-2 hover:bg-surface-2">
+            <button onClick={dismiss} className="btn text-ink-2 hover:bg-surface-muted">
               Ahora no
             </button>
           </div>

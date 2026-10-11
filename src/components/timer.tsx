@@ -192,7 +192,7 @@ export function MiniTimer() {
   const { timer, elapsed, running, pause, resume, stop } = useTimer();
   if (!timer) return null;
   return (
-    <div className="flex flex-col gap-3 rounded-2xl bg-night p-4 text-on-night shadow-md">
+    <div className="flex flex-col gap-3 rounded-2xl bg-night p-4 text-on-night">
       <Link
         href={`/recetario/${timer.productId}`}
         className="truncate text-xs font-medium text-on-night-muted transition-colors hover:text-on-night"
@@ -206,7 +206,7 @@ export function MiniTimer() {
           <button
             onClick={running ? pause : resume}
             aria-label={running ? "Pausar cronómetro" : "Continuar cronómetro"}
-            className="flex size-11 cursor-pointer items-center justify-center rounded-full bg-accent text-night shadow-sm transition-all duration-150 hover:brightness-95 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+            className="flex size-11 cursor-pointer items-center justify-center rounded-full bg-accent text-night transition-all duration-150 hover:brightness-95 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
           >
             {running ? <IconPause size={18} /> : <IconPlay size={18} />}
           </button>
@@ -228,7 +228,7 @@ export function FloatingTimer() {
   const { timer, elapsed, running, pause, resume } = useTimer();
   if (!timer) return null;
   return (
-    <div className="fixed inset-x-3 bottom-[calc(76px+env(safe-area-inset-bottom))] z-30 flex items-center gap-3 rounded-2xl bg-night px-4 py-2.5 text-on-night shadow-lg md:hidden">
+    <div className="fixed inset-x-3 bottom-[calc(76px+env(safe-area-inset-bottom))] z-30 flex items-center gap-3 rounded-2xl bg-night px-4 py-2.5 text-on-night md:hidden">
       <Link href={`/recetario/${timer.productId}`} className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-xs font-medium text-on-night-muted">{timer.productName}</span>
         <span className="font-display text-lg tabular-nums">{clock(elapsed)}</span>
@@ -236,7 +236,7 @@ export function FloatingTimer() {
       <button
         onClick={running ? pause : resume}
         aria-label={running ? "Pausar cronómetro" : "Continuar cronómetro"}
-        className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-accent text-night shadow-sm transition-all duration-150 hover:brightness-95 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+        className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-accent text-night transition-all duration-150 hover:brightness-95 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
       >
         {running ? <IconPause size={18} /> : <IconPlay size={18} />}
       </button>

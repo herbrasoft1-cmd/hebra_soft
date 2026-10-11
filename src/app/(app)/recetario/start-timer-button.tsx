@@ -11,8 +11,8 @@ export function StartTimerButton({ productId, productName }: { productId: string
     <button
       onClick={() => (isThis ? pause() : start(productId, productName))}
       aria-label={isThis ? `Pausar cronómetro de ${productName}` : `Iniciar cronómetro de ${productName}`}
-      className={`flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full shadow-sm transition-all duration-150 hover:shadow-md hover:brightness-95 active:scale-90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30 ${
-        isThis ? "bg-accent text-night" : "bg-sage text-on-sage"
+      className={`flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full transition-all duration-150 hover:brightness-95 active:scale-90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30 ${
+        isThis ? "bg-accent text-night" : "bg-success text-on-primary"
       }`}
     >
       {isThis ? <IconPause size={20} /> : <IconPlay size={20} />}

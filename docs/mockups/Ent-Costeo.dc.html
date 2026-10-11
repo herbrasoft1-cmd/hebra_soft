@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>HEBRA Enterprise · Costeo y simulador</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#A4533D}a:hover{color:#7E3D2C}
+</style>
+</helmet>
+<div style="width: 100%; min-height: 1200px; display: flex; flex-wrap: wrap; background: #F8F5EF; color: #26221F; font-family: 'Geist', system-ui, sans-serif; font-size: 14px">
+
+  <aside style="flex: 1 1 248px; max-width: 100%; box-sizing: border-box; background: #1E1916; color: #EDE3D6; padding: 20px 14px; display: flex; flex-direction: column; gap: 20px">
+    <button style="display: flex; align-items: center; gap: 12px; padding: 8px; border: 1px solid #332A25; border-radius: 14px; background: #261F1B; color: inherit; font-family: inherit; text-align: left; cursor: pointer">
+      <span style="width: 38px; height: 38px; border-radius: 10px; background: #A4533D; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FDFBF7" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="11" r="7"></circle><path d="M7.5 8c3.5 1 6.5 4.4 7.3 9.6"></path><path d="M5.6 12.4c2.7 0 5.8 1.7 6.8 5.6"></path><path d="M10 4.6c2.6 1.8 5 5.3 5.6 9.6"></path></svg>
+      </span>
+      <span style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 14px; font-weight: 600">Ovillo Studio</span><span style="font-size: 12px; color: #A8988A">Enterprise · 3 sedes</span></span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A8988A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"></path></svg>
+    </button>
+    <button style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border: 1px solid #332A25; border-radius: 10px; background: transparent; color: #A8988A; font-family: inherit; font-size: 13px; cursor: pointer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.2-4.2"></path></svg>
+      <span style="flex: 1; text-align: left">Buscar o ejecutar…</span>
+      <span style="font-family: 'Geist Mono', monospace; font-size: 11px; padding: 2px 6px; border: 1px solid #3D332D; border-radius: 6px">⌘K</span>
+    </button>
+    <nav aria-label="Principal" style="display: flex; flex-direction: column; gap: 2px">
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 1px; color: #7D6F63; padding: 8px 12px 6px">OPERACIÓN</div>
+      <a href="Ent-Dashboard.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect></svg>Panel</a>
+      <a href="Ent-Produccion.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M2 14c3-6 5 4 8-2s5 4 8-2 3 2 4 1"></path><circle cx="6" cy="12" r="1.2"></circle><circle cx="18" cy="11" r="1.2"></circle></svg>
+        <span style="flex: 1">Producción</span><span style="font-size: 11px; font-weight: 600; background: #A4533D; color: #FFF; padding: 1px 7px; border-radius: 999px">5</span></a>
+      <a href="Ent-Costeo.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; background: #2F2723; color: #FFF5EC; font-weight: 600; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E2A285" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M9 8h6M9 12h6M9 16h3"></path></svg>Recetario y costeo</a>
+      <a href="Ent-Inventario.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M6.5 7.5c4 1.2 7.6 5 8.6 11"></path><path d="M4.6 13c3.2 0 7 2 8.2 6.6"></path><path d="M9.5 4.4c3 2 5.8 6 6.4 11"></path></svg>Inventario</a>
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 1px; color: #7D6F63; padding: 16px 12px 6px">NEGOCIO</div>
+      <a href="Ent-Finanzas.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"></rect><path d="M3 10h18M15.5 14.5h2.5"></path></svg>Finanzas y facturación</a>
+      <a href="Ent-Movil-Pedido.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"></circle><path d="M3 19c.8-3.4 3.2-5 6-5s5.2 1.6 6 5"></path><path d="M16 5.5a3 3 0 0 1 0 5.6M18 14.5c1.6.6 2.6 2 3 4.5"></path></svg>Clientes y pedidos</a>
+      <a href="Ent-Equipo.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M5 19L19 5M5 5l14 14"></path><circle cx="19.6" cy="4.4" r="1.4"></circle><circle cx="4.4" cy="4.4" r="1.4"></circle></svg>Equipo y ajustes</a>
+    </nav>
+    <div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 4px">
+      <span style="width: 34px; height: 34px; border-radius: 17px; background: #C97A63; color: #1E1916; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center">MR</span>
+      <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 600">Mariana Ríos</span><span style="font-size: 12px; color: #A8988A">Propietaria</span></span>
+    </div>
+  </aside>
+
+  <main style="flex: 999 1 640px; min-width: 0; box-sizing: border-box; padding: 20px 32px 40px; display: flex; flex-direction: column; gap: 22px">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid #EAE3D8">
+      <div style="font-size: 13px; color: #7A7168">Recetario <span style="margin: 0 6px">/</span> Amigurumis <span style="margin: 0 6px">/</span> <span style="color: #26221F; font-weight: 500">Osito café</span></div>
+      <div style="display: flex; gap: 8px; align-items: center">
+        <span style="font-size: 12px; color: #7A7168">Editado por Ana P. hace 2 días</span>
+        <button style="min-height: 38px; padding: 0 12px; border: 1px solid #E2D9CC; border-radius: 10px; background: #FFFFFF; color: #26221F; font-family: inherit; font-size: 13px; cursor: pointer">Versión 3 · vigente</button>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+      <div style="display: flex; gap: 16px; align-items: center">
+        <div style="width: 64px; height: 64px; border-radius: 16px; background: #F3E4DA; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+          <svg width="40" height="40" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="15" cy="12" r="5" fill="#B98163"></circle><circle cx="33" cy="12" r="5" fill="#B98163"></circle><circle cx="24" cy="22" r="12" fill="#C9906F"></circle><circle cx="24" cy="38" r="9" fill="#C9906F"></circle><circle cx="20" cy="20" r="1.6" fill="#26221F"></circle><circle cx="28" cy="20" r="1.6" fill="#26221F"></circle><ellipse cx="24" cy="25.5" rx="3.2" ry="2.4" fill="#F3E4DA"></ellipse></svg>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <h1 style="margin: 0; font-family: 'Fraunces', serif; font-size: 34px; font-weight: 400; letter-spacing: -0.5px">Amigurumi Osito café</h1>
+          <span style="font-size: 13px; color: #7A7168">SKU AMI-OSO-CAF · 64 vendidos en 90 días · tiempo promedio 3 h 20 m</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px">
+        <button style="min-height: 40px; padding: 0 16px; border: 1px solid #E2D9CC; border-radius: 10px; background: #FFFFFF; color: #26221F; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer">Duplicar como variante</button>
+        <button style="min-height: 40px; padding: 0 16px; border: none; border-radius: 10px; background: #A4533D; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Publicar precio {{priceLabel}}</button>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+      <div style="flex: 3 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+        <section style="background: #FFFFFF; border: 1px solid #EAE3D8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; justify-content: space-between; align-items: center">
+            <h2 style="margin: 0; font-size: 16px; font-weight: 600">Lista de materiales</h2>
+            <button style="min-height: 34px; padding: 0 12px; border: 1px solid #E2D9CC; border-radius: 8px; background: #FFFFFF; color: #26221F; font-family: inherit; font-size: 13px; cursor: pointer">+ Agregar insumo</button>
+          </div>
+          <div style="overflow-x: auto">
+            <table style="width: 100%; min-width: 560px; border-collapse: collapse; font-size: 13px">
+              <thead><tr style="color: #7A7168; text-align: left"><th style="padding: 8px 0; font-weight: 500; border-bottom: 1px solid #EAE3D8">Insumo</th><th style="padding: 8px; font-weight: 500; border-bottom: 1px solid #EAE3D8">Lote</th><th style="padding: 8px; font-weight: 500; border-bottom: 1px solid #EAE3D8; text-align: right">Cantidad</th><th style="padding: 8px; font-weight: 500; border-bottom: 1px solid #EAE3D8; text-align: right">Costo unit.</th><th style="padding: 8px 0; font-weight: 500; border-bottom: 1px solid #EAE3D8; text-align: right">Subtotal</th></tr></thead>
+              <tbody style="font-variant-numeric: tabular-nums">
+                <tr><td style="padding: 12px 0; border-bottom: 1px solid #F2EDE5"><span style="display: flex; align-items: center; gap: 10px"><span style="width: 12px; height: 12px; border-radius: 6px; background: #7A5038"></span><span style="font-weight: 500">Lana Pima café</span></span></td><td style="padding: 12px 8px; border-bottom: 1px solid #F2EDE5; font-family: 'Geist Mono', monospace; font-size: 12px; color: #7A7168">L-204</td><td style="padding: 12px 8px; border-bottom: 1px solid #F2EDE5; text-align: right">45 g</td><td style="padding: 12px 8px; border-bottom: 1px solid #F2EDE5; text-align: right; color: #7A7168">$150</td><td style="padding: 12px 0; border-bottom: 1px solid #F2EDE5; text-align: right; font-weight: 600">$6.750</td></tr>
+                <tr><td style="padding: 12px 0; border-bottom: 1px solid #F2EDE5"><span style="display: flex; align-items: center; gap: 10px"><span style="width: 12px; height: 12px; border-radius: 6px; background: #26221F"></span><span style="font-weight: 500">Ojos de seguridad 12 mm</span></span></td><td style="padding: 12px 8px; border-bottom: 1px solid #F2EDE5; font-family: 'Geist Mono', monospace; font-size: 12px; color: #7A7168">O-031</td><td style="padding: 12px 8px; border-bottom: 1px solid #F2EDE5; text-align: right">2 u</td><td style="padding: 12px 8px; border-bottom: 1px solid #F2EDE5; text-align: right; color: #7A7168">$800</td><td style="padding: 12px 0; border-bottom: 1px solid #F2EDE5; text-align: right; font-weight: 600">$1.600</td></tr>
+                <tr><td style="padding: 12px 0"><span style="display: flex; align-items: center; gap: 10px"><span style="width: 12px; height: 12px; border-radius: 6px; background: #E8E0D5; border: 1px solid #D3C7B8; box-sizing: border-box"></span><span style="font-weight: 500">Relleno siliconado</span></span></td><td style="padding: 12px 8px; font-family: 'Geist Mono', monospace; font-size: 12px; color: #7A7168">R-118</td><td style="padding: 12px 8px; text-align: right">10 g</td><td style="padding: 12px 8px; text-align: right; color: #7A7168">$40</td><td style="padding: 12px 0; text-align: right; font-weight: 600">$400</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid #EAE3D8; font-size: 14px"><span style="color: #4D4741">Total materiales</span><span style="font-weight: 600; font-variant-numeric: tabular-nums">$8.750</span></div>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid #EAE3D8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; justify-content: space-between; align-items: center">
+            <h2 style="margin: 0; font-size: 16px; font-weight: 600">Tiempo real por tejedora</h2>
+            <span style="font-size: 12px; color: #7A7168">Últimas 64 piezas · cronómetro</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px">
+            <div style="display: grid; grid-template-columns: 140px minmax(0, 1fr) 70px; gap: 12px; align-items: center"><span>Ana Pérez</span><div style="height: 10px; border-radius: 5px; background: #F1ECE4"><div style="width: 68%; height: 10px; border-radius: 5px; background: #4E6E5B"></div></div><span style="text-align: right; font-variant-numeric: tabular-nums">2 h 50 m</span></div>
+            <div style="display: grid; grid-template-columns: 140px minmax(0, 1fr) 70px; gap: 12px; align-items: center"><span>Lina Cárdenas</span><div style="height: 10px; border-radius: 5px; background: #F1ECE4"><div style="width: 78%; height: 10px; border-radius: 5px; background: #C97A63"></div></div><span style="text-align: right; font-variant-numeric: tabular-nums">3 h 15 m</span></div>
+            <div style="display: grid; grid-template-columns: 140px minmax(0, 1fr) 70px; gap: 12px; align-items: center"><span>Diana Mejía</span><div style="height: 10px; border-radius: 5px; background: #F1ECE4"><div style="width: 92%; height: 10px; border-radius: 5px; background: #B7791F"></div></div><span style="text-align: right; font-variant-numeric: tabular-nums">3 h 50 m</span></div>
+          </div>
+          <div style="font-size: 13px; color: #4D4741; background: #F4EFE7; border-radius: 10px; padding: 10px 12px">Si todo el equipo tejiera al ritmo de Ana, el osito costaría $6.300 menos.</div>
+        </section>
+      </div>
+
+      <section style="flex: 2 1 380px; min-width: 0; background: #FFFFFF; border: 1px solid #EAE3D8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 18px">
+        <div style="display: flex; justify-content: space-between; align-items: center">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600">Simulador de precio</h2>
+          <button onClick="{{reset}}" style="min-height: 32px; padding: 0 10px; border: none; border-radius: 8px; background: transparent; color: #A4533D; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer">Restablecer</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 12px; color: #7A7168">Tiempo de tejido</span>
+            <div style="display: flex; align-items: center; border: 1px solid #E2D9CC; border-radius: 10px; overflow: hidden">
+              <button onClick="{{minusTime}}" aria-label="Restar 10 minutos" style="width: 40px; height: 40px; border: none; background: #F8F5EF; color: #26221F; font-size: 18px; cursor: pointer">−</button>
+              <span style="flex: 1; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums">{{timeLabel}}</span>
+              <button onClick="{{plusTime}}" aria-label="Sumar 10 minutos" style="width: 40px; height: 40px; border: none; background: #F8F5EF; color: #26221F; font-size: 18px; cursor: pointer">+</button>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 12px; color: #7A7168">Valor de la hora</span>
+            <div style="display: flex; align-items: center; border: 1px solid #E2D9CC; border-radius: 10px; overflow: hidden">
+              <button onClick="{{minusRate}}" aria-label="Restar 500 pesos" style="width: 40px; height: 40px; border: none; background: #F8F5EF; color: #26221F; font-size: 18px; cursor: pointer">−</button>
+              <span style="flex: 1; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums">{{rateLabel}}</span>
+              <button onClick="{{plusRate}}" aria-label="Sumar 500 pesos" style="width: 40px; height: 40px; border: none; background: #F8F5EF; color: #26221F; font-size: 18px; cursor: pointer">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <span style="font-size: 12px; color: #7A7168">Canal de venta</span>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+            <sc-for list="{{channels}}" as="ch" hint-placeholder-count="4">
+              <sc-if value="{{ch.active}}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ch.pick}}" aria-pressed="true" style="min-height: 52px; padding: 6px 10px; border: 2px solid #A4533D; border-radius: 10px; background: #F6E9E2; color: #26221F; font-family: inherit; text-align: left; display: flex; flex-direction: column; justify-content: center; gap: 2px; cursor: pointer"><span style="font-size: 13px; font-weight: 600">{{ch.label}}</span><span style="font-size: 11px; color: #7E3D2C">{{ch.fee}}</span></button>
+              </sc-if>
+              <sc-if value="{{ch.inactive}}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ch.pick}}" aria-pressed="false" style="min-height: 52px; padding: 6px 10px; border: 1px solid #E2D9CC; border-radius: 10px; background: #FFFFFF; color: #26221F; font-family: inherit; text-align: left; display: flex; flex-direction: column; justify-content: center; gap: 2px; cursor: pointer"><span style="font-size: 13px; font-weight: 500">{{ch.label}}</span><span style="font-size: 11px; color: #7A7168">{{ch.fee}}</span></button>
+              </sc-if>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <span style="font-size: 12px; color: #7A7168">Margen objetivo (sobre precio de venta)</span>
+          <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+            <sc-for list="{{margins}}" as="m" hint-placeholder-count="4">
+              <sc-if value="{{m.active}}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{m.pick}}" aria-pressed="true" style="min-height: 38px; border: none; border-radius: 8px; background: #26221F; color: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">{{m.label}}</button>
+              </sc-if>
+              <sc-if value="{{m.inactive}}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{m.pick}}" aria-pressed="false" style="min-height: 38px; border: 1px solid #E2D9CC; border-radius: 8px; background: #FFFFFF; color: #26221F; font-family: inherit; font-size: 13px; cursor: pointer">{{m.label}}</button>
+              </sc-if>
+            </sc-for>
+          </div>
+        </div>
+
+        <button onClick="{{toggleIva}}" aria-pressed="{{iva}}" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 12px; border: 1px solid #E2D9CC; border-radius: 10px; background: #FFFFFF; color: #26221F; font-family: inherit; font-size: 13px; cursor: pointer">
+          <span>Incluir IVA 19% en el precio al público</span>
+          <span style="width: 40px; height: 22px; border-radius: 11px; background: {{ivaTrack}}; position: relative; display: block"><span style="position: absolute; top: 3px; left: {{ivaKnob}}; width: 16px; height: 16px; border-radius: 8px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.2)"></span></span>
+        </button>
+
+        <div style="background: #26221F; color: #F3EAE0; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 12px">
+            <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #BFB2A4">Precio sugerido</span><span style="font-family: 'Fraunces', serif; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums">{{priceLabel}}</span></div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px"><span style="font-size: 12px; color: #BFB2A4">Ganas por pieza</span><span style="font-size: 20px; font-weight: 600; color: #9FCBAE; font-variant-numeric: tabular-nums">{{profitLabel}}</span></div>
+          </div>
+          <div style="display: flex; height: 12px; border-radius: 6px; overflow: hidden" role="img" aria-label="{{stackLabel}}">
+            <div style="width: {{w.mat}}; background: #C9906F"></div>
+            <div style="width: {{w.lab}}; background: #E2A285"></div>
+            <div style="width: {{w.wear}}; background: #8A6A3B"></div>
+            <div style="width: {{w.fee}}; background: #7A7168"></div>
+            <div style="width: {{w.tax}}; background: #5A5E7A"></div>
+            <div style="width: {{w.profit}}; background: #7FB08F"></div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px; font-size: 12px; color: #D8CABA; font-variant-numeric: tabular-nums">
+            <span style="display: flex; justify-content: space-between"><span>Materiales</span><span>{{l.mat}}</span></span>
+            <span style="display: flex; justify-content: space-between"><span>Mano de obra</span><span>{{l.lab}}</span></span>
+            <span style="display: flex; justify-content: space-between"><span>Desgaste 5%</span><span>{{l.wear}}</span></span>
+            <span style="display: flex; justify-content: space-between"><span>Comisión canal</span><span>{{l.fee}}</span></span>
+            <span style="display: flex; justify-content: space-between"><span>IVA</span><span>{{l.tax}}</span></span>
+            <span style="display: flex; justify-content: space-between; color: #9FCBAE"><span>Utilidad</span><span>{{l.profit}}</span></span>
+          </div>
+        </div>
+        <div style="font-size: 13px; color: #4D4741">Con este precio necesitas vender <strong>{{breakeven}} ositos</strong> al mes para cubrir los gastos fijos de la sede ($1,9 M).</div>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { minutes: 200, rate: 12000, channel: 'directo', margin: 40, iva: false };
+  }
+  renderVals() {
+    const s = this.state;
+    const money = (n) => '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const channels = {
+      directo: { label: 'Directo / WhatsApp', fee: 'Sin comisión', pct: 0, fixed: 0 },
+      instagram: { label: 'Instagram Shopping', fee: '5% por venta', pct: 0.05, fixed: 0 },
+      online: { label: 'Tienda online', fee: 'Pasarela 3,49% + $900', pct: 0.0349, fixed: 900 },
+      marketplace: { label: 'Marketplace', fee: '15% por venta', pct: 0.15, fixed: 0 }
+    };
+    const ch = channels[s.channel];
+    const materials = 8750;
+    const labor = (s.minutes / 60) * s.rate;
+    const wear = (materials + labor) * 0.05;
+    const cost = materials + labor + wear;
+    const m = s.margin / 100;
+    const net = Math.ceil(((cost + ch.fixed) / (1 - m - ch.pct)) / 100) * 100;
+    const fee = net * ch.pct + ch.fixed;
+    const tax = s.iva ? net * 0.19 : 0;
+    const price = Math.ceil((net + tax) / 100) * 100;
+    const profit = net - cost - fee;
+    const pct = (v) => ((v / price) * 100).toFixed(2) + '%';
+    const h = Math.floor(s.minutes / 60), mm = s.minutes % 60;
+    return {
+      timeLabel: h + ' h ' + String(mm).padStart(2, '0') + ' m',
+      rateLabel: money(s.rate),
+      priceLabel: money(price),
+      profitLabel: money(profit),
+      breakeven: Math.ceil(1900000 / Math.max(profit, 1)),
+      w: { mat: pct(materials), lab: pct(labor), wear: pct(wear), fee: pct(fee), tax: pct(tax), profit: pct(Math.max(profit, 0)) },
+      l: { mat: money(materials), lab: money(labor), wear: money(wear), fee: money(fee), tax: money(tax), profit: money(profit) },
+      stackLabel: 'Composición del precio: materiales ' + money(materials) + ', mano de obra ' + money(labor) + ', utilidad ' + money(profit),
+      channels: Object.keys(channels).map((k) => ({ label: channels[k].label, fee: channels[k].fee, active: k === s.channel, inactive: k !== s.channel, pick: () => this.setState({ channel: k }) })),
+      margins: [30, 40, 50, 60].map((v) => ({ label: v + '%', active: v === s.margin, inactive: v !== s.margin, pick: () => this.setState({ margin: v }) })),
+      iva: s.iva ? 'true' : 'false',
+      ivaTrack: s.iva ? '#A4533D' : '#D9CFC2',
+      ivaKnob: s.iva ? '21px' : '3px',
+      toggleIva: () => this.setState({ iva: !this.state.iva }),
+      minusTime: () => this.setState({ minutes: Math.max(30, this.state.minutes - 10) }),
+      plusTime: () => this.setState({ minutes: this.state.minutes + 10 }),
+      minusRate: () => this.setState({ rate: Math.max(5000, this.state.rate - 500) }),
+      plusRate: () => this.setState({ rate: this.state.rate + 500 }),
+      reset: () => this.setState({ minutes: 200, rate: 12000, channel: 'directo', margin: 40, iva: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>HEBRA · Mi turno</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#A4533D}a:hover{color:#7E3D2C}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F8F5EF; color: #26221F; font-family: 'Geist', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <div style="flex: 1; overflow: auto; padding: 22px 18px 18px; display: flex; flex-direction: column; gap: 18px">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <div style="display: flex; align-items: center; gap: 10px">
+        <span style="width: 40px; height: 40px; border-radius: 20px; background: #4E6E5B; color: #FFFFFF; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">AP</span>
+        <div style="display: flex; flex-direction: column"><span style="font-size: 12px; color: #7A7168">Sede Medellín · turno mañana</span><span style="font-size: 16px; font-weight: 600">Hola, Ana</span></div>
+      </div>
+      <button aria-label="Notificaciones" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid #EAE3D8; background: #FFFFFF; color: #26221F; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"></path></svg>
+      </button>
+    </div>
+
+    <section style="background: #1E1916; color: #F3EAE0; border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A8988A">#1288 · Laura M.</span>
+        <span style="font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: #3A2E28; color: #E2A285">Entrega lun 13</span>
+      </div>
+      <div style="font-family: 'Fraunces', serif; font-size: 24px">Amigurumi Osito café</div>
+      <div style="display: flex; align-items: center; justify-content: space-between">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <span style="font-family: 'Fraunces', serif; font-size: 44px; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: 1px">{{clock}}</span>
+          <span style="font-size: 12px; color: #A8988A">Meta del patrón: 3 h 20 m</span>
+        </div>
+        <button onClick="{{toggle}}" aria-label="{{toggleLabel}}" style="width: 64px; height: 64px; border-radius: 32px; border: none; background: #E2A285; color: #1E1916; display: flex; align-items: center; justify-content: center; cursor: pointer">
+          <sc-if value="{{running}}" hint-placeholder-val="{{ true }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M8 5v14M16 5v14"></path></svg></sc-if>
+          <sc-if value="{{paused}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5l11 7-11 7z"></path></svg></sc-if>
+        </button>
+      </div>
+      <div style="height: 6px; border-radius: 3px; background: #3A2E28"><div style="width: {{goalPct}}; height: 6px; border-radius: 3px; background: {{goalColor}}"></div></div>
+      <div style="font-size: 12px; color: #CDBFAF">{{status}}</div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline">
+        <h2 style="margin: 0; font-family: 'Fraunces', serif; font-size: 20px; font-weight: 500">Pasos del patrón</h2>
+        <span style="font-size: 13px; color: #7A7168">{{doneLabel}}</span>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid #EAE3D8; border-radius: 18px; display: flex; flex-direction: column">
+        <sc-for list="{{steps}}" as="s" hint-placeholder-count="5">
+          <button onClick="{{s.toggle}}" aria-pressed="{{s.pressed}}" style="display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 14px; border: none; border-bottom: 1px solid #F2EDE5; background: transparent; color: #26221F; font-family: inherit; text-align: left; cursor: pointer">
+            <span style="width: 24px; height: 24px; border-radius: 12px; border: 1.5px solid {{s.ring}}; background: {{s.fill}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; font-weight: 700">{{s.check}}</span>
+            <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 500; color: {{s.color}}">{{s.name}}</span><span style="font-size: 12px; color: #7A7168">{{s.detail}}</span></span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="margin: 0; font-family: 'Fraunces', serif; font-size: 20px; font-weight: 500">Después</h2>
+      <div style="background: #FFFFFF; border: 1px solid #EAE3D8; border-radius: 18px; padding: 14px; display: flex; align-items: center; gap: 12px">
+        <span style="width: 10px; height: 10px; border-radius: 5px; background: #B7791F"></span>
+        <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 500">Bolso tote crema x3</span><span style="font-size: 12px; color: #7A7168">#1279 · reasignado a ti · 15 h</span></span>
+        <span style="font-size: 12px; font-weight: 600; color: #7A4F0E">Mié 15</span>
+      </div>
+    </section>
+  </div>
+
+  <nav aria-label="Principal" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid #EAE3D8; background: #FFFFFF; padding: 6px 6px 18px">
+    <button style="min-height: 52px; border: none; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #A4533D; font-family: inherit; font-size: 11px; font-weight: 600; cursor: pointer">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2M9 2h6"></path></svg>Mi turno</button>
+    <button style="min-height: 52px; border: none; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #7A7168; font-family: inherit; font-size: 11px; cursor: pointer">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M2 14c3-6 5 4 8-2s5 4 8-2 3 2 4 1"></path><circle cx="6" cy="12" r="1.2"></circle><circle cx="18" cy="11" r="1.2"></circle></svg>Tareas</button>
+    <button style="min-height: 52px; border: none; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #7A7168; font-family: inherit; font-size: 11px; cursor: pointer">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M9 8h6M9 12h6M9 16h3"></path></svg>Patrones</button>
+    <button style="min-height: 52px; border: none; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #7A7168; font-family: inherit; font-size: 11px; cursor: pointer">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c1-4 4-6 7-6s6 2 7 6"></path></svg>Perfil</button>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { running: true, secs: 8640, done: [true, true, false, false, false] };
+  }
+  componentDidMount() {
+    this.timer = setInterval(() => { if (this.state.running) this.setState({ secs: this.state.secs + 1 }); }, 1000);
+  }
+  componentWillUnmount() { clearInterval(this.timer); }
+  renderVals() {
+    const s = this.state.secs, goal = 12000;
+    const pad = (n) => String(n).padStart(2, '0');
+    const clock = pad(Math.floor(s / 3600)) + ':' + pad(Math.floor((s % 3600) / 60)) + ':' + pad(s % 60);
+    const left = Math.max(0, goal - s);
+    const steps = [
+      ['Cabeza', 'Anillo mágico · 22 vueltas'],
+      ['Cuerpo', '18 vueltas · relleno firme'],
+      ['Brazos y piernas', '4 piezas · 10 vueltas c/u'],
+      ['Orejas y hocico', 'Lana crema para el hocico'],
+      ['Ensamble y bordado', 'Ojos 12 mm · nariz en hilo negro']
+    ].map(([name, detail], i) => {
+      const d = this.state.done[i];
+      return {
+        name, detail,
+        check: d ? '✓' : '',
+        fill: d ? '#4E6E5B' : '#FFFFFF',
+        ring: d ? '#4E6E5B' : '#D3C7B8',
+        color: d ? '#7A7168' : '#26221F',
+        pressed: d ? 'true' : 'false',
+        toggle: () => { const n = this.state.done.slice(); n[i] = !n[i]; this.setState({ done: n }); }
+      };
+    });
+    const doneCount = this.state.done.filter(Boolean).length;
+    return {
+      clock,
+      running: this.state.running,
+      paused: !this.state.running,
+      toggle: () => this.setState({ running: !this.state.running }),
+      toggleLabel: this.state.running ? 'Pausar cronómetro' : 'Continuar cronómetro',
+      goalPct: Math.min(100, Math.round((s / goal) * 100)) + '%',
+      goalColor: s > goal ? '#E9897A' : '#7FB08F',
+      status: s > goal ? 'Pasaste la meta: anótalo para ajustar el patrón.' : 'Vas bien · faltan ' + Math.floor(left / 3600) + ' h ' + pad(Math.floor((left % 3600) / 60)) + ' m para la meta',
+      steps,
+      doneLabel: doneCount + ' de 5'
+    };
+  }
+}
+</script>
+</body>
+</html>

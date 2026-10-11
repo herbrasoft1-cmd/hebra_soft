@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from "react";
 
+/** DESIGN.md §3: H1 Fraunces 36px (30px móvil), subtítulo 15px ink-2, acciones a la derecha. */
 export function PageHeader({
   title,
   subtitle,
@@ -10,9 +11,9 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
+    <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
       <div className="flex flex-col gap-1.5">
-        <h1 className="font-display text-[30px] leading-tight md:text-[34px]">{title}</h1>
+        <h1 className="font-display text-[30px] leading-tight md:text-[36px]">{title}</h1>
         {subtitle && <p className="text-[15px] text-ink-2">{subtitle}</p>}
       </div>
       {action}

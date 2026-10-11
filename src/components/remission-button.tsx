@@ -47,7 +47,7 @@ export function RemissionButton({ orderId, className = "btn-ghost" }: { orderId:
                 aria-pressed={m === method}
                 onClick={() => setMethod(m)}
                 className={`btn min-h-11 px-4 text-sm ${
-                  m === method ? "border-2 border-primary bg-primary-soft text-primary-ink" : "border border-line-strong"
+                  m === method ? "border-2 border-primary bg-primary-soft text-primary-hover" : "border border-border-strong"
                 }`}
               >
                 {m}
@@ -55,7 +55,7 @@ export function RemissionButton({ orderId, className = "btn-ghost" }: { orderId:
             ))}
           </div>
         </fieldset>
-        {error && <p className="text-sm text-primary-ink">{error}</p>}
+        {error && <p className="text-sm text-primary-hover">{error}</p>}
         <button onClick={generate} disabled={busy} className="btn-primary">
           {busy ? "Generando…" : "Crear PDF y compartir"}
         </button>

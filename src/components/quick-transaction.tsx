@@ -38,7 +38,7 @@ export function QuickTransactionSheet({
             <label
               key={k}
               className={`btn min-h-11 text-sm ${
-                kind === k ? "border-2 border-primary bg-primary-soft text-primary-ink" : "border border-line-strong"
+                kind === k ? "border-2 border-primary bg-primary-soft text-primary-hover" : "border border-border-strong"
               }`}
             >
               <input
@@ -79,7 +79,7 @@ export function QuickTransactionSheet({
             </select>
           </label>
         </div>
-        {error && <p className="text-sm text-primary-ink">{error}</p>}
+        {error && <p className="text-sm text-primary-hover">{error}</p>}
         <SubmitButton>{kind === "ingreso" ? "Guardar venta" : "Guardar gasto"}</SubmitButton>
       </form>
     </Sheet>

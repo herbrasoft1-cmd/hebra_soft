@@ -42,7 +42,7 @@ export function HomeActions({
       {timerTarget ? (
         <button
           onClick={onTimer}
-          className="flex min-h-29 flex-col items-start justify-between rounded-[20px] bg-sage p-4 text-left text-on-sage active:scale-[0.98]"
+          className="flex min-h-29 flex-col items-start justify-between rounded-[20px] bg-success p-4 text-left text-on-primary active:scale-[0.98]"
         >
           <span className="flex size-9 items-center justify-center rounded-full bg-white/20">
             {timer && running ? <IconPause size={18} /> : <IconPlay size={18} />}
@@ -57,7 +57,7 @@ export function HomeActions({
       ) : (
         <Link
           href="/recetario"
-          className="flex min-h-29 flex-col items-start justify-between rounded-[20px] bg-sage p-4 text-on-sage"
+          className="flex min-h-29 flex-col items-start justify-between rounded-[20px] bg-success p-4 text-on-primary"
         >
           <span className="flex size-9 items-center justify-center rounded-full bg-white/20">
             <IconPlay size={18} />

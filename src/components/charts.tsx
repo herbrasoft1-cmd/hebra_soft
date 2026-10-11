@@ -15,7 +15,7 @@ import { compactMoney, money } from "@/lib/format";
 
 export type ChartPoint = { label: string; value: number };
 
-const TONE_BAR = { primary: "bg-primary", sage: "bg-sage" } as const;
+const TONE_BAR = { primary: "bg-primary", sage: "bg-success" } as const;
 type Tone = keyof typeof TONE_BAR;
 
 /** "money" y "compact" en vez de recibir la función: no se puede pasar una función
@@ -27,7 +27,7 @@ function TableToggle({ on, onClick }: { on: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="rounded-full px-2.5 py-1 text-xs font-semibold text-muted transition-colors hover:bg-surface-2 hover:text-ink-2"
+      className="rounded-full px-2.5 py-1 text-xs font-semibold text-muted transition-colors hover:bg-surface-muted hover:text-ink-2"
     >
       {on ? "Ver gráfico" : "Ver tabla"}
     </button>
@@ -40,7 +40,7 @@ function DataTable({ data, format }: { data: ChartPoint[]; format: Format }) {
     <table className="w-full text-sm">
       <tbody>
         {data.map((d) => (
-          <tr key={d.label} className="border-b border-line last:border-0">
+          <tr key={d.label} className="border-b border-border last:border-0">
             <td className="py-2.5 text-ink-2">{d.label}</td>
             <td className="py-2.5 text-right font-semibold tabular-nums text-ink">{formatValue(d.value)}</td>
           </tr>
@@ -87,7 +87,7 @@ export function TrendBars({
           {/* Líneas guía recesivas */}
           <div className="pointer-events-none absolute inset-0 flex flex-col justify-between">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="border-t border-line" />
+              <div key={i} className="border-t border-border" />
             ))}
           </div>
           {data.map((d, i) => {
@@ -104,7 +104,7 @@ export function TrendBars({
                 onBlur={() => setHover(null)}
               >
                 {active && (
-                  <div className="absolute -top-9 whitespace-nowrap rounded-lg bg-night px-2.5 py-1.5 text-xs font-semibold text-on-night shadow-md">
+                  <div className="absolute -top-9 whitespace-nowrap rounded-lg bg-night px-2.5 py-1.5 text-xs font-semibold text-on-night">
                     {formatValue(d.value)}
                   </div>
                 )}
@@ -163,7 +163,7 @@ export function RankingBars({
                 <span className="truncate font-medium text-ink">{d.label}</span>
                 <span className="shrink-0 font-semibold tabular-nums text-ink-2">{formatValue(d.value)}</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-surface-2">
+              <div className="h-2 overflow-hidden rounded-full bg-surface-muted">
                 <div
                   className={`h-full rounded-full ${TONE_BAR[tone]}`}
                   style={{ width: `${Math.max(3, Math.round((d.value / max) * 100))}%` }}

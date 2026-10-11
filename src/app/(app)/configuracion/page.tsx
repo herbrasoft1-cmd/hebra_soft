@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/logout-button";
-import { PageHeader } from "@/components/page-header";
+import { PageHeader } from "@/components/ui/page-header";
 import { SubmitButton } from "@/components/submit-button";
 import { ThemeToggle } from "@/components/theme";
 import { getSession } from "@/lib/tenant";

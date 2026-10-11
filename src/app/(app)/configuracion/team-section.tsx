@@ -37,7 +37,7 @@ export function TeamSection({
           <h3 className="text-sm font-semibold text-ink-2">Invitaciones pendientes</h3>
           <ul className="card flex flex-col overflow-hidden">
             {invitations.map((inv) => (
-              <li key={inv.id} className="flex items-center gap-3 border-b border-line px-4 py-3 last:border-0">
+              <li key={inv.id} className="flex items-center gap-3 border-b border-border px-4 py-3 last:border-0">
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="truncate text-sm font-medium">{inv.email}</span>
                   <span className="text-xs text-muted">{ROLE_LABEL[inv.role]} · pendiente</span>

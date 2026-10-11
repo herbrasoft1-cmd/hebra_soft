@@ -153,6 +153,13 @@ export const IconArrowRight = (p: P) => (
   </Base>
 );
 
+export const IconBell = (p: P) => (
+  <Base {...p}>
+    <path d="M6 10a6 6 0 1 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6Z" />
+    <path d="M10 19a2 2 0 0 0 4 0" />
+  </Base>
+);
+
 export const IconClose = (p: P) => (
   <Base strokeWidth={2} {...p}>
     <path d="M6 6l12 12M18 6L6 18" />

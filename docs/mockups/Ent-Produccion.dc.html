@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>HEBRA Enterprise · Producción</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#A4533D}a:hover{color:#7E3D2C}
+</style>
+</helmet>
+<div style="width: 100%; min-height: 1160px; display: flex; flex-wrap: wrap; background: #F8F5EF; color: #26221F; font-family: 'Geist', system-ui, sans-serif; font-size: 14px">
+
+  <aside style="flex: 1 1 248px; max-width: 100%; box-sizing: border-box; background: #1E1916; color: #EDE3D6; padding: 20px 14px; display: flex; flex-direction: column; gap: 20px">
+    <button style="display: flex; align-items: center; gap: 12px; padding: 8px; border: 1px solid #332A25; border-radius: 14px; background: #261F1B; color: inherit; font-family: inherit; text-align: left; cursor: pointer">
+      <span style="width: 38px; height: 38px; border-radius: 10px; background: #A4533D; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FDFBF7" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="11" r="7"></circle><path d="M7.5 8c3.5 1 6.5 4.4 7.3 9.6"></path><path d="M5.6 12.4c2.7 0 5.8 1.7 6.8 5.6"></path><path d="M10 4.6c2.6 1.8 5 5.3 5.6 9.6"></path></svg>
+      </span>
+      <span style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 14px; font-weight: 600">Ovillo Studio</span><span style="font-size: 12px; color: #A8988A">Enterprise · 3 sedes</span></span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A8988A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"></path></svg>
+    </button>
+    <button style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border: 1px solid #332A25; border-radius: 10px; background: transparent; color: #A8988A; font-family: inherit; font-size: 13px; cursor: pointer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.2-4.2"></path></svg>
+      <span style="flex: 1; text-align: left">Buscar o ejecutar…</span>
+      <span style="font-family: 'Geist Mono', monospace; font-size: 11px; padding: 2px 6px; border: 1px solid #3D332D; border-radius: 6px">⌘K</span>
+    </button>
+    <nav aria-label="Principal" style="display: flex; flex-direction: column; gap: 2px">
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 1px; color: #7D6F63; padding: 8px 12px 6px">OPERACIÓN</div>
+      <a href="Ent-Dashboard.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect></svg>Panel</a>
+      <a href="Ent-Produccion.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; background: #2F2723; color: #FFF5EC; font-weight: 600; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E2A285" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M2 14c3-6 5 4 8-2s5 4 8-2 3 2 4 1"></path><circle cx="6" cy="12" r="1.2"></circle><circle cx="18" cy="11" r="1.2"></circle></svg>
+        <span style="flex: 1">Producción</span><span style="font-size: 11px; font-weight: 600; background: #A4533D; color: #FFF; padding: 1px 7px; border-radius: 999px">5</span></a>
+      <a href="Ent-Costeo.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M9 8h6M9 12h6M9 16h3"></path></svg>Recetario y costeo</a>
+      <a href="Ent-Inventario.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M6.5 7.5c4 1.2 7.6 5 8.6 11"></path><path d="M4.6 13c3.2 0 7 2 8.2 6.6"></path><path d="M9.5 4.4c3 2 5.8 6 6.4 11"></path></svg>Inventario</a>
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 1px; color: #7D6F63; padding: 16px 12px 6px">NEGOCIO</div>
+      <a href="Ent-Finanzas.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"></rect><path d="M3 10h18M15.5 14.5h2.5"></path></svg>Finanzas y facturación</a>
+      <a href="Ent-Movil-Pedido.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"></circle><path d="M3 19c.8-3.4 3.2-5 6-5s5.2 1.6 6 5"></path><path d="M16 5.5a3 3 0 0 1 0 5.6M18 14.5c1.6.6 2.6 2 3 4.5"></path></svg>Clientes y pedidos</a>
+      <a href="Ent-Equipo.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; color: #CDBFAF; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M5 19L19 5M5 5l14 14"></path><circle cx="19.6" cy="4.4" r="1.4"></circle><circle cx="4.4" cy="4.4" r="1.4"></circle></svg>Equipo y ajustes</a>
+    </nav>
+    <div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 4px">
+      <span style="width: 34px; height: 34px; border-radius: 17px; background: #C97A63; color: #1E1916; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center">MR</span>
+      <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 600">Mariana Ríos</span><span style="font-size: 12px; color: #A8988A">Propietaria</span></span>
+    </div>
+  </aside>
+
+  <main style="flex: 999 1 640px; min-width: 0; box-sizing: border-box; padding: 20px 32px 40px; display: flex; flex-direction: column; gap: 22px">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid #EAE3D8">
+      <div style="font-size: 13px; color: #7A7168">Ovillo Studio <span style="margin: 0 6px">/</span> <span style="color: #26221F; font-weight: 500">Producción</span></div>
+      <div style="display: flex; gap: 8px">
+        <button style="min-height: 38px; padding: 0 12px; border: 1px solid #E2D9CC; border-radius: 10px; background: #FFFFFF; color: #26221F; font-family: inherit; font-size: 13px; cursor: pointer">Sede: Medellín</button>
+        <button style="min-height: 38px; padding: 0 12px; border: 1px solid #E2D9CC; border-radius: 10px; background: #FFFFFF; color: #26221F; font-family: inherit; font-size: 13px; cursor: pointer">Semana 41 · 6–11 oct</button>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <h1 style="margin: 0; font-family: 'Fraunces', serif; font-size: 36px; font-weight: 400; letter-spacing: -0.5px">Producción</h1>
+        <p style="margin: 0; font-size: 15px; color: #4D4741">42 pedidos activos · 186 h de tejido comprometidas esta semana</p>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+        <div role="tablist" aria-label="Vista" style="display: flex; padding: 3px; background: #EFE9E0; border-radius: 10px; gap: 2px">
+          <sc-for list="{{views}}" as="v" hint-placeholder-count="2">
+            <sc-if value="{{v.active}}" hint-placeholder-val="{{ false }}">
+              <button role="tab" aria-selected="true" onClick="{{v.pick}}" style="min-height: 34px; padding: 0 14px; border: none; border-radius: 8px; background: #FFFFFF; color: #26221F; font-family: inherit; font-size: 13px; font-weight: 600; box-shadow: 0 1px 2px rgba(38,34,31,0.08); cursor: pointer">{{v.label}}</button>
+            </sc-if>
+            <sc-if value="{{v.inactive}}" hint-placeholder-val="{{ true }}">
+              <button role="tab" aria-selected="false" onClick="{{v.pick}}" style="min-height: 34px; padding: 0 14px; border: none; border-radius: 8px; background: transparent; color: #7A7168; font-family: inherit; font-size: 13px; cursor: pointer">{{v.label}}</button>
+            </sc-if>
+          </sc-for>
+        </div>
+        <button style="min-height: 40px; padding: 0 16px; border: none; border-radius: 10px; background: #A4533D; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer">+ Orden de producción</button>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+      <label style="display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 12px; border: 1px solid #E2D9CC; border-radius: 10px; background: #FFFFFF; flex: 1 1 240px; max-width: 320px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7A7168" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.2-4.2"></path></svg>
+        <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Buscar pedido</span>
+        <input type="search" placeholder="Pedido, cliente o producto" style="border: none; outline: none; background: none; font-family: inherit; font-size: 13px; color: #26221F; width: 100%">
+      </label>
+      <button style="min-height: 38px; padding: 0 12px; border: 1px dashed #D3C7B8; border-radius: 10px; background: transparent; color: #4D4741; font-family: inherit; font-size: 13px; cursor: pointer">Tejedora</button>
+      <button style="min-height: 38px; padding: 0 12px; border: 1px dashed #D3C7B8; border-radius: 10px; background: transparent; color: #4D4741; font-family: inherit; font-size: 13px; cursor: pointer">Canal</button>
+      <button style="min-height: 38px; padding: 0 12px; border: 1px solid #F3DCD7; border-radius: 10px; background: #FDF6F4; color: #8C2E24; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer">En riesgo · 5 ✕</button>
+    </div>
+
+    <sc-if value="{{showBoard}}" hint-placeholder-val="{{ true }}">
+      <div style="overflow-x: auto; padding-bottom: 6px">
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(250px, 1fr)); gap: 14px; min-width: 1040px">
+          <sc-for list="{{columns}}" as="col" hint-placeholder-count="4">
+            <section style="background: #F1ECE4; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 680px">
+              <div style="display: flex; align-items: center; gap: 8px; padding: 4px 4px 2px">
+                <span style="width: 9px; height: 9px; border-radius: 5px; background: {{col.dot}}"></span>
+                <h2 style="margin: 0; flex: 1; font-size: 14px; font-weight: 600">{{col.title}}</h2>
+                <span style="font-size: 12px; color: #7A7168; font-variant-numeric: tabular-nums">{{col.count}}</span>
+              </div>
+              <div style="font-size: 12px; color: #7A7168; padding: 0 4px">{{col.hours}}</div>
+              <sc-for list="{{col.cards}}" as="c" hint-placeholder-count="3">
+                <article style="background: #FFFFFF; border: 1px solid #EAE3D8; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 2px rgba(38,34,31,0.04)">
+                  <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+                    <span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #7A7168">{{c.id}}</span>
+                    <span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: {{c.dueBg}}; color: {{c.dueFg}}">{{c.due}}</span>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 2px">
+                    <span style="font-size: 14px; font-weight: 600">{{c.title}}</span>
+                    <span style="font-size: 12px; color: #7A7168">{{c.client}} · {{c.channel}}</span>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 5px">
+                    <div style="height: 5px; border-radius: 3px; background: #F1ECE4"><div style="width: {{c.pct}}; height: 5px; border-radius: 3px; background: {{c.bar}}"></div></div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: #7A7168"><span>{{c.hours}}</span><span>{{c.pct}}</span></div>
+                  </div>
+                  <div style="display: flex; align-items: center; justify-content: space-between">
+                    <span style="width: 26px; height: 26px; border-radius: 13px; background: {{c.avatarBg}}; color: #FFFFFF; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{c.who}}</span>
+                    <span style="font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums">{{c.price}}</span>
+                  </div>
+                </article>
+              </sc-for>
+              <button style="min-height: 38px; border: none; border-radius: 10px; background: transparent; color: #7A7168; font-family: inherit; font-size: 13px; cursor: pointer">{{col.more}}</button>
+            </section>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{showCapacity}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-wrap: wrap; gap: 16px">
+        <section style="flex: 3 1 640px; min-width: 0; background: #FFFFFF; border: 1px solid #EAE3D8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px">
+            <h2 style="margin: 0; font-size: 16px; font-weight: 600">Carga por tejedora (horas)</h2>
+            <div style="display: flex; gap: 14px; font-size: 12px; color: #4D4741">
+              <span style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #E7EFE9"></span>Holgada</span>
+              <span style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #F6DFC9"></span>Llena</span>
+              <span style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #E9B3A8"></span>Sobrecarga</span>
+            </div>
+          </div>
+          <div style="overflow-x: auto">
+            <div role="table" aria-label="Carga por tejedora" style="min-width: 620px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-variant-numeric: tabular-nums">
+              <div role="row" style="display: grid; grid-template-columns: 170px repeat(6, minmax(0, 1fr)) 60px; gap: 6px; color: #7A7168">
+                <span role="columnheader">Tejedora</span><span role="columnheader" style="text-align: center">Lun</span><span role="columnheader" style="text-align: center">Mar</span><span role="columnheader" style="text-align: center">Mié</span><span role="columnheader" style="text-align: center">Jue</span><span role="columnheader" style="text-align: center">Vie</span><span role="columnheader" style="text-align: center">Sáb</span><span role="columnheader" style="text-align: right">Total</span>
+              </div>
+              <sc-for list="{{people}}" as="p" hint-placeholder-count="6">
+                <div role="row" style="display: grid; grid-template-columns: 170px repeat(6, minmax(0, 1fr)) 60px; gap: 6px; align-items: center">
+                  <span role="cell" style="display: flex; align-items: center; gap: 8px"><span style="width: 26px; height: 26px; border-radius: 13px; background: {{p.color}}; color: #FFF; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{p.ini}}</span>{{p.name}}</span>
+                  <sc-for list="{{p.days}}" as="d" hint-placeholder-count="6">
+                    <span role="cell" style="height: 38px; border-radius: 8px; background: {{d.bg}}; display: flex; align-items: center; justify-content: center; font-weight: 500">{{d.h}}</span>
+                  </sc-for>
+                  <span role="cell" style="text-align: right; font-weight: 600">{{p.total}}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </section>
+        <section style="flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+          <div style="background: #FFFFFF; border: 1px solid #EAE3D8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 13px; color: #7A7168">Capacidad semanal</span>
+            <span style="font-family: 'Fraunces', serif; font-size: 34px">186 / 240 h</span>
+            <div style="height: 8px; border-radius: 4px; background: #F1ECE4"><div style="width: 77.5%; height: 8px; border-radius: 4px; background: #B7791F"></div></div>
+            <span style="font-size: 13px; color: #4D4741">54 h libres · alcanza para ~6 ositos más</span>
+          </div>
+          <div style="background: #26221F; color: #F3EAE0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+            <span style="font-size: 13px; font-weight: 600; color: #E2A285">Sugerencia de reparto</span>
+            <span style="font-size: 14px; line-height: 1.5">Mover el pedido #1279 (Bolso tote x3, 15 h) de Lina a Ana P. equilibra la semana y entrega a tiempo.</span>
+            <button style="min-height: 40px; border: none; border-radius: 10px; background: #E2A285; color: #26221F; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Aplicar cambio</button>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1160}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { view: 'board' };
+  }
+  renderVals() {
+    const due = (kind) => kind === 'late' ? { dueBg: '#FBE7E4', dueFg: '#8C2E24', bar: '#B23A2E' } : kind === 'warn' ? { dueBg: '#FBF0DC', dueFg: '#7A4F0E', bar: '#B7791F' } : { dueBg: '#F1ECE4', dueFg: '#4D4741', bar: '#4E6E5B' };
+    const av = { LC: '#6E4A3A', AP: '#4E6E5B', DM: '#8A6A3B', SV: '#5A5E7A', JR: '#7A4A5E', '—': '#B9AFA3' };
+    const card = (id, title, client, channel, d, kind, pct, hours, who, price) => ({ id, title, client, channel, due: d, pct: pct + '%', hours, who, price, avatarBg: av[who], ...due(kind) });
+    const columns = [
+      { title: 'En espera', dot: '#B9AFA3', count: 11, hours: '74 h estimadas', more: 'Ver 8 más', cards: [
+        card('#1279', 'Bolso tote crema x3', 'Boutique Lana', 'WhatsApp', 'En 2 días', 'warn', 0, '0 / 15 h', '—', '$360.000'),
+        card('#1291', 'Amigurumis x12', 'Colegio San José', 'Correo', 'Vie 16', 'warn', 0, '0 / 38 h', '—', '$921.600'),
+        card('#1293', 'Cartera bandolera', 'Valentina H.', 'Instagram', 'Mar 27', 'ok', 0, '0 / 6 h', '—', '$95.000')
+      ]},
+      { title: 'En tejido', dot: '#C97A63', count: 18, hours: '82 h restantes', more: 'Ver 15 más', cards: [
+        card('#1284', 'Manta para bebé 80×80', 'Sofía T.', 'Instagram', 'Mañana', 'late', 40, '5,6 / 14 h', 'LC', '$185.000'),
+        card('#1270', 'Gorro de lana x2', 'Juliana P.', 'Instagram', 'Bloqueado', 'late', 55, '2,2 / 4 h', 'DM', '$70.000'),
+        card('#1288', 'Amigurumi Osito café', 'Laura M.', 'Tienda online', 'Lun 13', 'ok', 72, '2,4 / 3,3 h', 'AP', '$76.800')
+      ]},
+      { title: 'Control de calidad', dot: '#4E6E5B', count: 8, hours: '6 h de revisión', more: 'Ver 6 más', cards: [
+        card('#1266', 'Bolso tote crema', 'Camila R.', 'Instagram', 'Mié 14', 'ok', 100, '9,8 / 9,5 h', 'SV', '$120.000'),
+        card('#1262', 'Set posavasos x6', 'Café Raíz', 'WhatsApp', 'Mié 14', 'ok', 100, '2,1 / 2,5 h', 'JR', '$252.000')
+      ]},
+      { title: 'Enviado', dot: '#26221F', count: 5, hours: 'Últimos 7 días', more: 'Ver historial', cards: [
+        card('#1258', 'Bufanda trenzada', 'Mateo L.', 'Instagram', 'En camino', 'ok', 100, '7 / 7 h', 'AP', '$65.000'),
+        card('#1251', 'Set posavasos x6', 'Daniela V.', 'WhatsApp', 'Entregado', 'ok', 100, '2,4 / 2,5 h', 'LC', '$42.000')
+      ]}
+    ];
+    const load = (h) => h === 0 ? '#F7F4EF' : h <= 6 ? '#E7EFE9' : h <= 8 ? '#F6DFC9' : '#E9B3A8';
+    const rows = [
+      ['Lina Cárdenas', 'LC', '#6E4A3A', [8, 9, 10, 8, 9, 4]],
+      ['Ana Pérez', 'AP', '#4E6E5B', [5, 6, 4, 6, 5, 0]],
+      ['Diana Mejía', 'DM', '#8A6A3B', [8, 8, 7, 8, 8, 4]],
+      ['Sara Vélez', 'SV', '#5A5E7A', [6, 7, 8, 7, 6, 3]],
+      ['Julia Rojas', 'JR', '#7A4A5E', [4, 5, 6, 5, 4, 0]],
+      ['Camilo Duque', 'CD', '#4D4741', [7, 6, 8, 9, 7, 2]]
+    ];
+    const people = rows.map(([name, ini, color, hs]) => ({
+      name, ini, color,
+      days: hs.map((h) => ({ h: h ? h + ' h' : '—', bg: load(h) })),
+      total: hs.reduce((a, b) => a + b, 0) + ' h'
+    }));
+    const v = this.state.view;
+    return {
+      columns, people,
+      showBoard: v === 'board',
+      showCapacity: v === 'capacity',
+      views: [['board', 'Tablero'], ['capacity', 'Capacidad']].map(([k, label]) => ({ label, active: v === k, inactive: v !== k, pick: () => this.setState({ view: k }) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

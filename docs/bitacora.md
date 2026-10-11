@@ -241,3 +241,51 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     todavía**: las migraciones 0003 y 0004 no se han corrido en Supabase, así que el flujo de
     invitación/roles/auditoría no se ha probado con datos reales — eso es lo siguiente apenas el
     usuario corra las migraciones.
+
+- **Llega el kit "HEBRA Enterprise" (mismo día).** El usuario pegó `@prompts/00-primer-prompt.md` y
+  pidió ejecutarlo tal cual. Apareció un `CLAUDE.md`, `docs/ROADMAP.md`, `docs/DESIGN.md` y 9
+  mockups en `docs/mockups/` — un roadmap mucho más detallado y profesional que el trabajo de
+  "enterprise" hecho hasta ese momento en esta misma sesión (ver entrada anterior), con su propio
+  sistema de diseño (Geist, sin sombras, menú espresso) y su propio modelo de roles (4, con sedes,
+  no 3 como se había construido). Se siguió el primer prompt al pie de la letra: se leyeron las 4
+  fuentes de verdad, se abrieron los 9 mockups con Playwright para verlos renderizados, y se
+  escribió `docs/ESTADO.md` (qué del roadmap ya existe en el MVP, fase por fase, riesgos y 5
+  preguntas) y `docs/CHANGELOG.md` vacío — sin tocar `src/` ni `supabase/`, como pedía el prompt.
+  Hallazgo más importante documentado ahí: el trabajo de equipo/roles de la entrada anterior ya
+  estaba commiteado (`c3b8a12 "MVP funcionando"`, sin pushear) y contradice una regla del nuevo
+  `CLAUDE.md` (las tejedoras nunca deben ver costos, ni ese trabajo lo garantiza). Quedó como
+  pregunta abierta para el usuario, no se tocó.
+
+- **Fase 0 del roadmap Enterprise: sistema de diseño y nuevo layout (mismo día).** El usuario pidió
+  "un plan para comenzar a ejecutar" — se entró a modo plan otra vez, se decidió empezar por la
+  Fase 0 (no depende de la pregunta abierta de equipo/roles, que sigue sin resolver) y se ejecutó
+  tras su aprobación.
+  - `src/app/globals.css`: tokens reemplazados por los exactos de `DESIGN.md` (paleta clara,
+    oscura conservando las superficies del MVP, menú lateral espresso). Se quitó el sistema de
+    sombras anterior casi por completo (`DESIGN.md` pide paneles sin sombra); solo queda un token
+    `--shadow-tab` para la pestaña activa de un `SegmentedControl`. Radios: paneles 16px (ya
+    coincidía), botones/inputs 10px, chips 999px.
+  - **Migración de tokens en toda la app:** los nombres viejos (`sage`, `line`, `primary-ink`,
+    `surface-2`) ya no existen — se reemplazaron en bloque (`sed`) por los nuevos
+    (`success`, `border`, `primary-hover`, `surface-muted`) en los ~32 archivos que los usaban, y
+    se quitaron todas las referencias a sombras (`shadow-xs/sm/md/lg`) de otros ~20 archivos.
+  - Geist y Geist Mono cargados en `src/app/layout.tsx` junto a Fraunces.
+  - 16 componentes nuevos en `src/components/ui/` (`DESIGN.md` §6): `AppSidebar`, `TopBar`,
+    `PageHeader` (reemplaza `src/components/page-header.tsx`, eliminado), `CommandPalette` (⌘K,
+    con lista estática de pantallas + 3 acciones rápidas, atajo de teclado global),
+    `StatusChip`, `ProgressBar`, `Avatar`/`AvatarStack`, `KpiCard`, `Panel`, `SegmentedControl`,
+    `Tabs`, `DataTable`, `KanbanColumn`/`OrderCard`, `CapacityGrid`, `Stepper`, `ChoiceCard`,
+    `Toggle`, `InsightCard`, `AlertRow`. Los que ya tenían un equivalente hecho a mano en el MVP
+    (`Avatar`, `ProgressBar`) se conectaron de verdad en Inicio/Clientes/Pedidos/Insumos; el resto
+    (pensados para las fases 1-4) quedan construidos pero sin usar todavía.
+  - `src/components/nav.tsx`: se quitó `Sidebar` (reemplazado por `AppSidebar`); `BottomNav` se
+    mantiene igual, solo hereda los tokens nuevos.
+  - `(app)/layout.tsx`: usa `AppSidebar`/`TopBar`/`CommandPalette`; se agregó una consulta liviana
+    para el badge de pedidos activos en el menú (dato real, no inventado).
+  - **Verificado de verdad, no solo que compile:** capturas de pantalla reales con Playwright
+    (cuenta de prueba ya existente) de las 7 pantallas en claro/oscuro y escritorio/móvil, más la
+    paleta ⌘K y el modal de invitar al equipo — todo coincide con la dirección de los mockups.
+    `npm run lint`, `npm test` y `npm run build` pasan limpio.
+  - Casilla de la Fase 0 marcada en `docs/ROADMAP.md`, entrada agregada en `docs/CHANGELOG.md`.
+  - **Pendiente:** decidir qué hacer con el trabajo de equipo/roles (Fase 1 real todavía no
+    empieza) — sigue siendo la pregunta abierta más importante de `docs/ESTADO.md`.
