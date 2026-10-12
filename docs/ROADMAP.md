@@ -88,10 +88,11 @@ Estado: marca `[x]` al cerrar cada fase.
 
 ---
 
-## [ ] Fase 6 — Finanzas y facturación (excluida por ahora)
+## [x] Fase 6 — Finanzas y facturación
 
-> El usuario pidió explícitamente no hacer esta fase por el momento (2026-10-11). Se salta en el
-> orden del roadmap — seguir con la Fase 8 después de la 5 si esta sigue excluida.
+> El usuario la excluyó el 2026-10-11 y la reinstaló explícitamente el 2026-10-12, con una condición:
+> construir todo lo que se pueda en código y dejar el punto de conexión listo para cuando él cree la
+> cuenta de un proveedor de facturación electrónica (ver `docs/pendientes.md`).
 
 - Pagos parciales y anticipos (`payments`) con método; cartera por antigüedad (0–15, 16–30, 31–60, +60).
 - Estado de resultados: ingresos − materiales − mano de obra − comisiones − gastos fijos = utilidad neta (cascada).

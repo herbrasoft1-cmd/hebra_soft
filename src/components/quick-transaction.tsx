@@ -6,7 +6,7 @@ import { Sheet } from "./sheet";
 import { SubmitButton } from "./submit-button";
 
 const INCOME_CATEGORIES = ["Venta", "Anticipo", "Otro ingreso"];
-const EXPENSE_CATEGORIES = ["Materiales", "Publicidad", "Internet", "Suscripciones", "Envíos", "Otro gasto"];
+const EXPENSE_CATEGORIES = ["Materiales", "Gastos fijos", "Publicidad", "Internet", "Suscripciones", "Envíos", "Otro gasto"];
 const METHODS = ["Efectivo", "Transferencia", "Nequi", "Daviplata", "Tarjeta"];
 
 /** Registro rápido de venta o gasto en una hoja inferior. */

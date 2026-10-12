@@ -569,3 +569,44 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     pedidos); un token inválido devuelve 404 limpio.
   - `npm run lint`/`test` (64/64, +8 nuevas de `tracking.ts`)/`build` pasan limpio. Casilla de la
     Fase 8 marcada en `docs/ROADMAP.md`, entrada en `docs/CHANGELOG.md`.
+
+- **Fase 6 del roadmap Enterprise: finanzas y facturación (día siguiente, 2026-10-12).** El usuario
+  la había excluido el día anterior y la reinstaló explícitamente, con una condición clara: construir
+  todo lo que se pueda en código y dejar el punto de conexión listo para cuando él cree la cuenta de
+  un proveedor de facturación electrónica. Le pregunté qué proveedor (Alegra/Siigo/ninguno todavía) y
+  eligió no construir ningún adaptador real por ahora — solo el punto de extensión.
+  - Dos agentes Explore confirmaron varias cosas que cambiaron el plan para bien antes de escribir
+    nada: el "saldo real" ya existía desde la Fase 8 (`get_order_balance`/`register_order_payment`),
+    así que Fase 6 no debía crear una tabla `payments` nueva; el patrón de numeración de remisiones
+    (`tenants.remission_seq` + función que incrementa y devuelve) era exactamente el patrón a repetir
+    para facturas; `ventas` puede emitir documentos pero no ve `/caja` (gatea por `view_finance`, que
+    `ventas` no tiene) — el patrón ya resuelto era `RemissionButton` en el Kanban, gateado por
+    `issue_invoices`, así que "Emitir factura" debía seguir el mismo camino.
+  - **Migración `0014`:** `customers.document_number` (NIT/cédula), `tenants.invoice_seq`, tabla
+    `invoices` (RLS: owner/admin/ventas, mismo chequeo inline que ya usaba `create_remission`, no
+    `has_role` que solo distingue owner/admin), RPC `reserve_invoice_number`.
+  - **Decisión de alcance deliberada:** "gastos fijos" se modela como `transactions` con categoría
+    "Gastos fijos" en vez de una tabla de gastos recurrentes nueva — reutiliza lo que ya existía.
+    "Recordatorios de cobro" del mockup trae un solo botón "Enviar recordatorios (N)"; se cambió a un
+    botón de WhatsApp por cliente pendiente, porque `wa.me` abre una conversación a la vez y los
+    navegadores bloquean varios `window.open` seguidos desde el mismo clic — un botón "masivo" real
+    no funcionaría, así que se prefirió lo honesto sobre lo que el mockup sugiere.
+  - **Gap real encontrado en la verificación con el servidor real:** el desplegable de categoría del
+    formulario rápido de gastos en Caja (`EXPENSE_CATEGORIES` en `quick-transaction.tsx`) no incluía
+    "Gastos fijos" — la convención que la cascada de Finanzas necesitaba no era alcanzable desde
+    ninguna pantalla. Se agregó la opción a la lista existente.
+  - **Verificado de punta a punta con datos reales:** se completó el NIT de una clienta de prueba
+    (Marcela Ríos) y se emitió una factura desde el botón nuevo del Kanban — quedó en `invoices` con
+    estado `rechazada` y el mensaje real "La facturación electrónica aún no está configurada." (no un
+    crash ni un estado inventado); "Reintentar" repitió el mismo flujo y mostró el mensaje inline
+    correctamente. Se registró un gasto real con categoría "Gastos fijos" ($50.000) y la cascada bajó
+    de $135K a $85K de utilidad neta (63,0% de margen) exactamente como corresponde. La cartera por
+    antigüedad bucketeó bien el saldo pendiente real de $15.000 (del abono parcial de la Fase 8) en el
+    tramo 0-15 días. El CSV exportado tuvo exactamente los movimientos del mes, incluido el gasto
+    fijo y los dos abonos. Se confirmó que la cuenta `ventas` ve el botón "Factura" en el Kanban pero
+    es redirigida fuera de `/finanzas` (mismo comportamiento que ya tenía `/caja`).
+  - Bug cosmético encontrado y corregido: el selector de mes mostraba "Octubre De 2026" (la clase
+    `capitalize` de Tailwind capitaliza cada palabra, no solo la primera) — se corrigió capitalizando
+    manualmente solo la primera letra en JS.
+  - `npm run lint`/`test` (74/74, +10 nuevas de `finance.ts`)/`build` pasan limpio. Casilla de la Fase
+    6 marcada en `docs/ROADMAP.md`, entrada en `docs/CHANGELOG.md`.

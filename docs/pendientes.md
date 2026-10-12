@@ -95,10 +95,28 @@
 - [ ] Borrar si se quiere (datos de prueba de la Fase 5): proveedor "Lanas del Valle", la OC
       `#C25BA8` (borrador, creada por reorden automático) y los 30g de "Lana café" transferidos a la
       sede "Bogotá".
-- [ ] **Fase 6 — Finanzas y facturación: excluida por ahora** (pedido explícito del usuario,
+- [x] Fase 6 — Finanzas y facturación. Excluida el 2026-10-11, reinstalada por el usuario el
+      2026-10-12 con una condición: construir todo en código, sin adaptador real de facturación
+      (eligió "ninguno todavía" cuando se le preguntó Alegra/Siigo/ninguno). Migración `0014` corrida
+      (`customers.document_number`, `tenants.invoice_seq`, tabla `invoices`, RPC
+      `reserve_invoice_number`). Sin tabla `payments` nueva (reutiliza `transactions.order_id` de la
+      Fase 8); "Gastos fijos" reutiliza `transactions` con esa categoría (se agregó al desplegable de
+      Caja, que antes no la tenía). Verificado con el servidor real: factura emitida desde el Kanban
+      queda `rechazada` con el mensaje real (no inventado); "Reintentar" funciona; cascada y cartera
+      correctas con datos reales; CSV exportado correcto; `ventas` ve "Factura" en el Kanban pero no
+      entra a `/finanzas`. Ver `docs/CHANGELOG.md` y `docs/bitacora.md`.
+- [ ] **Para que la facturación electrónica funcione de verdad**: crear una cuenta en un proveedor
+      (Alegra recomendado — API simple, plan económico para negocios pequeños, muy usado en
+      Colombia), y pasarle las credenciales a Claude. El trabajo que falta está documentado como
+      comentario en `src/lib/invoicing.ts`: crear `src/lib/invoicing/alegra.ts` implementando
+      `InvoicingProvider`, leer `ALEGRA_EMAIL`/`ALEGRA_TOKEN` (env vars server-only, sin prefijo
+      `NEXT_PUBLIC_`) en `.env.local` y en Vercel, y devolver ese proveedor desde
+      `getInvoicingProvider()` cuando esas env vars existan. El resto del app ya está listo.
+- [ ] Borrar si se quiere (datos de prueba de la Fase 6): el NIT de prueba `900123456-7` en el
+      cliente "Marcela Ríos", la factura `FE-0001` rechazada, y el gasto "Arriendo taller" ($50.000,
+      categoría "Gastos fijos") registrado en Caja.
+- [ ] **Fase 7 — Integraciones, seguridad y plan: excluida por ahora** (pedido explícito del usuario,
       2026-10-11). No empezar sin que lo pida de nuevo.
-- [ ] **Fase 7 — Integraciones, seguridad y plan: excluida por ahora** (mismo pedido). No empezar
-      sin que lo pida de nuevo.
 - [x] Fase 8 — Móvil por rol y portal del cliente. Migración `0013` corrida (`product_steps`,
       `order_step_progress`, `orders.tracking_token`/`progress_photo_url`, RPCs `get_order_tracking`/
       `get_order_balance`/`register_order_payment`/`toggle_order_step`, bucket `avance`). "Saldo real

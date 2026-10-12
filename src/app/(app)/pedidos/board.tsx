@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useOptimistic, useState, useTransition } from "react";
 import { ordersAtRisk } from "@/lib/analytics";
 import { IconArrowRight, IconPlus, IconTrash } from "@/components/icons";
+import { InvoiceButton } from "@/components/invoice-button";
 import { RemissionButton } from "@/components/remission-button";
 import { Sheet } from "@/components/sheet";
 import { SubmitButton } from "@/components/submit-button";
@@ -424,6 +425,9 @@ function OrderCard({
         )}
         {canIssueInvoices && (o.status === "calidad" || o.status === "enviado") && (
           <RemissionButton orderId={o.id} className="btn-ghost min-h-11 flex-1 px-3 text-sm" />
+        )}
+        {canIssueInvoices && (o.status === "calidad" || o.status === "enviado") && (
+          <InvoiceButton orderId={o.id} className="btn-ghost min-h-11 flex-1 px-3 text-sm" />
         )}
         {next && (
           <button onClick={() => onMove(o.id, next)} className="btn-sage min-h-11 flex-[1.4] px-3 text-sm">

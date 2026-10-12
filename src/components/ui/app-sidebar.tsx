@@ -12,6 +12,7 @@ import {
   IconInicio,
   IconOvillo,
   IconRecetario,
+  IconWallet,
 } from "@/components/icons";
 import { MiniTimer } from "@/components/timer";
 import { canFully } from "@/lib/permissions";
@@ -35,6 +36,7 @@ function useItems(recipeLabel: string, role: Role, activeOrders: number): Item[]
     { href: "/pedidos", label: "Pedidos", icon: IconHebra, group: "OPERACIÓN", badge: activeOrders || undefined },
     { href: "/clientes", label: "Clientes", icon: IconClientes, group: "NEGOCIO" },
     { href: "/caja", label: "Caja", icon: IconCaja, group: "NEGOCIO", adminOnly: true },
+    { href: "/finanzas", label: "Finanzas", icon: IconWallet, group: "NEGOCIO", adminOnly: true },
     { href: "/analitica", label: "Analítica", icon: IconChart, group: "NEGOCIO", adminOnly: true },
     { href: "/configuracion", label: "Configuración", icon: IconAgujas, group: "NEGOCIO", adminOnly: true },
   ];

@@ -90,6 +90,15 @@ export function CustomersView({ customers }: { customers: Row[] }) {
                 Dirección de envío
                 <textarea className="input min-h-20 py-2.5" name="address" defaultValue={editing === "new" ? "" : (editing.address ?? "")} />
               </label>
+              <label className="field">
+                NIT / Cédula
+                <input
+                  className="input"
+                  name="document_number"
+                  placeholder="Para facturar"
+                  defaultValue={editing === "new" ? "" : (editing.document_number ?? "")}
+                />
+              </label>
               <SubmitButton>Guardar</SubmitButton>
             </form>
             {editing !== "new" && (

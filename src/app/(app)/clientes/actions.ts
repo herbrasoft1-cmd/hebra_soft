@@ -12,6 +12,7 @@ export async function saveCustomer(formData: FormData) {
     whatsapp: String(formData.get("whatsapp") ?? "").trim() || null,
     instagram: String(formData.get("instagram") ?? "").trim().replace(/^@/, "") || null,
     address: String(formData.get("address") ?? "").trim() || null,
+    document_number: String(formData.get("document_number") ?? "").trim() || null,
   };
   if (!record.name) return;
   const { error } = id

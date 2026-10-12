@@ -113,6 +113,7 @@ export type Customer = {
   whatsapp: string | null;
   instagram: string | null;
   address: string | null;
+  document_number: string | null;
 };
 
 export type Order = {
@@ -224,6 +225,24 @@ export type Transaction = {
   description: string | null;
   amount: number;
   payment_method: string | null;
+  order_id: string | null;
   occurred_on: string;
   location_id: string | null;
+};
+
+export type InvoiceStatus = "enviando" | "aceptada_dian" | "rechazada";
+
+export type Invoice = {
+  id: string;
+  tenant_id: string;
+  order_id: string;
+  number: number;
+  provider: string | null;
+  status: InvoiceStatus;
+  external_id: string | null;
+  pdf_url: string | null;
+  error_message: string | null;
+  total: number;
+  created_at: string;
+  sent_at: string | null;
 };

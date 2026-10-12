@@ -2,6 +2,42 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Fase 6 — Finanzas y facturación (2026-10-12)
+
+El usuario había excluido esta fase y la reinstaló explícitamente, con una condición clara:
+construir todo lo que se pueda en código, y dejar listo el punto de conexión para cuando él cree la
+cuenta de un proveedor de facturación electrónica (confirmó no construir ningún adaptador real de
+Alegra/Siigo todavía).
+
+- Migración `0014`: `customers.document_number` (NIT/cédula) y `tenants.invoice_seq`. Tabla
+  `invoices` — registra cada intento real de factura electrónica, nunca un estado inventado (RLS:
+  owner/admin/ventas, mismo chequeo inline que ya usaba `create_remission`). RPC
+  `reserve_invoice_number`, mismo patrón que `remission_seq`.
+- **Sin tabla `payments` nueva**: el saldo/cartera siguen saliendo de `transactions.order_id`, ya
+  formalizado en la Fase 8 (`get_order_balance`). "Gastos fijos" se reutiliza como `transactions` con
+  categoría "Gastos fijos" (se agregó esa opción al desplegable de Caja, que antes no la tenía — sin
+  eso, la convención no era alcanzable desde la UI).
+- `src/lib/finance.ts`: `receivableAging` (cartera por antigüedad, 0-15/16-30/31-60/+60 días),
+  `incomeStatement` (la cascada ingresos − materiales − mano de obra − comisiones − gastos fijos),
+  `channelCommission`. Con pruebas.
+- Página `/finanzas` (gateada por `view_finance`, igual que Caja): KPIs, cascada "De ingresos a
+  utilidad" (gráfico de cascada), cartera por antigüedad con recordatorio de WhatsApp **por cliente**
+  (no un botón masivo — `wa.me` abre una conversación a la vez y los navegadores bloquean varios
+  `window.open` seguidos), tabla de documentos (facturas + remisiones unificadas), export a CSV.
+- "Emitir factura" vive en dos lugares, igual que "Remisión": el Kanban de Pedidos (gateado por
+  `issue_invoices`, así `ventas` también puede sin entrar a `/finanzas`) y la tabla de documentos de
+  Finanzas (para reintentar).
+- `src/lib/invoicing.ts` documenta exactamente qué archivo crear y qué variables de entorno leer
+  cuando se conecte un proveedor real — el resto del app no necesita cambios.
+- Verificado de punta a punta con datos reales: completar el NIT de un cliente y emitir una factura
+  desde el Kanban queda en `invoices` con estado `rechazada` y el mensaje real "La facturación
+  electrónica aún no está configurada." (no un crash); "Reintentar" repite el flujo; un gasto con
+  categoría "Gastos fijos" se reflejó correctamente en la cascada ($135K → $85K, 63,0%); la cartera
+  bucketeó bien un saldo real; el CSV exportado tiene los datos correctos; `ventas` ve el botón
+  "Factura" en el Kanban pero es redirigida fuera de `/finanzas`.
+- `npm run lint`/`test` (74/74, +10 nuevas de `finance.ts`)/`build` pasan limpio. Casilla de la Fase 6
+  marcada en `docs/ROADMAP.md`.
+
 ## Fase 8 — Móvil por rol y portal del cliente (2026-10-11)
 
 Las Fases 6 y 7 siguen excluidas, así que el roadmap saltó directo de la 5 a la 8. Los 3 mockups
