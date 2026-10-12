@@ -53,7 +53,11 @@ export default async function RecipesPage() {
     <>
       <PageHeader
         title={mod.recipe.menuLabel}
-        subtitle={`Tus ${mod.recipe.itemPlural.toLowerCase()} con su costo real: materiales, tiempo y desgaste.`}
+        subtitle={
+          canViewCosts
+            ? `Tus ${mod.recipe.itemPlural.toLowerCase()} con su costo real: materiales, tiempo y desgaste.`
+            : `Consulta tus ${mod.recipe.itemPlural.toLowerCase()}: insumos, tiempo y precio.`
+        }
       />
 
       {canEdit && (

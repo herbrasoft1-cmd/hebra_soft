@@ -648,3 +648,47 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     correcto para cada uno de los 3 roles probados; el tooltip de la campana apareció correctamente
     al pasar el mouse.
   - `npm run lint`/`test` (74/74)/`build` pasan limpio.
+
+- **Continuación: auditoría completa de experiencia de usuario (mismo día).** El usuario reportó no
+  ver los cambios de cuenta/sidebar — resultó ser caché del service worker, pero pidió de paso una
+  revisión completa de la experiencia de usuario. Se recorrió la app con Playwright como los 3 roles
+  (owner/ventas/tejedora), en escritorio y celular, sobre las pantallas principales. Encontró 3
+  problemas reales, no cosméticos:
+  - **Fuga de costos a roles sin `view_costs` (serio, pre-existente desde antes de esta sesión):**
+    `/insumos` nunca filtraba por rol — ni al leer (`select("*")` sin gating, a diferencia de
+    Recetario que sí lo hacía desde la Fase 0) ni al escribir (`saveSupply`/`deleteSupply` en
+    `insumos/actions.ts` no tenían ningún chequeo de permiso, cualquier tejedora podía crear/editar/
+    borrar insumos con su costo). Corregido: `saveSupply`/`deleteSupply` ahora exigen
+    `canFully(role, "edit_recipes")`; `insumos/page.tsx` sigue trayendo la fila completa de la base
+    (evita el límite de Supabase de que el string de `.select()` sea literal para poder tipar
+    condicionalmente) pero **sanitiza `unit_cost`/`total_cost` a 0 antes de pasarlos como prop al
+    componente cliente**, así el dato real nunca llega al navegador; `SuppliesView` ahora oculta
+    costo unitario, "Compra: $X", el KPI "Valor del inventario", el monto de "Órdenes de compra
+    abiertas", el tip "Así calcula HEBRA tu costo", "+ Nueva compra" y el panel de Órdenes de
+    compra/Transferencias completo para quien no tiene `view_costs` — queda una vista de solo stock,
+    igual de honesta que `RecipeViewer` en Recetario. De paso, el subtítulo de Recetario ("con su
+    costo real...") también prometía algo que esos roles no ven — se volvió condicional.
+  - **Navegación móvil incompleta (gap real, no solo de esta sesión):** `TopBar` (con el selector de
+    sede) y `AppSidebar` son ambos `hidden md:flex` — exclusivamente de escritorio. La barra inferior
+    (`BottomNav`) nunca incluyó "Clientes" (crítico para `ventas`, cuyo trabajo diario depende de
+    eso), y tampoco "Caja"/"Finanzas"/"Analítica"/"Configuración" para administración — en celular,
+    el dueño del negocio no tenía ninguna forma de llegar a Finanzas o Configuración. Se rediseñó
+    `BottomNav`: 4 ítems fijos (Inicio/Insumos/Recetario/Pedidos) + un quinto "Más" que abre una hoja
+    con el resto (Clientes, Caja/Finanzas/Analítica/Configuración si el rol tiene `view_finance`,
+    Ayuda) — mismo criterio de "nunca dejar una pantalla sin punto de entrada en celular" que ya
+    estableció el `AccountMenu` flotante.
+  - **Botón de cronómetro visible para quien no tiene `use_timer`:** `HomeActions` (acciones rápidas
+    de Inicio) mostraba "Iniciar cronómetro" a cualquier rol, sin chequear `canFully(role,
+    "use_timer")` — `ventas` (que no tiene ese permiso) podía iniciar y correr el cronómetro
+    normalmente, pero al intentar guardarlo `logTimerSession` lo rechazaba en el servidor, dejando la
+    sesión atascada en la cola de pendientes para siempre, sin ningún aviso. Se agregó el chequeo: sin
+    `use_timer`, Inicio solo muestra "Registrar venta" (ancho completo en vez de 2 columnas).
+  - **Verificado de punta a punta con las 3 cuentas de rol:** Insumos sin ningún $ visible para
+    tejedora, sin regresión para administración; el menú "Más" mostró exactamente los ítems
+    correctos para `ventas` (Clientes + Ayuda) y para administración (Clientes, Caja, Finanzas,
+    Analítica, Configuración, Ayuda); Inicio de `ventas` ya no ofrece el cronómetro.
+  - **Nota de proceso:** el archivo de sesión de Playwright para tejedora había quedado inválido por
+    la prueba de logout de la tanda anterior — se detectó por screenshots idénticos (misma pantalla
+    de login repetida) y se resolvió decodificando el JWT de la cookie vieja para recuperar el correo
+    y volver a iniciar sesión, guardando un `storageState` fresco.
+  - `npm run lint`/`test` (74/74)/`build` pasan limpio.

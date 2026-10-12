@@ -15,6 +15,7 @@ import { deleteSupply, saveSupply } from "./actions";
 import { PurchaseOrdersPanel } from "./purchase-orders-panel";
 
 export function SuppliesView({
+  canSeeCosts,
   supplies,
   units,
   examples,
@@ -31,6 +32,7 @@ export function SuppliesView({
   allSupplyOptions,
   locations,
 }: {
+  canSeeCosts: boolean;
   supplies: Supply[];
   units: Unit[];
   examples: string;
@@ -61,19 +63,23 @@ export function SuppliesView({
   return (
     <div className="flex flex-col gap-5">
       <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
-        <KpiCard label="Valor del inventario" value={compactMoney(inventoryValue)}>
-          <span className="text-xs text-muted">{referencesCount} referencias en esta vista</span>
-        </KpiCard>
+        {canSeeCosts && (
+          <KpiCard label="Valor del inventario" value={compactMoney(inventoryValue)}>
+            <span className="text-xs text-muted">{referencesCount} referencias en esta vista</span>
+          </KpiCard>
+        )}
         <KpiCard label="Bajo punto de reorden" value={String(belowReorderCount)}>
           <span className="text-xs text-muted">{outOfStockCount} agotados</span>
         </KpiCard>
-        <KpiCard label="Órdenes de compra abiertas" value={String(openPOCount)}>
-          <span className="text-xs text-muted">{money(openPOAmount)} por recibir</span>
-        </KpiCard>
+        {canSeeCosts && (
+          <KpiCard label="Órdenes de compra abiertas" value={String(openPOCount)}>
+            <span className="text-xs text-muted">{money(openPOAmount)} por recibir</span>
+          </KpiCard>
+        )}
         <KpiCard label="Proveedores" value={String(suppliersCount)} />
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className={`grid gap-5 ${canSeeCosts ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""}`}>
         <div className="flex flex-col gap-5">
           <div className="flex flex-wrap items-end gap-3">
             <label className="field min-w-56 flex-1">
@@ -86,28 +92,34 @@ export function SuppliesView({
                 onChange={(e) => setQ(e.target.value)}
               />
             </label>
-            <button className="btn-primary" onClick={() => setEditing("new")}>
-              <IconPlus size={18} /> Nueva compra
-            </button>
+            {canSeeCosts && (
+              <button className="btn-primary" onClick={() => setEditing("new")}>
+                <IconPlus size={18} /> Nueva compra
+              </button>
+            )}
           </div>
 
-          <div className="flex flex-col gap-2.5 rounded-[18px] bg-success-soft p-4">
-            <span className="text-[13px] font-semibold text-success-ink">Así calcula HEBRA tu costo</span>
-            <p className="text-sm text-ink-2">
-              Registras lo que compraste (ej. 100 g por $15.000) y HEBRA guarda cuánto vale cada gramo ($150),
-              promediado con lo que ya tenías. Así el recetario sabe el costo exacto de cada pieza.
-            </p>
-          </div>
+          {canSeeCosts && (
+            <div className="flex flex-col gap-2.5 rounded-[18px] bg-success-soft p-4">
+              <span className="text-[13px] font-semibold text-success-ink">Así calcula HEBRA tu costo</span>
+              <p className="text-sm text-ink-2">
+                Registras lo que compraste (ej. 100 g por $15.000) y HEBRA guarda cuánto vale cada gramo ($150),
+                promediado con lo que ya tenías. Así el recetario sabe el costo exacto de cada pieza.
+              </p>
+            </div>
+          )}
 
           {supplies.length === 0 ? (
             <EmptyState
               icon={IconOvillo}
               title="Aún no tienes insumos"
-              text="Empieza registrando tu última compra de lana o hilo."
+              text={canSeeCosts ? "Empieza registrando tu última compra de lana o hilo." : "Todavía no hay insumos registrados."}
               action={
-                <button className="btn-primary" onClick={() => setEditing("new")}>
-                  Registrar primer insumo
-                </button>
+                canSeeCosts ? (
+                  <button className="btn-primary" onClick={() => setEditing("new")}>
+                    Registrar primer insumo
+                  </button>
+                ) : undefined
               }
             />
           ) : (
@@ -117,38 +129,51 @@ export function SuppliesView({
                 const low =
                   s.low_stock_threshold > 0 ? s.quantity_remaining <= s.low_stock_threshold : ratio < 0.4;
                 const u = UNIT_LABEL[s.unit];
-                return (
-                  <li key={s.id}>
-                    <button
-                      onClick={() => setEditing(s)}
-                      className="card flex w-full flex-col gap-2.5 px-4 py-3.5 text-left transition-all hover:-translate-y-0.5 hover:border-border-strong"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
-                          <IconOvillo size={20} />
+                const card = (
+                  <div className="flex flex-col gap-2.5 px-4 py-3.5 text-left">
+                    <div className="flex items-center gap-3">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
+                        <IconOvillo size={20} />
+                      </span>
+                      <span className="flex min-w-0 flex-1 flex-col">
+                        <span className="truncate text-[15px] font-semibold">{s.name}</span>
+                        <span className="truncate text-xs text-muted">
+                          {[s.brand, s.lot_color].filter(Boolean).join(" · ") || "Sin marca"}
                         </span>
-                        <span className="flex min-w-0 flex-1 flex-col">
-                          <span className="truncate text-[15px] font-semibold">{s.name}</span>
-                          <span className="truncate text-xs text-muted">
-                            {[s.brand, s.lot_color].filter(Boolean).join(" · ") || "Sin marca"}
-                          </span>
-                        </span>
+                      </span>
+                      {canSeeCosts && (
                         <span className="flex flex-col items-end">
                           <span className="text-[15px] font-semibold tabular-nums">{unitMoney(Number(s.unit_cost))}</span>
                           <span className="text-[11px] text-muted">por {u.long}</span>
                         </span>
-                      </div>
-                      <ProgressBar value={Math.round(ratio * 100)} tone={low ? "warning" : "success"} />
-                      <div className="flex justify-between text-xs text-ink-2">
-                        <span>
-                          Quedan {Number(s.quantity_remaining)} {u.short}
-                          {low && <strong className="ml-1 text-primary-hover">· por agotarse</strong>}
-                        </span>
+                      )}
+                    </div>
+                    <ProgressBar value={Math.round(ratio * 100)} tone={low ? "warning" : "success"} />
+                    <div className="flex justify-between text-xs text-ink-2">
+                      <span>
+                        Quedan {Number(s.quantity_remaining)} {u.short}
+                        {low && <strong className="ml-1 text-primary-hover">· por agotarse</strong>}
+                      </span>
+                      {canSeeCosts && (
                         <span>
                           Compra: {Number(s.quantity_purchased)} {u.short} · {money(s.total_cost)}
                         </span>
-                      </div>
-                    </button>
+                      )}
+                    </div>
+                  </div>
+                );
+                return (
+                  <li key={s.id}>
+                    {canSeeCosts ? (
+                      <button
+                        onClick={() => setEditing(s)}
+                        className="card w-full transition-all hover:-translate-y-0.5 hover:border-border-strong"
+                      >
+                        {card}
+                      </button>
+                    ) : (
+                      <div className="card">{card}</div>
+                    )}
                   </li>
                 );
               })}
@@ -156,13 +181,15 @@ export function SuppliesView({
           )}
         </div>
 
-        <PurchaseOrdersPanel
-          orders={openPurchaseOrders}
-          suggestion={transferSuggestion}
-          supplies={allSupplyOptions}
-          suppliers={suppliers}
-          locations={locations}
-        />
+        {canSeeCosts && (
+          <PurchaseOrdersPanel
+            orders={openPurchaseOrders}
+            suggestion={transferSuggestion}
+            supplies={allSupplyOptions}
+            suppliers={suppliers}
+            locations={locations}
+          />
+        )}
       </div>
 
       <Sheet

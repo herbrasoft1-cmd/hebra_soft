@@ -12,10 +12,12 @@ export function HomeActions({
   lastProduct,
   openSale,
   timerVerb,
+  canUseTimer,
 }: {
   lastProduct: { id: string; name: string } | null;
   openSale: boolean;
   timerVerb: string;
+  canUseTimer: boolean;
 }) {
   const [saleOpen, setSaleOpen] = useState(openSale);
   const { timer, elapsed, running, start, pause, resume } = useTimer();
@@ -28,7 +30,7 @@ export function HomeActions({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-3 md:max-w-2xl">
+    <div className={`grid gap-3 md:max-w-2xl ${canUseTimer ? "grid-cols-2" : "grid-cols-1"}`}>
       <button
         onClick={() => setSaleOpen(true)}
         className="flex min-h-29 flex-col items-start justify-between rounded-[20px] bg-primary p-4 text-left text-on-primary active:scale-[0.98]"
@@ -39,7 +41,7 @@ export function HomeActions({
         <span className="text-base font-semibold">Registrar venta</span>
       </button>
 
-      {timerTarget ? (
+      {canUseTimer && timerTarget ? (
         <button
           onClick={onTimer}
           className="flex min-h-29 flex-col items-start justify-between rounded-[20px] bg-success p-4 text-left text-on-primary active:scale-[0.98]"
@@ -54,7 +56,7 @@ export function HomeActions({
             <span className="truncate text-[13px] opacity-90">{timerTarget.productName}</span>
           </span>
         </button>
-      ) : (
+      ) : canUseTimer ? (
         <Link
           href="/recetario"
           className="flex min-h-29 flex-col items-start justify-between rounded-[20px] bg-success p-4 text-on-primary"
@@ -67,7 +69,7 @@ export function HomeActions({
             <span className="text-[13px] opacity-90">Crea tu primer patrón</span>
           </span>
         </Link>
-      )}
+      ) : null}
 
       {saleOpen && <QuickTransactionSheet open onClose={() => setSaleOpen(false)} />}
     </div>

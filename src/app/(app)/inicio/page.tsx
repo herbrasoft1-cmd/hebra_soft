@@ -64,7 +64,7 @@ async function SimpleHome({
   mod: IndustryModule;
   accion?: string;
 }) {
-  const { supabase, user } = session;
+  const { supabase, user, role } = session;
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
   const sparkStart = new Date(now.getTime() - (SPARK_DAYS - 1) * 86400000).toISOString().slice(0, 10);
@@ -126,7 +126,7 @@ async function SimpleHome({
         </p>
       </div>
 
-      <HomeActions lastProduct={lastProduct} openSale={accion === "venta"} timerVerb={mod.timer.label} />
+      <HomeActions lastProduct={lastProduct} openSale={accion === "venta"} timerVerb={mod.timer.label} canUseTimer={canFully(role, "use_timer")} />
 
       <div className="grid grid-cols-3 gap-3">
         <Stat label="Ventas del mes" value={money(monthIncome)} icon={IconTrendUp} tone="sage" spark={incomeSparkline} />

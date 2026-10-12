@@ -27,7 +27,8 @@ function parse(formData: FormData) {
 }
 
 export async function saveSupply(formData: FormData) {
-  const { supabase, tenant } = await getSession();
+  const { supabase, tenant, role } = await getSession();
+  if (!canFully(role, "edit_recipes")) throw new Error("No tienes permiso para registrar compras de insumos.");
   const id = String(formData.get("id") ?? "");
   const { remaining, ...data } = parse(formData);
   if (!data.name || data.quantity_purchased <= 0) throw new Error("Nombre y cantidad son obligatorios");
@@ -51,7 +52,8 @@ export async function saveSupply(formData: FormData) {
 }
 
 export async function deleteSupply(formData: FormData): Promise<{ error?: string }> {
-  const { supabase, tenant } = await getSession();
+  const { supabase, tenant, role } = await getSession();
+  if (!canFully(role, "edit_recipes")) return { error: "No tienes permiso para eliminar insumos." };
   const id = String(formData.get("id"));
   const { error } = await supabase.from("supplies").delete().eq("id", id).eq("tenant_id", tenant.id);
   if (error) return { error: "No se puede eliminar: el insumo está en algún patrón del recetario." };

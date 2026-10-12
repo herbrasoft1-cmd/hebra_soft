@@ -201,6 +201,14 @@ export const IconChevronDown = (p: P) => (
   </Base>
 );
 
+export const IconDots = (p: P) => (
+  <Base fill="currentColor" stroke="none" {...p}>
+    <circle cx="5" cy="12" r="2" />
+    <circle cx="12" cy="12" r="2" />
+    <circle cx="19" cy="12" r="2" />
+  </Base>
+);
+
 export const IconHelp = (p: P) => (
   <Base {...p}>
     <circle cx="12" cy="12" r="9" />

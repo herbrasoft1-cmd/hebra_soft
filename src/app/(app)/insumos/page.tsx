@@ -2,6 +2,7 @@ import { Pager } from "@/components/pager";
 import { PageHeader } from "@/components/ui/page-header";
 import { blockedOrders, suggestTransfer, type LocationStock, type OrderWithRecipe } from "@/lib/inventory";
 import { getActiveLocationId } from "@/lib/location";
+import { canFully } from "@/lib/permissions";
 import { getSession } from "@/lib/tenant";
 import type { Location, PurchaseOrder, Supplier, Supply } from "@/lib/types";
 import { getIndustryModule } from "@/modules";
@@ -17,8 +18,9 @@ export default async function SuppliesPage({ searchParams }: { searchParams: Pro
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  const { supabase, tenant } = await getSession();
+  const { supabase, tenant, role } = await getSession();
   const activeLocationId = await getActiveLocationId();
+  const canSeeCosts = canFully(role, "view_costs");
 
   let query = supabase.from("supplies").select("*", { count: "exact" }).eq("tenant_id", tenant.id);
   if (activeLocationId) query = query.eq("location_id", activeLocationId);
@@ -31,12 +33,14 @@ export default async function SuppliesPage({ searchParams }: { searchParams: Pro
         .select("id, name, unit, location_id, quantity_remaining, unit_cost, low_stock_threshold, locations(name)")
         .eq("tenant_id", tenant.id),
       supabase.from("suppliers").select("*").eq("tenant_id", tenant.id).order("name"),
-      supabase
-        .from("purchase_orders")
-        .select("*, suppliers(name), locations(name), purchase_order_lines(*, supplies(name, unit))")
-        .eq("tenant_id", tenant.id)
-        .neq("status", "recibida")
-        .order("created_at", { ascending: false }),
+      canSeeCosts
+        ? supabase
+            .from("purchase_orders")
+            .select("*, suppliers(name), locations(name), purchase_order_lines(*, supplies(name, unit))")
+            .eq("tenant_id", tenant.id)
+            .neq("status", "recibida")
+            .order("created_at", { ascending: false })
+        : Promise.resolve({ data: [] }),
       supabase
         .from("orders")
         .select("id, title, quantity, status, location_id, product_id, products(product_supplies(quantity, supplies(name)))")
@@ -49,16 +53,16 @@ export default async function SuppliesPage({ searchParams }: { searchParams: Pro
   const mod = getIndustryModule(tenant.industry);
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
 
-  // KPIs: respetan la sede activa, igual que el resto de la app.
+  // KPIs: respetan la sede activa, igual que el resto de la app. Sin view_costs no hay unit_cost
+  // en los datos (ni siquiera se pidió a la base), así que estos quedan en 0 a propósito.
   const pageSupplies = activeLocationId ? (allSupplies ?? []).filter((s) => s.location_id === activeLocationId) : (allSupplies ?? []);
-  const inventoryValue = pageSupplies.reduce((s, r) => s + Number(r.quantity_remaining) * Number(r.unit_cost), 0);
+  const inventoryValue = canSeeCosts ? pageSupplies.reduce((s, r) => s + Number(r.quantity_remaining) * Number(r.unit_cost), 0) : 0;
   const belowReorder = pageSupplies.filter((s) => Number(s.low_stock_threshold) > 0 && Number(s.quantity_remaining) <= Number(s.low_stock_threshold));
   const outOfStockCount = belowReorder.filter((s) => Number(s.quantity_remaining) <= 0).length;
   const openPOList = (openPOs ?? []) as unknown as PurchaseOrder[];
-  const openPOAmount = openPOList.reduce(
-    (s, po) => s + (po.purchase_order_lines ?? []).reduce((ls, l) => ls + Number(l.quantity) * Number(l.unit_cost), 0),
-    0,
-  );
+  const openPOAmount = canSeeCosts
+    ? openPOList.reduce((s, po) => s + (po.purchase_order_lines ?? []).reduce((ls, l) => ls + Number(l.quantity) * Number(l.unit_cost), 0), 0)
+    : 0;
 
   // Transferencia sugerida: siempre con datos de todas las sedes, sin importar el filtro activo.
   type AllSupplyRow = { id: string; name: string; unit: string; location_id: string | null; quantity_remaining: number; unit_cost: number; low_stock_threshold: number; locations: { name: string } | null };
@@ -88,11 +92,16 @@ export default async function SuppliesPage({ searchParams }: { searchParams: Pro
   const blocked = blockedOrders(ordersWithRecipe, stockBySupplyAndLocation);
   const transferSuggestion = suggestTransfer(stock, blocked);
 
+  // Quien no puede ver costos (ej. tejedora) nunca debe recibir unit_cost/total_cost en el payload
+  // que llega al navegador, aunque la consulta ya haya traído la fila completa del servidor.
+  const visibleSupplies = ((data ?? []) as Supply[]).map((s) => (canSeeCosts ? s : { ...s, unit_cost: 0, total_cost: 0 }));
+
   return (
     <>
       <PageHeader title="Insumos" subtitle="Lo que compras en volumen y usas por partes, por sede y por lote." />
       <SuppliesView
-        supplies={(data ?? []) as Supply[]}
+        canSeeCosts={canSeeCosts}
+        supplies={visibleSupplies}
         units={mod.defaultUnits}
         examples={mod.supplyExamples}
         suppliers={(suppliers ?? []) as Supplier[]}
