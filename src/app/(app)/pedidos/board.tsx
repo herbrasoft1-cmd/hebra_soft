@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useOptimistic, useState, useTransition } from "react";
 import { ordersAtRisk } from "@/lib/analytics";
-import { IconArrowRight, IconPlus, IconTrash } from "@/components/icons";
+import { IconArrowRight, IconDots, IconPlus, IconTrash } from "@/components/icons";
 import { InvoiceButton } from "@/components/invoice-button";
 import { RemissionButton } from "@/components/remission-button";
 import { Sheet } from "@/components/sheet";
@@ -11,11 +11,13 @@ import { SubmitButton } from "@/components/submit-button";
 import { Avatar } from "@/components/ui/avatar";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { SegmentedControl } from "@/components/ui/segmented-control";
+import { Tooltip } from "@/components/ui/tooltip";
 import { dueLabel, money, whatsappLink } from "@/lib/format";
 import { canFully } from "@/lib/permissions";
 import { committedHours, dueUrgency, estimatedHours, progressPct, weeklyAvailableHours, type OrderForLoad } from "@/lib/production";
 import type { Availability, Customer, Membership, Order, OrderStatus, Role, SalesChannel, Tenant } from "@/lib/types";
 import { deleteOrder, markPaid, moveOrder, saveOrder } from "./actions";
+import { CancelOrderSheet } from "./cancel-order-sheet";
 import { CapacityView } from "./capacity-view";
 import { OrderTimerButton } from "./order-timer-button";
 
@@ -49,6 +51,7 @@ type Crew = { user_id: string; email: string };
 
 export function Board({
   orders,
+  cancelledOrders,
   customers,
   products,
   statusLabels,
@@ -63,6 +66,7 @@ export function Board({
   channels,
 }: {
   orders: Order[];
+  cancelledOrders: Order[];
   customers: Customer[];
   products: ProductOpt[];
   statusLabels: Record<OrderStatus, string>;
@@ -79,6 +83,7 @@ export function Board({
   const canIssueInvoices = canFully(role, "issue_invoices");
   const canAssign = canFully(role, "manage_orders");
   const canUseTimer = canFully(role, "use_timer");
+  const canCancel = canFully(role, "manage_orders");
   const [, startTransition] = useTransition();
   const [optimistic, setOptimistic] = useOptimistic(
     orders,
@@ -88,7 +93,7 @@ export function Board({
   const [tab, setTab] = useState<OrderStatus>("proceso");
   const [editing, setEditing] = useState<Order | "new" | null>(null);
   const [dragOver, setDragOver] = useState<OrderStatus | null>(null);
-  const [view, setView] = useState<"board" | "capacity">("board");
+  const [view, setView] = useState<"board" | "capacity" | "cancelled">("board");
   const [search, setSearch] = useState("");
   const [tejedoraFilter, setTejedoraFilter] = useState("");
   const [channelFilter, setChannelFilter] = useState("");
@@ -148,6 +153,7 @@ export function Board({
           options={[
             { value: "board" as const, label: "Tablero" },
             { value: "capacity" as const, label: "Capacidad" },
+            { value: "cancelled" as const, label: `Cancelados${cancelledOrders.length > 0 ? ` · ${cancelledOrders.length}` : ""}` },
           ]}
           value={view}
           onChange={setView}
@@ -159,6 +165,8 @@ export function Board({
 
       {view === "capacity" ? (
         <CapacityView members={crew} availability={availability} orders={loadOrders} viewerId={viewerId} canEditAny={role === "owner" || role === "admin"} />
+      ) : view === "cancelled" ? (
+        <CancelledList orders={cancelledOrders} />
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-2">
@@ -252,6 +260,8 @@ export function Board({
                 onEdit={() => setEditing(o)}
                 canIssueInvoices={canIssueInvoices}
                 canUseTimer={canUseTimer}
+                canCancel={canCancel}
+                blockedSupply={o.product_id ? outOfStockByProduct[o.product_id] : undefined}
                 product={o.product_id ? productById.get(o.product_id) : undefined}
                 loggedSeconds={loggedSecondsByOrder[o.id] ?? 0}
                 assignee={o.assigned_to ? memberById.get(o.assigned_to) : undefined}
@@ -308,6 +318,8 @@ export function Board({
                         onEdit={() => setEditing(o)}
                         canIssueInvoices={canIssueInvoices}
                         canUseTimer={canUseTimer}
+                        canCancel={canCancel}
+                        blockedSupply={o.product_id ? outOfStockByProduct[o.product_id] : undefined}
                         product={o.product_id ? productById.get(o.product_id) : undefined}
                         loggedSeconds={loggedSecondsByOrder[o.id] ?? 0}
                         assignee={o.assigned_to ? memberById.get(o.assigned_to) : undefined}
@@ -346,6 +358,8 @@ function OrderCard({
   onEdit,
   canIssueInvoices,
   canUseTimer,
+  canCancel,
+  blockedSupply,
   product,
   loggedSeconds,
   assignee,
@@ -356,22 +370,34 @@ function OrderCard({
   onEdit: () => void;
   canIssueInvoices: boolean;
   canUseTimer: boolean;
+  canCancel: boolean;
+  blockedSupply?: string;
   product?: ProductOpt;
   loggedSeconds: number;
   assignee?: Membership;
   compact?: boolean;
 }) {
+  const [showMore, setShowMore] = useState(false);
+  const [showCancel, setShowCancel] = useState(false);
   const next = STATUSES[STATUSES.indexOf(o.status) + 1];
   const wa = whatsappLink(o.customers?.whatsapp, `Hola ${o.customers?.name ?? ""}, te escribo por tu pedido: ${o.title}`);
   const urgency = dueUrgency(o.due_date, o.status, new Date());
   const estHours = product ? estimatedHours(product.labor_seconds, o.quantity) : 0;
   const pct = estHours > 0 ? progressPct(loggedSeconds, estHours) : null;
+  const hasOverflow = Boolean(wa) || (canIssueInvoices && (o.status === "calidad" || o.status === "enviado"));
 
   return (
     <article className="card flex flex-col gap-3 p-4 transition-all">
       <div className="flex items-center justify-between gap-2">
         <span className="font-mono text-[11px] text-muted">#{o.id.slice(0, 6).toUpperCase()}</span>
-        <span className={`chip shrink-0 ${DUE_TONE[urgency]}`}>{o.status === "enviado" ? "Entregado" : dueLabel(o.due_date)}</span>
+        <div className="flex shrink-0 gap-1.5">
+          {blockedSupply && (
+            <Tooltip label={`Falta: ${blockedSupply}`} side="top">
+              <span className="chip bg-danger-soft text-danger-ink">Bloqueado</span>
+            </Tooltip>
+          )}
+          <span className={`chip ${DUE_TONE[urgency]}`}>{o.status === "enviado" ? "Entregado" : dueLabel(o.due_date)}</span>
+        </div>
       </div>
       <button onClick={onEdit} className="flex flex-col gap-0.5 text-left">
         <span className="text-[15px] font-semibold">
@@ -418,16 +444,20 @@ function OrderCard({
         <Link href={`/pedidos/${o.id}`} className="btn-ghost min-h-11 flex-1 px-3 text-sm">
           Detalle
         </Link>
-        {wa && (
-          <a href={wa} target="_blank" rel="noreferrer" className="btn-ghost min-h-11 flex-1 px-3 text-sm">
-            WhatsApp
-          </a>
+        {hasOverflow && (
+          <button
+            type="button"
+            onClick={() => setShowMore(true)}
+            aria-label="Más acciones"
+            className="btn-ghost min-h-11 px-3 text-sm"
+          >
+            <IconDots size={16} />
+          </button>
         )}
-        {canIssueInvoices && (o.status === "calidad" || o.status === "enviado") && (
-          <RemissionButton orderId={o.id} className="btn-ghost min-h-11 flex-1 px-3 text-sm" />
-        )}
-        {canIssueInvoices && (o.status === "calidad" || o.status === "enviado") && (
-          <InvoiceButton orderId={o.id} className="btn-ghost min-h-11 flex-1 px-3 text-sm" />
+        {canCancel && o.status !== "enviado" && (
+          <button type="button" onClick={() => setShowCancel(true)} className="btn-ghost min-h-11 px-3 text-sm text-primary-hover">
+            Cancelar
+          </button>
         )}
         {next && (
           <button onClick={() => onMove(o.id, next)} className="btn-sage min-h-11 flex-[1.4] px-3 text-sm">
@@ -435,7 +465,53 @@ function OrderCard({
           </button>
         )}
       </div>
+
+      {hasOverflow && (
+        <Sheet open={showMore} onClose={() => setShowMore(false)} title="Más acciones">
+          <div className="flex flex-col gap-2">
+            {wa && (
+              <a href={wa} target="_blank" rel="noreferrer" className="btn-ghost min-h-11 w-full text-sm">
+                WhatsApp
+              </a>
+            )}
+            {canIssueInvoices && (o.status === "calidad" || o.status === "enviado") && (
+              <RemissionButton orderId={o.id} className="btn-ghost min-h-11 w-full text-sm" />
+            )}
+            {canIssueInvoices && (o.status === "calidad" || o.status === "enviado") && (
+              <InvoiceButton orderId={o.id} className="btn-ghost min-h-11 w-full text-sm" />
+            )}
+          </div>
+        </Sheet>
+      )}
+      {canCancel && <CancelOrderSheet orderId={o.id} orderTitle={o.title} open={showCancel} onClose={() => setShowCancel(false)} />}
     </article>
+  );
+}
+
+function CancelledList({ orders }: { orders: Order[] }) {
+  if (orders.length === 0) {
+    return <p className="card p-7 text-center text-sm text-muted">No hay pedidos cancelados.</p>;
+  }
+  return (
+    <ul className="card flex flex-col overflow-hidden">
+      {orders.map((o) => (
+        <li key={o.id} className="flex flex-col gap-1 border-b border-border px-4 py-3.5 last:border-0">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[15px] font-medium">
+              {o.title}
+              {o.quantity > 1 ? ` x${o.quantity}` : ""}
+            </span>
+            <span className="text-xs text-muted">{o.cancelled_at ? new Date(o.cancelled_at).toLocaleDateString("es-CO") : ""}</span>
+          </div>
+          <div className="flex items-center justify-between gap-2 text-xs text-ink-2">
+            <span className="truncate">{o.customers?.name ?? "Sin cliente"}{o.cancel_reason ? ` · ${o.cancel_reason}` : ""}</span>
+            <span className="shrink-0 tabular-nums">
+              {o.refund_amount && o.refund_amount > 0 ? `Devuelto: ${money(o.refund_amount)}` : "Sin devolución"}
+            </span>
+          </div>
+        </li>
+      ))}
+    </ul>
   );
 }
 

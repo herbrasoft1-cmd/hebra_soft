@@ -10,6 +10,7 @@ import { getSession } from "@/lib/tenant";
 import type { Membership, OrderStatus } from "@/lib/types";
 import { getIndustryModule } from "@/modules";
 import { moveOrder } from "../actions";
+import { CancelOrderTrigger } from "./cancel-order-trigger";
 import { OrderTimeline } from "./order-timeline";
 import { PaymentCard } from "./payment-card";
 import { ShareTrackingButton } from "./share-tracking-button";
@@ -94,9 +95,19 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         {order.details && <p className="text-sm text-ink-2">{order.details}</p>}
       </div>
 
-      <OrderTimeline status={order.status} statusLabels={mod.statusLabels} />
+      {order.cancelled_at ? (
+        <div className="flex flex-col gap-1 rounded-2xl bg-surface-muted p-4">
+          <p className="text-sm font-semibold text-ink">Pedido cancelado</p>
+          <p className="text-sm text-ink-2">{new Date(order.cancelled_at).toLocaleDateString("es-CO")}{order.cancel_reason ? ` · ${order.cancel_reason}` : ""}</p>
+          {order.refund_amount != null && order.refund_amount > 0 && (
+            <p className="text-sm text-ink-2">Se devolvió {money(order.refund_amount)}.</p>
+          )}
+        </div>
+      ) : (
+        <OrderTimeline status={order.status} statusLabels={mod.statusLabels} />
+      )}
 
-      {risk.length > 0 && (
+      {risk.length > 0 && !order.cancelled_at && (
         <div className="flex flex-col gap-1 rounded-2xl bg-danger-soft p-4">
           {risk.map((r, i) => (
             <p key={i} className="text-sm text-danger-ink">
@@ -166,10 +177,13 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
       <div className="flex flex-col gap-2.5">
         <ShareTrackingButton token={order.tracking_token} />
-        {canAssign && next && (
+        {canAssign && next && !order.cancelled_at && (
           <form action={async () => { "use server"; await moveOrder(order.id, next); }}>
             <button className="btn-primary w-full">Pasar a {mod.statusLabels[next].toLowerCase()}</button>
           </form>
+        )}
+        {canAssign && order.status !== "enviado" && !order.cancelled_at && (
+          <CancelOrderTrigger orderId={order.id} orderTitle={order.title} />
         )}
       </div>
     </div>

@@ -691,4 +691,51 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     la prueba de logout de la tanda anterior — se detectó por screenshots idénticos (misma pantalla
     de login repetida) y se resolvió decodificando el JWT de la cookie vieja para recuperar el correo
     y volver a iniciar sesión, guardando un `storageState` fresco.
+
+- **Continuación: cancelación de pedidos con devolución justa, "Bloqueado" en el tablero y menú "⋯"
+  en la tarjeta (mismo día).** El usuario comparó el mockup de Producción contra el Kanban real y
+  encontró 3 brechas, pedidas en orden de más a menos complejas: no había forma de cancelar un
+  pedido con devolución real (`deleteOrder` solo borraba, sin registrar nada en Caja); el mockup
+  muestra un badge "Bloqueado" para pedidos sin insumos, ausente del tablero real; y la tarjeta real
+  acumuló hasta 6 botones (más alta que el mockup). Sobre la devolución, el usuario fue explícito:
+  reembolso automático pero **justo** — si ya hay tiempo real de trabajo registrado, ese tiempo no se
+  devuelve, porque ya es esfuerzo de quien teje.
+  - **Migración `0015`** (sin tocar el enum `order_status` — ya documentado el riesgo de `ALTER TYPE
+    ... ADD VALUE` en la misma transacción que su uso): `orders.cancelled_at`/`cancel_reason`/
+    `refund_amount`, nullable, ortogonales al estado. RPC `cancel_order` (`security definer`, mismo
+    patrón que `mark_order_paid`/`reserve_invoice_number`): chequeo inline de rol (owner/admin/
+    ventas), rechaza pedidos ya `enviado` o ya cancelados, valida `0 ≤ monto ≤ pagado` en el
+    servidor, y si el monto es mayor a 0 inserta una `transactions` nueva (`gasto`, categoría
+    "Devolución") — la venta original nunca se borra ni se edita, queda el historial completo.
+  - **Devolución justa, basada en datos reales:** `suggestedRefund()` en `src/lib/finance.ts` —
+    `máx(0, total pagado − costo real de las horas ya logueadas)`, usando `timer_sessions` del pedido
+    y `laborCost()` (ya existía). No se descuenta un estimado de materiales (HEBRA no rastrea consumo
+    parcial, así que inventar ese número sería adivinar). El monto queda editable antes de confirmar.
+    Bug encontrado y corregido en la propia verificación: sin redondear, el campo mostraba
+    `29986.666666666668` en vez de un peso entero — se envolvió el resultado en `Math.round()`.
+  - **"Bloqueado" en el tablero:** sin consultas nuevas — reutiliza `outOfStockByProduct`, que
+    `pedidos/page.tsx` ya calculaba para el filtro "En riesgo" y nunca se pintaba en la tarjeta. Chip
+    `danger` junto al badge de fecha, con `Tooltip` (ya existía) mostrando el insumo agotado.
+  - **Tarjeta reorganizada:** quedan siempre visibles Cronómetro (si aplica), "Detalle", "Cancelar"
+    (si no está cancelado y el estado no es enviado) y "Avanzar estado"; WhatsApp/Remisión/Factura se
+    agruparon detrás de un botón "⋯" que abre una hoja — mismo patrón del "Más" del `BottomNav`.
+  - **Pestaña nueva "Cancelados"** en el tablero (mismo patrón del toggle Tablero/Capacidad): lista
+    de solo lectura con motivo, fecha y monto devuelto. El tablero activo excluye
+    `cancelled_at is not null` en la consulta principal.
+  - **Fuera de esta fase, a propósito:** cancelar un pedido ya `enviado` (requeriría inventario de
+    producto terminado, que HEBRA no tiene); descuento automático de materiales en la devolución (sin
+    dato real de consumo parcial que lo respalde); penalidades configurables (el monto editable a
+    mano cubre ese caso).
+  - **Verificado de punta a punta con datos reales:** un pedido sin tiempo logueado sugirió devolución
+    del 100% (`$60.000`, caso probado desde `/pedidos/[id]` con la cuenta `ventas`); un pedido con
+    ~4 segundos de cronómetro real vinculado sugirió `$29.987` sobre `$30.000` pagados (el descuento
+    exacto de esa mano de obra); al confirmar, apareció la `transactions` "Devolución" en Caja
+    (`−$29.987`, Balance recalculado a `$55.013`), el pedido salió del tablero activo y apareció en
+    "Cancelados · 1" con motivo y fecha correctos; `ventas` ve el botón "Cancelar" en cada tarjeta,
+    `tejedora` no. El badge "Bloqueado" se verificó por código (línea por línea en `board.tsx` y
+    `pedidos/page.tsx`) — no se forzó un insumo a cero en los datos de prueba porque la única forma de
+    lograrlo es enviar un pedido real a `'enviado'`, acción irreversible que habría alterado el
+    inventario de prueba solo para ver un chip condicional ya probado en el mismo componente
+    (`Tooltip`) y con el mismo dato (`outOfStockByProduct`) para el filtro "En riesgo".
+  - `npm run lint`/`test` (78/78, +4 nuevas de `suggestedRefund`)/`build` pasan limpio.
   - `npm run lint`/`test` (74/74)/`build` pasan limpio.

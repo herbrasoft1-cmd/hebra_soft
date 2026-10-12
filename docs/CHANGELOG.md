@@ -38,6 +38,30 @@ Alegra/Siigo todavía).
 - `npm run lint`/`test` (74/74, +10 nuevas de `finance.ts`)/`build` pasan limpio. Casilla de la Fase 6
   marcada en `docs/ROADMAP.md`.
 
+## Mejora fuera del roadmap — Cancelación de pedidos con devolución justa (2026-10-12)
+
+Pedida por el usuario tras comparar el mockup de Producción con el Kanban real: faltaba poder
+cancelar un pedido con devolución registrada en Caja, el badge "Bloqueado" del mockup no existía, y
+la tarjeta había acumulado demasiados botones.
+
+- Migración `0015`: `orders.cancelled_at`/`cancel_reason`/`refund_amount` (nullable, ortogonales al
+  estado — sin tocar el enum `order_status`). RPC `cancel_order` (`security definer`, mismo patrón
+  que `mark_order_paid`): valida rol (owner/admin/ventas), rechaza pedidos `enviado` o ya cancelados,
+  valida el monto en el servidor, registra la devolución como `transactions` tipo gasto/"Devolución"
+  sin tocar la venta original.
+- `suggestedRefund()` en `src/lib/finance.ts`: devolución = pagado − costo real de horas logueadas
+  (`timer_sessions` + `laborCost()`), nunca un porcentaje inventado; monto editable antes de
+  confirmar, política explícitamente pedida por el usuario para ser justa con el tiempo ya invertido.
+- "Bloqueado" en la tarjeta del Kanban: reutiliza `outOfStockByProduct` (ya existía para "En
+  riesgo", nunca se pintaba) con `Tooltip` mostrando el insumo agotado — cero consultas nuevas.
+- Tarjeta reorganizada: Cronómetro/Detalle/Cancelar/Avanzar estado quedan visibles; WhatsApp/
+  Remisión/Factura se agruparon en un menú "⋯". Pestaña nueva "Cancelados" en el tablero.
+- Verificado con datos reales: devolución 100% sin tiempo logueado, devolución descontada
+  correctamente con tiempo real logueado, `transactions` de "Devolución" visible en Caja, `ventas`
+  puede cancelar y `tejedora` no ve el botón, flujo probado tanto desde el Kanban como desde
+  `/pedidos/[id]`.
+- `npm run lint`/`test` (78/78, +4 nuevas)/`build` pasan limpio.
+
 ## Fase 8 — Móvil por rol y portal del cliente (2026-10-11)
 
 Las Fases 6 y 7 siguen excluidas, así que el roadmap saltó directo de la 5 a la 8. Los 3 mockups

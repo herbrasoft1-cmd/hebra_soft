@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
+import { suggestedRefund } from "@/lib/finance";
 import { getActiveLocationId } from "@/lib/location";
 import { canFully } from "@/lib/permissions";
 import { getSession } from "@/lib/tenant";
@@ -114,6 +115,38 @@ export async function assignOrder(orderId: string, userId: string | null) {
 /** La sugerencia de reparto de la vista Capacidad: mismo camino que asignar a mano. */
 export async function applySuggestion(orderId: string, userId: string) {
   await assignOrder(orderId, userId);
+}
+
+/** Lo que necesita la hoja de cancelar antes de confirmar: pagado real, horas reales tejidas,
+ * y la devolución justa calculada (editable por quien cancela). */
+export async function getCancelPreview(
+  orderId: string,
+): Promise<{ totalPaid: number; loggedSeconds: number; hourlyRate: number; suggested: number; error?: string }> {
+  const { supabase, tenant } = await getSession();
+  const [{ data: order }, { data: balance }, { data: sessions }] = await Promise.all([
+    supabase.from("orders").select("price, quantity").eq("id", orderId).eq("tenant_id", tenant.id).maybeSingle(),
+    supabase.rpc("get_order_balance", { p_order_id: orderId }),
+    supabase.from("timer_sessions").select("seconds").eq("tenant_id", tenant.id).eq("order_id", orderId),
+  ]);
+  const hourlyRate = Number(tenant.hourly_rate);
+  if (!order) return { totalPaid: 0, loggedSeconds: 0, hourlyRate, suggested: 0, error: "Pedido no encontrado." };
+
+  const total = Number(order.price) * order.quantity;
+  const totalPaid = Math.max(0, total - Number(balance ?? total));
+  const loggedSeconds = (sessions ?? []).reduce((s, r) => s + Number(r.seconds), 0);
+  return { totalPaid, loggedSeconds, hourlyRate, suggested: suggestedRefund(totalPaid, loggedSeconds, hourlyRate) };
+}
+
+/** Cancela el pedido (no aplica a enviados) y registra la devolución justa en Caja, si aplica. */
+export async function cancelOrder(orderId: string, reason: string, refundAmount: number): Promise<{ error?: string }> {
+  const { supabase, role } = await getSession();
+  if (!canFully(role, "manage_orders")) return { error: "No tienes permiso para cancelar pedidos." };
+  const { error } = await supabase.rpc("cancel_order", { p_order_id: orderId, p_reason: reason, p_refund_amount: refundAmount });
+  if (error) return { error: error.message };
+  revalidate();
+  revalidatePath("/caja");
+  revalidatePath("/finanzas");
+  return {};
 }
 
 /** Cada quien edita su propia disponibilidad; Propietaria/Administración, cualquiera (RLS lo refuerza). */

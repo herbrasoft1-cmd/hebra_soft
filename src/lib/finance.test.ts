@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { channelCommission, incomeStatement, receivableAging } from "./finance";
+import { channelCommission, incomeStatement, receivableAging, suggestedRefund } from "./finance";
 
 describe("receivableAging", () => {
   const today = new Date("2026-10-11T00:00:00Z");
@@ -68,5 +68,24 @@ describe("channelCommission", () => {
 
   it("sin canal, comisión 0", () => {
     expect(channelCommission(90000, 1, null)).toBe(0);
+  });
+});
+
+describe("suggestedRefund", () => {
+  it("sin tiempo logueado, se devuelve el 100%", () => {
+    expect(suggestedRefund(92500, 0, 12000)).toBe(92500);
+  });
+
+  it("resta el costo real de las horas ya tejidas", () => {
+    // 2 horas a $12.000/h = $24.000 de mano de obra ya invertida
+    expect(suggestedRefund(92500, 7200, 12000)).toBe(92500 - 24000);
+  });
+
+  it("nunca es negativo aunque el trabajo valga más de lo pagado", () => {
+    expect(suggestedRefund(10000, 36000, 12000)).toBe(0);
+  });
+
+  it("sin pago registrado, no hay nada que devolver", () => {
+    expect(suggestedRefund(0, 3600, 12000)).toBe(0);
   });
 });

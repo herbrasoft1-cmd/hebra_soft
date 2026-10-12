@@ -2,6 +2,7 @@
  * Cálculos de Finanzas (Fase 6): funciones puras, sin dependencias de
  * Supabase, para poder probarlas con Vitest.
  */
+import { laborCost } from "./costing";
 
 export type AgingBucket = "0-15" | "16-30" | "31-60" | "60+";
 export const AGING_BUCKETS: AgingBucket[] = ["0-15", "16-30", "31-60", "60+"];
@@ -51,4 +52,12 @@ export type ChannelRate = { commission_pct: number; fixed_fee: number } | null;
 export function channelCommission(price: number, quantity: number, channel: ChannelRate): number {
   if (!channel) return 0;
   return (price * quantity * channel.commission_pct) / 100 + channel.fixed_fee;
+}
+
+/** Devolución justa al cancelar un pedido: todo lo pagado, menos el costo real de las horas ya
+ * tejidas (no un porcentaje inventado — el tiempo real logueado con el cronómetro). Redondeado a
+ * pesos enteros: nadie paga ni devuelve fracciones de peso. */
+export function suggestedRefund(totalPaid: number, laborLoggedSeconds: number, hourlyRate: number): number {
+  const alreadyEarned = laborCost(laborLoggedSeconds, hourlyRate);
+  return Math.max(0, Math.round(totalPaid - alreadyEarned));
 }

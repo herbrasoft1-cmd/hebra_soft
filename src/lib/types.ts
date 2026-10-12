@@ -134,6 +134,9 @@ export type Order = {
   assigned_to: string | null;
   tracking_token: string | null;
   progress_photo_url: string | null;
+  cancelled_at: string | null;
+  cancel_reason: string | null;
+  refund_amount: number | null;
   customers?: Pick<Customer, "name" | "whatsapp" | "instagram" | "address"> | null;
 };
 

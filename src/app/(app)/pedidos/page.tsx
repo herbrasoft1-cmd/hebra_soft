@@ -21,14 +21,25 @@ export default async function OrdersPage() {
     .from("orders")
     .select("*, customers(name, whatsapp, instagram, address)")
     .eq("tenant_id", tenant.id)
+    .is("cancelled_at", null)
     .or(`status.neq.enviado,updated_at.gte.${cutoff}`);
   if (activeLocationId) ordersQuery = ordersQuery.eq("location_id", activeLocationId);
   // Tejedora: solo sus pedidos asignados + los que nadie ha tomado todavía.
   if (can(role, "manage_orders") === "own") ordersQuery = ordersQuery.or(`assigned_to.eq.${user.id},assigned_to.is.null`);
 
-  const [{ data: orders }, { data: customers }, { data: products }, { data: members }, { data: availability }, { data: channels }] =
+  let cancelledQuery = supabase
+    .from("orders")
+    .select("*, customers(name, whatsapp, instagram, address)")
+    .eq("tenant_id", tenant.id)
+    .not("cancelled_at", "is", null)
+    .order("cancelled_at", { ascending: false })
+    .limit(50);
+  if (activeLocationId) cancelledQuery = cancelledQuery.eq("location_id", activeLocationId);
+
+  const [{ data: orders }, { data: cancelledOrders }, { data: customers }, { data: products }, { data: members }, { data: availability }, { data: channels }] =
     await Promise.all([
       ordersQuery.order("due_date", { ascending: true, nullsFirst: false }).limit(300),
+      cancelledQuery,
       supabase.from("customers").select("*").eq("tenant_id", tenant.id).order("name").limit(300),
       supabase
         .from("products")
@@ -68,6 +79,7 @@ export default async function OrdersPage() {
       <PageHeader title="Pedidos" subtitle={`${active} pedido${active === 1 ? "" : "s"} activo${active === 1 ? "" : "s"}`} />
       <Board
         orders={list}
+        cancelledOrders={(cancelledOrders ?? []) as Order[]}
         customers={(customers ?? []) as Customer[]}
         products={productRows.map((p) => ({ id: p.id, name: p.name, sale_price: p.sale_price, labor_seconds: p.labor_seconds }))}
         statusLabels={mod.statusLabels}
