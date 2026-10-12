@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ComponentType } from "react";
 import { RevenueProfitChart, Sparkline } from "@/components/charts";
-import { IconAgujas, IconHebra, IconOvillo, IconTrendUp, IconWallet } from "@/components/icons";
+import { IconHebra, IconOvillo, IconTrendUp, IconWallet } from "@/components/icons";
 import { AlertRow } from "@/components/ui/alert-row";
 import { Avatar } from "@/components/ui/avatar";
 import { type Column, DataTable } from "@/components/ui/data-table";
@@ -113,26 +113,17 @@ async function SimpleHome({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1.5">
-          <span className="text-sm text-muted">{todayLong()}</span>
-          <h1 className="font-display text-[30px] leading-tight md:text-[36px]">
-            {greeting}
-            {firstName ? `, ${firstName}` : ""}
-          </h1>
-          <p className="text-[15px] text-ink-2">
-            {dueThisWeek > 0
-              ? `Tienes ${dueThisWeek} pedido${dueThisWeek === 1 ? "" : "s"} por entregar esta semana.`
-              : "No tienes entregas urgentes esta semana."}
-          </p>
-        </div>
-        <Link
-          href="/configuracion"
-          aria-label="Configuración"
-          className="icon-btn size-11 shrink-0 border border-border bg-surface md:hidden"
-        >
-          <IconAgujas size={22} />
-        </Link>
+      <div className="flex flex-col gap-1.5">
+        <span className="text-sm text-muted">{todayLong()}</span>
+        <h1 className="font-display text-[30px] leading-tight md:text-[36px]">
+          {greeting}
+          {firstName ? `, ${firstName}` : ""}
+        </h1>
+        <p className="text-[15px] text-ink-2">
+          {dueThisWeek > 0
+            ? `Tienes ${dueThisWeek} pedido${dueThisWeek === 1 ? "" : "s"} por entregar esta semana.`
+            : "No tienes entregas urgentes esta semana."}
+        </p>
       </div>
 
       <HomeActions lastProduct={lastProduct} openSale={accion === "venta"} timerVerb={mod.timer.label} />

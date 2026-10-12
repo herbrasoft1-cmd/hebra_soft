@@ -6,6 +6,7 @@ import { InstallPrompt, OfflineBanner } from "@/components/pwa";
 import { FloatingTimer, TimerProvider } from "@/components/timer";
 import { getActiveLocationId } from "@/lib/location";
 import { getSession } from "@/lib/tenant";
+import { ROLE_LABEL } from "@/lib/roles";
 import { getIndustryModule } from "@/modules";
 import { setActiveLocation } from "./location-actions";
 
@@ -33,6 +34,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           industryLabel={mod.name}
           recipeLabel={mod.recipe.menuLabel}
           role={role}
+          userId={user.id}
           userName={userName}
           activeOrders={count ?? 0}
         />
@@ -44,6 +46,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             locations={locations ?? []}
             activeLocationId={activeLocationId}
             onSetLocation={setActiveLocation}
+            userId={user.id}
+            userName={userName}
+            roleLabel={ROLE_LABEL[role]}
           />
           <OfflineBanner />
           <main className="mx-auto w-full max-w-6xl flex-1 px-5 pt-5 pb-40 md:px-8 md:pb-10">{children}</main>

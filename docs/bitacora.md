@@ -610,3 +610,41 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     manualmente solo la primera letra en JS.
   - `npm run lint`/`test` (74/74, +10 nuevas de `finance.ts`)/`build` pasan limpio. Casilla de la Fase
     6 marcada en `docs/ROADMAP.md`, entrada en `docs/CHANGELOG.md`.
+
+- **Mejora fuera del roadmap: cuenta de usuario, sidebar y ayuda por rol (mismo día).** El usuario
+  preguntó cómo se edita el nombre que aparece en el sidebar; investigar la respuesta destapó un gap
+  real: `LogoutButton` solo vivía dentro de `/configuracion`, bloqueada para `ventas`/`tejedora` — esos
+  dos roles **no tenían ninguna forma de cerrar sesión**, ni en escritorio ni en celular (el `TopBar`
+  con el selector de sede también está oculto en celular, `hidden md:flex`, así que no había ningún
+  punto de acceso a la cuenta fuera del sidebar de escritorio).
+  - **`AccountMenu`** (`src/components/account-menu.tsx`, nuevo): hoja con avatar, formulario para
+    editar el propio nombre (`src/app/(app)/account-actions.ts`, `supabase.auth.updateUser`), link a
+    "Ayuda" y `LogoutButton` — accesible para cualquier rol. Se monta en dos sitios: el bloque de
+    usuario del sidebar de escritorio (`AppSidebar`) y un botón flotante nuevo arriba a la derecha en
+    celular (`TopBar`, que antes era 100% `hidden md:flex` — ahora el botón de cuenta vive fuera de
+    ese bloque, visible siempre).
+  - **Bug encontrado y corregido en el mismo cambio:** el ícono de engranaje que ya existía en el
+    encabezado móvil de Inicio (`SimpleHome` y `ShiftHome`) enlazaba a `/configuracion` — roto para
+    ventas/tejedora (redirige a Inicio) y ahora además quedaba tapado/duplicado por el nuevo botón de
+    cuenta. Se quitó de ambos archivos.
+  - **Etiqueta de rol más neutra:** "Propietaria" (femenino fijo, igual que el mockup, que asume una
+    dueña mujer) se cambió a "Titular" en `src/lib/roles.ts` — el usuario pidió explícitamente que no
+    asumiera el género del dueño del negocio.
+  - **`Tooltip`** (`src/components/ui/tooltip.tsx`, nuevo): CSS puro, sin JS, con foco de teclado
+    además de hover. Conectado al botón de cuenta (sidebar y celular) y a la campana de notificaciones
+    del `TopBar`; queda disponible para reutilizar en otros controles de solo ícono.
+  - **Sidebar más pulido:** indicador de ítem activo (barra de color a la izquierda, antes solo el
+    fondo cambiaba), el círculo de usuario pasó de iniciales planas a reutilizar el componente
+    `Avatar` compartido (mismo color por persona en toda la app), nuevo ítem "Ayuda" visible para
+    todos los roles (no solo administración).
+  - **`/ayuda`** (nuevo, dentro de `(app)` pero sin gatear por `view_finance`): guía por rol con
+    secciones plegables (`<details>`), contenido real y específico de las pantallas que cada rol
+    puede ver — no un texto genérico. Tejedora ve "Tu cuenta" + "Mi turno"; Ventas ve "Tu cuenta" +
+    "Pedidos" + "Clientes"; Administración/Titular ve las 9 secciones completas.
+  - **Verificado de punta a punta con las 3 cuentas de rol:** se cambió el nombre del propietario de
+    "QA Visual" a "Ana Owner QA" y se confirmó que se propaga al saludo y al sidebar tras recargar
+    (persistido de verdad en Supabase Auth, no solo en el estado del cliente); se cerró sesión desde
+    la cuenta tejedora y terminó en `/login` — antes era imposible; `/ayuda` mostró el contenido
+    correcto para cada uno de los 3 roles probados; el tooltip de la campana apareció correctamente
+    al pasar el mouse.
+  - `npm run lint`/`test` (74/74)/`build` pasan limpio.

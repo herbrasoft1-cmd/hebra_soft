@@ -1,7 +1,10 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { AccountMenu } from "@/components/account-menu";
 import { IconBell } from "@/components/icons";
+import { Avatar } from "@/components/ui/avatar";
+import { Tooltip } from "@/components/ui/tooltip";
 
 type LocationOpt = { id: string; name: string };
 
@@ -29,51 +32,72 @@ export function TopBar({
   locations,
   activeLocationId,
   onSetLocation,
+  userId,
+  userName,
+  roleLabel,
 }: {
   businessName: string;
   recipeLabel: string;
   locations: LocationOpt[];
   activeLocationId: string | null;
   onSetLocation: (formData: FormData) => void;
+  userId: string;
+  userName: string;
+  roleLabel: string;
 }) {
   const path = usePathname();
   const label = currentLabel(path, recipeLabel);
 
   return (
-    <div className="hidden min-h-12 items-center justify-between border-b border-border px-8 pt-5 md:flex">
-      <nav aria-label="Ubicación" className="flex items-center gap-1.5 text-[13px] text-muted">
-        <span>{businessName}</span>
-        {label && (
-          <>
-            <span aria-hidden="true">/</span>
-            <span className="font-medium text-ink-2">{label}</span>
-          </>
-        )}
-      </nav>
-      <div className="flex items-center gap-2 pb-3">
-        {locations.length > 0 && (
-          <form action={onSetLocation}>
-            <select
-              key={activeLocationId ?? "todas"}
-              name="location_id"
-              defaultValue={activeLocationId ?? ""}
-              onChange={(e) => e.currentTarget.form?.requestSubmit()}
-              aria-label="Sede"
-              className="min-h-9 rounded-lg border border-border-strong bg-surface px-2.5 text-[13px]"
-            >
-              <option value="">Todas las sedes</option>
-              {locations.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.name}
-                </option>
-              ))}
-            </select>
-          </form>
-        )}
-        <button type="button" aria-label="Notificaciones" className="icon-btn size-[38px] border border-border-strong bg-surface">
-          <IconBell size={15} />
-        </button>
+    <>
+      {/* Celular: sin barra lateral visible, así que la cuenta vive en un botón flotante. */}
+      <div className="fixed top-[calc(env(safe-area-inset-top)+12px)] right-4 z-30 md:hidden">
+        <Tooltip label="Mi cuenta" side="bottom">
+          <AccountMenu userId={userId} userName={userName} roleLabel={roleLabel}>
+            <span className="block rounded-full ring-2 ring-surface">
+              <Avatar id={userId} name={userName} size={34} />
+            </span>
+          </AccountMenu>
+        </Tooltip>
       </div>
-    </div>
+
+      <div className="hidden min-h-12 items-center justify-between border-b border-border px-8 pt-5 md:flex">
+        <nav aria-label="Ubicación" className="flex items-center gap-1.5 text-[13px] text-muted">
+          <span>{businessName}</span>
+          {label && (
+            <>
+              <span aria-hidden="true">/</span>
+              <span className="font-medium text-ink-2">{label}</span>
+            </>
+          )}
+        </nav>
+        <div className="flex items-center gap-2 pb-3">
+          {locations.length > 0 && (
+            <form action={onSetLocation}>
+              <select
+                key={activeLocationId ?? "todas"}
+                name="location_id"
+                defaultValue={activeLocationId ?? ""}
+                onChange={(e) => e.currentTarget.form?.requestSubmit()}
+                aria-label="Sede"
+                className="min-h-9 rounded-lg border border-border-strong bg-surface px-2.5 text-[13px]"
+              >
+                <option value="">Todas las sedes</option>
+                {locations.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.name}
+                  </option>
+                ))}
+              </select>
+            </form>
+          )}
+          <Tooltip label="Notificaciones" side="bottom">
+            <button type="button" aria-label="Notificaciones" className="icon-btn size-[38px] border border-border-strong bg-surface">
+              <IconBell size={15} />
+            </button>
+          </Tooltip>
+        </div>
+      </div>
+    </>
   );
 }

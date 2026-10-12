@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
+import { AccountMenu } from "@/components/account-menu";
 import {
   IconAgujas,
   IconCaja,
   IconChart,
   IconClientes,
   IconHebra,
+  IconHelp,
   IconInicio,
   IconOvillo,
   IconRecetario,
@@ -18,6 +20,8 @@ import { MiniTimer } from "@/components/timer";
 import { canFully } from "@/lib/permissions";
 import { ROLE_LABEL } from "@/lib/roles";
 import type { Role } from "@/lib/types";
+import { Avatar } from "@/components/ui/avatar";
+import { Tooltip } from "@/components/ui/tooltip";
 
 type Item = {
   href: string;
@@ -39,6 +43,7 @@ function useItems(recipeLabel: string, role: Role, activeOrders: number): Item[]
     { href: "/finanzas", label: "Finanzas", icon: IconWallet, group: "NEGOCIO", adminOnly: true },
     { href: "/analitica", label: "Analítica", icon: IconChart, group: "NEGOCIO", adminOnly: true },
     { href: "/configuracion", label: "Configuración", icon: IconAgujas, group: "NEGOCIO", adminOnly: true },
+    { href: "/ayuda", label: "Ayuda", icon: IconHelp, group: "NEGOCIO" },
   ];
   return items.filter((it) => !it.adminOnly || canFully(role, "view_finance"));
 }
@@ -52,6 +57,7 @@ export function AppSidebar({
   industryLabel,
   recipeLabel,
   role,
+  userId,
   userName,
   activeOrders,
 }: {
@@ -59,6 +65,7 @@ export function AppSidebar({
   industryLabel: string;
   recipeLabel: string;
   role: Role;
+  userId: string;
   userName: string;
   activeOrders: number;
 }) {
@@ -108,10 +115,11 @@ export function AppSidebar({
                     key={it.href}
                     href={it.href}
                     aria-current={active ? "page" : undefined}
-                    className={`flex min-h-10 items-center gap-3 rounded-[10px] px-3 text-[14px] transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/40 ${
+                    className={`relative flex min-h-10 items-center gap-3 rounded-[10px] px-3 text-[14px] transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/40 ${
                       active ? "bg-sidebar-active font-semibold text-sidebar-text-active" : "text-sidebar-text-2 hover:bg-sidebar-active/60"
                     }`}
                   >
+                    {active && <span aria-hidden="true" className="absolute top-1.5 bottom-1.5 left-0 w-[3px] rounded-full bg-sidebar-icon-active" />}
                     <Icon size={18} />
                     <span className="flex-1 truncate" style={active ? { color: "var(--color-sidebar-text-active)" } : undefined}>
                       {it.label}
@@ -128,15 +136,17 @@ export function AppSidebar({
 
       <div className="mt-auto flex flex-col gap-3">
         <MiniTimer />
-        <div className="flex items-center gap-2.5 border-t border-sidebar-border px-1 pt-3">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-raised text-[12px] font-semibold text-sidebar-text">
-            {userName.slice(0, 2).toUpperCase()}
-          </span>
-          <span className="flex min-w-0 flex-col">
-            <span className="truncate text-[13px] font-medium text-sidebar-text">{userName}</span>
-            <span className="truncate text-[12px] text-sidebar-muted">{ROLE_LABEL[role]}</span>
-          </span>
-        </div>
+        <Tooltip label="Editar perfil, ayuda y cerrar sesión" side="top" full>
+          <AccountMenu userId={userId} userName={userName} roleLabel={ROLE_LABEL[role]}>
+            <div className="flex w-full items-center gap-2.5 rounded-[10px] border-t border-sidebar-border px-1.5 pt-3 pb-0.5 transition-colors hover:bg-sidebar-active/60">
+              <Avatar id={userId} name={userName} size={32} />
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-[13px] font-medium text-sidebar-text">{userName}</span>
+                <span className="truncate text-[12px] text-sidebar-muted">{ROLE_LABEL[role]}</span>
+              </span>
+            </div>
+          </AccountMenu>
+        </Tooltip>
       </div>
     </aside>
   );

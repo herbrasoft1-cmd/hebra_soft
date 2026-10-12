@@ -195,6 +195,27 @@ export const IconWallet = (p: P) => (
   </Base>
 );
 
+export const IconChevronDown = (p: P) => (
+  <Base strokeWidth={2} {...p}>
+    <path d="M6 9l6 6 6-6" />
+  </Base>
+);
+
+export const IconHelp = (p: P) => (
+  <Base {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M9.3 9.3a2.7 2.7 0 1 1 3.8 2.5c-.8.4-1.1 1-1.1 1.9" />
+    <circle cx="12" cy="17.2" r="0.1" fill="currentColor" stroke="currentColor" strokeWidth="1.8" />
+  </Base>
+);
+
+export const IconUser = (p: P) => (
+  <Base {...p}>
+    <circle cx="12" cy="8" r="3.6" />
+    <path d="M4.5 20c1-4.2 3.9-6.3 7.5-6.3s6.5 2.1 7.5 6.3" />
+  </Base>
+);
+
 /** Logo HEBRA: ovillo con hebra suelta */
 export function Logo({ size = 34 }: { size?: number }) {
   return (

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { IconAgujas } from "@/components/icons";
 import { dueLabel, todayLong } from "@/lib/format";
 import { getSession } from "@/lib/tenant";
 import type { Order, ProductStep, Tenant } from "@/lib/types";
@@ -56,17 +55,12 @@ export async function ShiftHome({ session, tenant, mod }: { session: Session; te
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1.5">
-          <span className="text-sm text-muted">{todayLong()}</span>
-          <h1 className="font-display text-[30px] leading-tight md:text-[36px]">
-            {greeting}
-            {firstName ? `, ${firstName}` : ""}
-          </h1>
-        </div>
-        <Link href="/configuracion" aria-label="Configuración" className="icon-btn size-11 shrink-0 border border-border bg-surface md:hidden">
-          <IconAgujas size={22} />
-        </Link>
+      <div className="flex flex-col gap-1.5">
+        <span className="text-sm text-muted">{todayLong()}</span>
+        <h1 className="font-display text-[30px] leading-tight md:text-[36px]">
+          {greeting}
+          {firstName ? `, ${firstName}` : ""}
+        </h1>
       </div>
 
       {!current ? (
