@@ -105,3 +105,20 @@ cambiar el campo **Build command** en el dashboard a `npm run build:cf`, no un c
   opción recomendada es el build automático desde GitHub (Cloudflare lo compila en su propia
   infraestructura, Linux) en vez de `npm run deploy` desde esta máquina — ver la opción 1 de
   "Variables de entorno" arriba.
+
+## Dominio propio (`hebrasoft.com`)
+
+El dominio se compró directo en Cloudflare (mismo account), así que no hace falta tocar DNS a
+mano: `wrangler.jsonc` tiene `"routes": [{ "pattern": "hebrasoft.com", "custom_domain": true }]`
+— Cloudflare lo conecta solo al Worker `hebra-soft` en el próximo deploy (certificado SSL
+incluido). Si más adelante se quiere `www.hebrasoft.com` también, agregar otra entrada igual en
+ese array con ese pattern.
+
+**Pendiente tras activar el dominio propio:** agregar `https://hebrasoft.com/auth/callback` (y de
+paso `https://hebra-soft.herbrasoft1.workers.dev/auth/callback` si se quiere mantener esa URL
+usable) a la lista de *Redirect URLs* permitidas en Supabase (Authentication → URL Configuration).
+El código ya arma la URL de redirect dinámicamente a partir del header `host` de cada request
+(`src/app/(auth)/actions.ts`, `siteOrigin()`), así que no hace falta tocar código — pero Supabase
+igual exige que la URL esté en esa lista blanca, si no, los links de invitación/confirmación de
+registro van a fallar silenciosamente (redirigen al Site URL por defecto en vez del callback real)
+en cuanto alguien los abra desde el dominio nuevo.

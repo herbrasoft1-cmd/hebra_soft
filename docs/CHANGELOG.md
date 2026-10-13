@@ -2,6 +2,14 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Infraestructura — Dominio propio hebrasoft.com (2026-10-13)
+
+Agregado `"routes": [{ "pattern": "hebrasoft.com", "custom_domain": true }]` a `wrangler.jsonc`
+para conectar el dominio (comprado directo en Cloudflare) al Worker `hebra-soft`; no requiere DNS
+manual ni SSL manual, Cloudflare lo hace solo al desplegar. Pendiente (manual, en el dashboard de
+Supabase, no en código): agregar `https://hebrasoft.com/auth/callback` a las Redirect URLs
+permitidas, o los links de invitación/confirmación van a fallar al abrirse desde el dominio nuevo.
+
 ## Bug fix — "Instala HEBRA" reaparecía tras descartarlo (2026-10-13)
 
 El usuario reportó, probando ya en producción, que el aviso "Instala HEBRA" volvía a aparecer
