@@ -76,11 +76,18 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-6 pb-10">
-      <div className="flex items-center justify-between gap-3">
+      {/* pr-12 en móvil: el botón flotante de cuenta vive fijo en esa esquina (TopBar), así que
+          esto evita que el nuevo botón "⋯" quede debajo y sea imposible de tocar. */}
+      <div className="flex items-center justify-between gap-3 pr-12 md:pr-0">
         <Link href="/pedidos" className="inline-flex min-h-11 items-center gap-2 text-sm text-muted">
           <IconBack size={18} /> Pedidos
         </Link>
-        <span className="font-mono text-xs text-muted">#{order.id.slice(0, 6).toUpperCase()}</span>
+        <div className="flex items-center gap-2.5">
+          <span className="font-mono text-xs text-muted">#{order.id.slice(0, 6).toUpperCase()}</span>
+          {canAssign && order.status !== "enviado" && !order.cancelled_at && (
+            <CancelOrderTrigger orderId={order.id} orderTitle={order.title} variant="icon" />
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -104,7 +111,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           )}
         </div>
       ) : (
-        <OrderTimeline status={order.status} statusLabels={mod.statusLabels} />
+        <OrderTimeline status={order.status} statusLabels={mod.statusLabels} activePct={order.status === "proceso" ? pct : null} />
       )}
 
       {risk.length > 0 && !order.cancelled_at && (
@@ -179,15 +186,12 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         customerName={order.customers?.name ?? null}
       />
 
-      <div className="flex flex-col gap-2.5">
+      <div className={`grid gap-2.5 ${canAssign && next && !order.cancelled_at ? "grid-cols-2" : "grid-cols-1"}`}>
         <ShareTrackingButton token={order.tracking_token} />
         {canAssign && next && !order.cancelled_at && (
           <form action={async () => { "use server"; await moveOrder(order.id, next); }}>
             <button className="btn-primary w-full">Pasar a {mod.statusLabels[next].toLowerCase()}</button>
           </form>
-        )}
-        {canAssign && order.status !== "enviado" && !order.cancelled_at && (
-          <CancelOrderTrigger orderId={order.id} orderTitle={order.title} />
         )}
       </div>
     </div>

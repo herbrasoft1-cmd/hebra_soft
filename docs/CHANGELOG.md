@@ -82,6 +82,22 @@ más grande: faltaban 2 de 4 pestañas del mockup).
   por persona.
 - `npm run lint`/`test` (78/78)/`build` pasan limpio.
 
+## Mejora fuera del roadmap — Auditoría mockup-vs-real, Fase 7: Pedido móvil (2026-10-13)
+
+- `OrderTimeline`: el paso activo ahora muestra el % real de avance (cronómetro) dentro del nodo,
+  en vez de un punto genérico — mismo dato que ya se calculaba en la página pero no se pasaba.
+- "Cancelar pedido" se movió del fondo de la página (tercer botón apilado) a un botón "⋯" en el
+  encabezado; abajo quedan solo 2 botones en grid (Compartir seguimiento / Avanzar estado).
+- **Bug real encontrado y corregido en la propia verificación:** el botón flotante de cuenta
+  (fijo, esquina superior derecha en móvil) tapaba literalmente el nuevo botón "⋯" e impedía
+  tocarlo — confirmado con Playwright ("intercepts pointer events"), no solo un problema visual.
+  Corregido con espacio reservado en el encabezado para esa esquina en móvil.
+- Fuera de esta fase, documentado (plan original): "Sumar apoyo" (segundo colaborador sin
+  reemplazar al principal) cambiaría el modelo de datos de `assigned_to`; el insight combinado de
+  horas restantes + disponibilidad diaria de la persona, porque HEBRA solo tiene capacidad
+  semanal real, no diaria — inventar la parte diaria sería adivinar.
+- `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
 ## Mejora fuera del roadmap — Auditoría mockup-vs-real, Fase 6: Portal de seguimiento (2026-10-13)
 
 `get_order_tracking` nunca unía `product_steps`/`order_step_progress` (de "Mi turno", Fase 8)

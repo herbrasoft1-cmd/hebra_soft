@@ -1113,3 +1113,21 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     está tejiendo a mano — va en el 33% (1 de 3 pasos). Sigue: Cuerpo." — coincide exactamente con
     el estado real de los pasos.
   - `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
+- **Auditoría mockup-vs-real, Fase 7: Pedido móvil (2026-10-13).** `order-timeline.tsx` ganó un
+  prop `activePct` que muestra el % real de avance (cronómetro, ya calculado en la página) dentro
+  del nodo activo. "Cancelar pedido" se movió del fondo (tercer botón apilado) a un botón "⋯" en
+  el encabezado (`CancelOrderTrigger` ganó `variant="icon"|"full"`), dejando 2 botones en grid
+  abajo (Compartir seguimiento / Avanzar estado).
+  - **Bug real encontrado en la propia verificación:** al probar el clic del nuevo botón "⋯" con
+    Playwright, el click fallaba repetidamente con "element intercepts pointer events" — el botón
+    flotante de cuenta (`fixed top-[...] right-4`, visible en toda la app en móvil) se superponía
+    exactamente encima del nuevo botón y lo hacía intocable de verdad, no solo visualmente
+    apretado. Corregido con `pr-12 md:pr-0` en la fila del encabezado para reservarle espacio a esa
+    esquina en móvil; reverificado y el clic funciona.
+  - **Fuera de esta fase, documentado (ya estaba en el plan aprobado):** "Sumar apoyo" (segundo
+    colaborador sin reemplazar al asignado principal) cambiaría el modelo de datos de
+    `assigned_to` (hoy un único usuario); el insight combinado "horas restantes del pedido +
+    disponibilidad diaria de la persona" — HEBRA solo tiene capacidad semanal real
+    (`weeklyAvailableHours`), no diaria, así que inventar la parte diaria sería adivinar.
+  - `npm run lint`/`test` (83/83)/`build` pasan limpio.
