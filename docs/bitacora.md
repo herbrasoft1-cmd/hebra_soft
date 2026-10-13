@@ -1219,3 +1219,21 @@ partir de la comparación de Pedidos/Producción contra `Ent-Produccion.dc.html`
      runtime real con `npx wrangler dev` en local: la portada responde `200 OK` con el HTML
      completo (se veía hasta el preload de la imagen del hero).
   - `npm run lint`/`test` (83/83) pasan limpio tras el downgrade.
+
+- **"Instala HEBRA" reaparecía tras descartarlo, bug real en producción (2026-10-13).** El usuario
+  probó en Chrome de escritorio ya en producción y vio el aviso volver a aparecer sobre cualquier
+  pantalla después de tocar "Ahora no", navegando por los links del menú. Antes de tocar código se
+  verificó con Playwright contra la URL real: (1) la navegación SPA no remonta el layout (un
+  marcador en `window` sobrevive la navegación), descartando que fuera el mismo bug de Turbopack en
+  dev ya corregido antes; (2) el descarte sí persiste en `localStorage` y bloquea el efecto en un
+  remount nuevo. La causa real: el listener de `beforeinstallprompt` en `InstallPrompt`
+  (`src/components/pwa.tsx`) se agregaba una vez al montar pero nunca se quitaba al descartar ni al
+  instalar — como el componente no se remonta entre pantallas, si el navegador reemite el evento
+  más tarde en la misma sesión (pasa en la práctica en Chrome), el handler seguía activo y volvía a
+  abrir el aviso encima de la pantalla actual. Corregido guardando el handler en un `useRef` y
+  llamando `removeEventListener` explícitamente en `dismiss()` e `install()`.
+  - Aparte, se confirmó con el usuario (no se asumió) que en el celular el instalador nunca
+    apareció porque abrió el link desde WhatsApp — ese navegador embebido no soporta instalar PWAs,
+    es una limitación de la app externa, no un bug de HEBRA. Para instalar en el celular hay que
+    abrir el link directo en Chrome/Safari.
+  - `npm run lint`/`test` (83/83) pasan limpio.

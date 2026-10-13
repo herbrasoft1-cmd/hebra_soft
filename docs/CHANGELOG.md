@@ -2,6 +2,22 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Bug fix — "Instala HEBRA" reaparecía tras descartarlo (2026-10-13)
+
+El usuario reportó, probando ya en producción, que el aviso "Instala HEBRA" volvía a aparecer
+encima de cualquier pantalla incluso después de tocar "Ahora no", navegando por los links del menú
+(sin recargar la página — confirmado que la navegación SPA no se remonta, descartando que fuera el
+mismo bug de Turbopack en dev ya corregido antes). Causa real en `src/components/pwa.tsx`,
+`InstallPrompt`: el listener de `beforeinstallprompt` se registraba una vez al montar pero nunca se
+quitaba al descartar ni al instalar — como el componente vive en `(app)/layout.tsx` y no se
+remonta entre pantallas, si el navegador volvía a emitir el evento más tarde en la misma sesión (algo
+que Chrome hace en la práctica), el aviso se abría de nuevo sobre lo que fuera que se estuviera
+viendo. Corregido guardando el handler en un `ref` y quitando el listener explícitamente en
+`dismiss()` e `install()`, no solo en el cleanup de desmontaje. De paso se confirmó con el usuario
+que abrir el link desde WhatsApp/Telegram en el celular no muestra el instalador porque esas apps
+abren un navegador embebido sin esa capacidad — no es un bug, es una limitación de ese navegador.
+`npm run lint`/`test` (83/83) pasan limpio.
+
 ## Infraestructura — Primer despliegue real en Cloudflare, Next.js fijado a 16.3.8 (2026-10-13)
 
 El primer despliegue real (no solo el build local) encontró dos problemas que solo aparecen en el

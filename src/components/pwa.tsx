@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IconCheck, IconWifiOff } from "./icons";
 import { useTimer } from "./timer";
 
@@ -70,6 +70,7 @@ export function InstallPrompt() {
   const [isIos, setIsIos] = useState(false);
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState<string | null>(null);
+  const handlerRef = useRef<((e: Event) => void) | null>(null);
 
   useEffect(() => {
     // Solo en producción: en dev, el layout se remonta en cada navegación y el aviso reaparecería siempre.
@@ -97,14 +98,25 @@ export function InstallPrompt() {
       setEvent(e as BeforeInstallPromptEvent);
       setOpen(true);
     };
+    handlerRef.current = handler;
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
+
+  // El navegador puede volver a emitir "beforeinstallprompt" más de una vez en la misma sesión —
+  // sin esto, el aviso reaparecía encima de la pantalla que fuera, aunque ya se hubiera descartado.
+  const stopListening = () => {
+    if (handlerRef.current) {
+      window.removeEventListener("beforeinstallprompt", handlerRef.current);
+      handlerRef.current = null;
+    }
+  };
 
   const dismiss = () => {
     try {
       localStorage.setItem(DISMISS_KEY, String(Date.now()));
     } catch {}
+    stopListening();
     setOpen(false);
     setDone("Te lo recordaremos en unos días");
     setTimeout(() => setDone(null), 3000);
@@ -114,6 +126,7 @@ export function InstallPrompt() {
     if (!event) return;
     await event.prompt();
     const choice = await event.userChoice;
+    stopListening();
     setOpen(false);
     setEvent(null);
     if (choice.outcome === "accepted") {
