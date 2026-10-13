@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "hebra",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2024-12-30",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "hebra",
+    },
+  ],
+  // NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY no van aquí (no se versionan
+  // valores reales de conexión): se configuran como "Build variables" en el dashboard de
+  // Cloudflare (Workers & Pages → hebra → Settings → Variables and Secrets) y, para
+  // desarrollo/preview local con `wrangler`, en `.dev.vars` (ver `.dev.vars.example` y
+  // `docs/DEPLOY.md`).
+}

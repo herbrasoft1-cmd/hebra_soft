@@ -1168,3 +1168,28 @@ partir de la comparación de Pedidos/Producción contra `Ent-Produccion.dc.html`
   borde genérico, se veía pegada encima de la foto) a `bg-night/90 backdrop-blur-xl` con
   `border-white/10` y `shadow-tab`, dejando que el tono cálido del fondo se filtre levemente para
   mejor armonía visual. `npm run lint`/`test` (83/83)/`build` pasan limpio en cada iteración.
+
+- **Preparación para desplegar en Cloudflare, fuera del roadmap (2026-10-13).** El usuario avisó
+  que está subiendo el proyecto a Cloudflare y pidió dejar el código listo para un despliegue
+  exitoso. Se instaló `@opennextjs/cloudflare` + `wrangler` como devDependencies y se agregaron
+  `wrangler.jsonc`, `open-next.config.ts`, `.dev.vars.example`, scripts
+  `preview`/`deploy`/`cf-typegen` y `docs/DEPLOY.md` con la guía completa. No se verificó solo
+  instalando: se corrió `npx opennextjs-cloudflare build` de verdad, lo que encontró dos avisos
+  reales:
+  - Se intentó fijar `export const runtime = "edge"` en `src/proxy.ts` para evitar el aviso "Node.js
+    middleware support is experimental in cloudflare" — **el build falló**: Next.js 16 prohíbe esa
+    config en el proxy ("Proxy always runs on Node.js runtime", sin alternativa). Se revirtió el
+    cambio; el aviso queda documentado en `DEPLOY.md` como algo a vigilar tras desplegar (probar
+    login/logout en producción), no como algo que se pueda evitar con esta versión de Next.
+  - OpenNext avisa que no es 100% compatible compilando en Windows ("could encounter unpredictable
+    failures during runtime") — por eso `DEPLOY.md` recomienda conectar el repo de GitHub para que
+    Cloudflare compile en su propia infraestructura (Linux) en vez de `npm run deploy` local.
+  - `next.config.ts` ganó `images.unoptimized: true` (el optimizador de imágenes de Next necesita
+    Vercel o el binding de pago "Images" de Cloudflare; las fotos que sube la app ya se comprimen
+    antes de subirse, así que no hace falta).
+  - Las credenciales de Supabase (`NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY`) NO se
+    escribieron en `wrangler.jsonc` ni en ningún archivo versionado — quedan documentadas en
+    `DEPLOY.md` para configurarse como variables de build en el dashboard de Cloudflare.
+  - `npm run lint`/`test` (83/83) pasan limpio; `npx opennextjs-cloudflare build` termina en
+    `OpenNext build complete.` sin errores (solo 2 warnings cosméticos de esbuild dentro de un
+    chunk de una dependencia de terceros, no del código propio).

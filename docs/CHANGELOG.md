@@ -2,6 +2,24 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Infraestructura — Preparación para desplegar en Cloudflare (2026-10-13)
+
+Se agregó todo lo necesario en código para desplegar HEBRA como Cloudflare Worker con
+[`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare) (no cambia la app, solo la empaqueta
+para ese runtime): `wrangler.jsonc`, `open-next.config.ts`, scripts `preview`/`deploy`/`cf-typegen`
+en `package.json`, `.dev.vars.example` y `docs/DEPLOY.md` con la guía completa (variables de
+entorno, primer despliegue). `next.config.ts` gana `images.unoptimized: true` porque el optimizador
+de imágenes de Next necesita el runtime de Vercel o el binding de pago "Images" de Cloudflare.
+
+Verificado compilando de verdad con `npx opennextjs-cloudflare build` (no solo instalando
+paquetes), lo que encontró dos avisos reales a documentar en vez de ignorar: (1) Next.js 16 ya no
+permite fijar `runtime = "edge"` en `src/proxy.ts` — el proxy siempre corre en Node.js, y Cloudflare
+marca ese soporte como experimental ("use at your own risk"); el build igual compila, pero hay que
+probar login/logout en producción después de desplegar. (2) OpenNext avisa que no es 100%
+compatible compilando en Windows — por eso la guía recomienda conectar el repo de GitHub para que
+Cloudflare compile en su propia infraestructura (Linux) en vez de `npm run deploy` desde esta
+máquina. `npm run lint`/`test` (83/83) pasan limpio; no se tocó lógica de la app.
+
 ## Fase 6 — Finanzas y facturación (2026-10-12)
 
 El usuario había excluido esta fase y la reinstaló explícitamente, con una condición clara:

@@ -5,6 +5,14 @@ const nextConfig: NextConfig = {
     // Permite subir el logo del negocio (hasta ~1,5 MB) por server action
     serverActions: { bodySizeLimit: "2mb" },
   },
+  images: {
+    // El optimizador de imágenes de Next necesita el runtime de Vercel o el binding
+    // "Images" de Cloudflare (tiene costo aparte). Se desactiva para desplegar en
+    // Cloudflare Workers sin esa dependencia; las fotos (avatares, logo, avance de
+    // pedido) ya se suben pre-comprimidas. Se puede reactivar sumando el binding
+    // "images" en wrangler.jsonc si hace falta más adelante.
+    unoptimized: true,
+  },
   async headers() {
     return [
       {
