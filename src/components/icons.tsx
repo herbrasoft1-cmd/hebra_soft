@@ -224,20 +224,9 @@ export const IconUser = (p: P) => (
   </Base>
 );
 
-/** Logo HEBRA: ovillo con hebra suelta */
+/** Logo HEBRA: la "H" entrelazada con el ovillo, mismo archivo que los íconos PWA. */
 export function Logo({ size = 34 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 34 34" aria-hidden="true">
-      <circle cx="17" cy="17" r="16" className="fill-primary-soft" />
-      <path
-        d="M6 20c4-8 6 5 10-2s6 5 11-3"
-        fill="none"
-        className="stroke-accent"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
+  return <img src="/icons/icon-512.png" alt="HEBRA" width={size} height={size} className="shrink-0" />;
 }
 
 /** Hebra decorativa (separador ondulado) */

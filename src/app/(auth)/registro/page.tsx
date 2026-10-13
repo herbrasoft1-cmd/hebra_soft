@@ -67,6 +67,13 @@ function RegisterForm() {
       <button className="btn-primary" disabled={pending}>
         {pending ? "Creando…" : "Crear cuenta"}
       </button>
+      <p className="text-center text-xs text-muted">
+        Al crear tu cuenta aceptas el{" "}
+        <Link href="/privacidad" className="underline hover:text-ink-2">
+          tratamiento de datos y privacidad
+        </Link>{" "}
+        de HEBRA.
+      </p>
       <p className="text-center text-sm text-ink-2">
         ¿Ya tienes cuenta?{" "}
         <Link href="/login" className="font-semibold text-primary">

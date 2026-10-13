@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/registro", "/offline", "/auth", "/invitar", "/seguimiento"];
+const PUBLIC_PATHS = ["/login", "/registro", "/offline", "/auth", "/invitar", "/seguimiento", "/privacidad"];
 
 /**
  * Proxy (antes "middleware"): refresca la sesión de Supabase en cada request
@@ -34,7 +34,8 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isPublic = PUBLIC_PATHS.some((p) => path.startsWith(p));
+  // "/" se compara exacto (si no, startsWith("/") haría público todo el sitio).
+  const isPublic = path === "/" || PUBLIC_PATHS.some((p) => path.startsWith(p));
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();

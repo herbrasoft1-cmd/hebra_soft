@@ -871,3 +871,53 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     verificación de `duplicateProduct` (uno antes del fix, con receta vacía; uno después, correcto)
     — ambos se eliminaron al cerrar la fase para no dejar basura de prueba en el tenant QA.
   - `npm run lint`/`test` (78/78)/`build` pasan limpio.
+
+- **Logo nuevo, pantalla de inicio pública y política de privacidad (2026-10-13).** El usuario pidió
+  cambiar el logo del software (compartió una imagen) y agregar una pantalla de inicio que no fuera
+  solo el login, con tratamiento de datos/privacidad — aclarando que HEBRA es de uso privado de un
+  cliente, no un servicio público, así que el texto legal debía reflejar eso y no un ToS genérico
+  de SaaS masivo.
+  - **Problema técnico real encontrado antes de tocar nada:** el archivo del logo era un `.jpg`
+    (`Format24bppRgb`, confirmado con `System.Drawing`), sin canal alfa — el cuadriculado de
+    "fondo transparente" que se veía era un patrón pintado en los píxeles, no transparencia real.
+    Usarlo tal cual habría dejado ese cuadriculado visible como parte del logo. Se confirmó con el
+    usuario (`AskUserQuestion`) antes de intentar arreglarlo automáticamente en vez de asumir.
+  - **Recorte cromático con despill, no solo binario:** primer intento (corte binario por
+    saturación/brillo) dejó un halo rosado visible en los bordes curvos del símbolo a resolución
+    completa. Se mejoró a una matting real: banda de transición con alpha proporcional a la
+    saturación + recuperación del color de primer plano (fórmula `fg = bg + (observado-bg)/alpha`,
+    asumiendo fondo ~RGB(236,236,236), el promedio real de las 2 celdas del cuadriculado medidas
+    con `GetPixel`). El halo que persiste a 1365px es imperceptible una vez reducido a tamaño real
+    de ícono (192px/64px, verificado visualmente) — verificado en vivo antes de darlo por bueno.
+  - Set completo generado con `System.Drawing` (sin dependencias npm nuevas): `icon-192.png`/
+    `icon-512.png` (transparentes), `icon-maskable-512.png` (fondo crema `#F8F5EF`, símbolo al 62%
+    para la zona segura de íconos maskable), `apple-touch-icon.png` (180px, fondo crema — iOS no
+    maneja bien transparencia). Master sin comprimir en `public/brand/hebra-mark.png`.
+  - `Logo` (`src/components/icons.tsx`) pasó de un SVG placeholder (círculo + trazo) a `<img
+    src="/icons/icon-512.png">` — se propaga solo a login/404/error/offline/bienvenida/invitación/
+    portal de seguimiento (como *fallback* cuando el negocio no subió su propio logo, nunca
+    reemplazando el logo real de un negocio).
+  - **Nueva portada pública** (`src/app/page.tsx`, antes un `redirect("/inicio")` ciego):
+    ahora revisa sesión con una consulta liviana (`supabase.auth.getUser()`, no `getSession()`
+    completo, que fuerza redirect a `/login`) — con sesión redirige a `/inicio` como antes; sin
+    sesión muestra encabezado + hero + 4 tarjetas de función (Insumos/Recetario/Pedidos/Caja) + pie
+    con enlace a `/privacidad`. CTA principal "Iniciar sesión"; CTA secundaria "Tengo una
+    invitación" hacia `/registro` (deliberadamente no "Regístrate gratis", coherente con que no es
+    un servicio público).
+  - **Nueva `/privacidad`**: tratamiento de datos encuadrado en Ley 1581 de 2012/Decreto 1377 de
+    2013 (Habeas Data Colombia), aclarando que HEBRA es *encargado* del tratamiento y el negocio
+    titular es *responsable*; cubre qué se recopila (cuenta de equipo, operación del negocio,
+    clientes finales del negocio, datos técnicos de acceso/2FA), para qué se usa, dónde se
+    almacena (Supabase + RLS) y derechos del titular. Enlazada desde el pie de la portada y desde
+    `/registro` (nueva línea de consentimiento antes del botón de crear cuenta).
+  - **Bug real encontrado en la propia verificación en vivo:** `src/proxy.ts` (middleware) redirige
+    a `/login` cualquier ruta no listada en `PUBLIC_PATHS` cuando no hay sesión — `/` y
+    `/privacidad` no estaban en esa lista, así que la portada nueva nunca se habría mostrado en la
+    práctica (se habría visto siempre el login, exactamente el problema original que se pedía
+    resolver). Corregido: se agregó `/privacidad` a `PUBLIC_PATHS` y se cambió la comparación de
+    `/` a coincidencia exacta en vez de `startsWith` (que habría hecho público todo el sitio por
+    error, ya que toda ruta empieza con `/`).
+  - **Verificado de punta a punta:** `/` sin sesión muestra la portada completa; `/` con sesión
+    (cuenta owner) redirige correctamente a `/inicio`; `/privacidad` renderiza las 8 secciones;
+    `/login`, `/offline`, `/registro` muestran el logo nuevo sin errores de consola.
+  - `npm run lint`/`test` (78/78)/`build` pasan limpio.

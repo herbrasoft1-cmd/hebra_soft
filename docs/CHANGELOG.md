@@ -82,6 +82,36 @@ más grande: faltaban 2 de 4 pestañas del mockup).
   por persona.
 - `npm run lint`/`test` (78/78)/`build` pasan limpio.
 
+## Mejora fuera del roadmap — Logo nuevo, pantalla de inicio y política de privacidad (2026-10-13)
+
+El usuario pidió reemplazar el logo del software y agregar una pantalla pública de inicio (hoy `/`
+redirigía ciegamente a `/inicio`, que exige sesión), con tratamiento de datos y privacidad
+enfocados en uso privado (no un servicio público de autoregistro masivo).
+
+- **Logo:** la imagen enviada era un `.jpg` sin canal alfa real (el cuadriculado de "transparencia"
+  estaba pintado en los píxeles, no era alfa). Se recuperó transparencia real con un script de
+  recorte cromático (umbral de saturación + despill de color) y se generó el set completo de
+  íconos (`icon-192`, `icon-512`, `icon-maskable-512` con zona segura, `apple-touch-icon` con fondo
+  sólido). El componente `Logo` (`src/components/icons.tsx`) ahora usa la marca nueva en vez del
+  placeholder SVG anterior — se propaga automáticamente a login, 404, error, offline, bienvenida,
+  invitaciones y el portal de seguimiento (como *fallback* cuando el negocio no subió su propio
+  logo).
+- **Pantalla de inicio pública** (`src/app/page.tsx`): si hay sesión, redirige a `/inicio` como
+  antes; si no, muestra una landing simple (encabezado, hero, 4 tarjetas de funciones, pie con
+  enlace a la política) — sin prometer autoregistro masivo, con "Tengo una invitación" como CTA
+  secundaria hacia `/registro`.
+- **Nueva página `/privacidad`**: tratamiento de datos encuadrado en uso privado (Ley 1581 de 2012
+  / Habeas Data Colombia), aclarando que el negocio titular es responsable del tratamiento y HEBRA
+  es encargado del tratamiento; cubre qué datos se recopilan (cuenta, operación, clientes finales
+  del negocio), para qué se usan, dónde se almacenan (Supabase, RLS) y derechos del titular. Se
+  enlaza desde el pie de la portada y desde el formulario de registro.
+- **Bug real encontrado al verificar:** el middleware (`src/proxy.ts`) redirigía a `/login`
+  cualquier ruta no listada explícitamente en `PUBLIC_PATHS` para usuarios sin sesión — `/` y
+  `/privacidad` no estaban ahí, así que la nueva portada nunca se habría visto en la práctica.
+  Corregido agregando `/privacidad` a la lista y tratando `/` como coincidencia exacta (no
+  `startsWith`, que habría hecho público todo el sitio).
+- `npm run lint`/`test` (78/78)/`build` pasan limpio.
+
 ## Mejora fuera del roadmap — Auditoría mockup-vs-real, Fase 4: Recetario → Costeo (2026-10-13)
 
 - **Bug real corregido:** la barra de "Tiempo real por tejedora" (`recipe-editor.tsx`) calculaba el
