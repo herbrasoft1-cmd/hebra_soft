@@ -2,6 +2,23 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Infraestructura — Primer despliegue real en Cloudflare, Next.js fijado a 16.3.8 (2026-10-13)
+
+El primer despliegue real (no solo el build local) encontró dos problemas que solo aparecen en el
+runtime de Cloudflare, no en `next dev`/`next build` normales:
+
+- El Worker ya existente en la cuenta se llama `hebra-soft`, pero `wrangler.jsonc` tenía `"name":
+  "hebra"` — el binding `WORKER_SELF_REFERENCE` fallaba con "Worker 'hebra' which was not found".
+  Corregido: `name` y el `service` del binding ahora son `hebra-soft` en los dos lugares.
+- Con el nombre ya corregido, el sitio seguía devolviendo 500 en **todas** las rutas
+  (`error code: 1101`). Los logs de Cloudflare (Observability → Events) mostraron la causa real:
+  `Unexpected loadManifest(/.next/server/preview-props.json) call!` — un bug conocido y sin
+  corregir de `opennextjs-cloudflare` con Next.js 16.4.0 (que agregó `getPreviewProps()` para
+  Draft Mode; el adaptador no sabe servir ese manifest todavía). HEBRA no usa Draft Mode, así que
+  se bajó `next` de `^16.4.0` a `16.3.8` (fijo, sin `^`, para que no se vuelva a subir solo) —
+  versión anterior sin el bug. Verificado no solo con el build sino corriendo el Worker en el
+  runtime real con `wrangler dev` en local: la portada responde `200 OK` con el HTML completo.
+
 ## Infraestructura — Preparación para desplegar en Cloudflare (2026-10-13)
 
 Se agregó todo lo necesario en código para desplegar HEBRA como Cloudflare Worker con

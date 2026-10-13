@@ -1193,3 +1193,29 @@ partir de la comparación de Pedidos/Producción contra `Ent-Produccion.dc.html`
   - `npm run lint`/`test` (83/83) pasan limpio; `npx opennextjs-cloudflare build` termina en
     `OpenNext build complete.` sin errores (solo 2 warnings cosméticos de esbuild dentro de un
     chunk de una dependencia de terceros, no del código propio).
+
+- **Primer despliegue real en Cloudflare, con dos bugs reales encontrados en el camino
+  (2026-10-13).** El usuario conectó el repo de GitHub a Cloudflare Workers Builds y fue pasando
+  los errores de cada build a medida que salían, en vivo:
+  1. `ERROR Could not find compiled Open Next config` — el Build command del dashboard estaba en
+     el default `npm run build` (solo `next build`, nunca genera `.open-next/`). Se agregó el
+     script `build:cf` y se documentó en `DEPLOY.md` cambiar ese campo a `npm run build:cf`.
+  2. `Service binding 'WORKER_SELF_REFERENCE' references Worker 'hebra' which was not found` — el
+     Worker real en la cuenta se llama `hebra-soft` (se confirmó leyendo la URL/breadcrumb del
+     dashboard en una captura del usuario), pero `wrangler.jsonc` decía `"hebra"`. Corregido en
+     los dos lugares (`name` y `services[0].service`); verificado después en el dashboard
+     (Overview → Bindings) que el binding ya apunta a `hebra-soft`.
+  3. El sitio quedó devolviendo 500 en todas las rutas incluso con el build y el binding ya
+     arreglados. Primero se sospechó de las variables de Supabase no configuradas (teoría
+     razonable dado que `process.env.NEXT_PUBLIC_SUPABASE_URL!` se usa en `src/proxy.ts`/
+     `src/lib/supabase/server.ts` sin validar), pero **se verificó en vez de asumir**: se guió al
+     usuario paso a paso para activar "Workers Logs" en Observability, y el log real mostró
+     `Unexpected loadManifest(/.next/server/preview-props.json) call!` — nada que ver con
+     Supabase. Investigado por web: bug conocido y sin corregir del adaptador
+     `opennextjs-cloudflare`, introducido por `getPreviewProps()` de Next.js 16.4.0 (issues
+     #1355/#1448 del repo, un PR con fix #1428 cerrado sin mergear por accidente). Se confirmó con
+     el usuario (HEBRA no usa Draft Mode, cero impacto funcional) antes de bajar `next` de
+     `^16.4.0` a `16.3.8` fijo. Verificado no solo con el build sino levantando el Worker en el
+     runtime real con `npx wrangler dev` en local: la portada responde `200 OK` con el HTML
+     completo (se veía hasta el preload de la imagen del hero).
+  - `npm run lint`/`test` (83/83) pasan limpio tras el downgrade.

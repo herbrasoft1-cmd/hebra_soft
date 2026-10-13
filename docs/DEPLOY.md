@@ -4,6 +4,14 @@ HEBRA se despliega como **Cloudflare Worker** (no Cloudflare Pages estático) us
 [`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare), que empaqueta el build de Next.js
 (App Router, Server Actions, `src/proxy.ts`, rutas dinámicas) para correr en el runtime de Workers.
 
+> **Next.js está fijado en `16.3.8` (no `^16.4.0`) a propósito.** Next 16.4.0 agregó
+> `getPreviewProps()` (Draft Mode interno), que el adaptador de Cloudflare no sabe servir todavía
+> — tira `Unexpected loadManifest(/.next/server/preview-props.json) call!` y la app cae con 500 en
+> **todas** las rutas. Es un bug conocido y sin corregir en `opennextjs-cloudflare` (GitHub
+> `opennextjs-cloudflare` issues #1355/#1448, reportados en octubre 2026). HEBRA no usa Draft Mode,
+> así que no hay pérdida funcional. **No subir `next` más allá de `16.3.x` hasta que el adaptador
+> publique un fix** (revisar el changelog de `@opennextjs/cloudflare` antes de actualizar Next).
+
 ## Qué se agregó al proyecto para esto
 
 - `wrangler.jsonc` — config del Worker (nombre, flags de compatibilidad, carpeta de assets).
