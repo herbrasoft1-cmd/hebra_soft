@@ -75,10 +75,10 @@ export default function PrivacyPage() {
         <section className="card flex flex-col gap-2.5 p-5">
           <h2 className="font-display text-lg font-semibold">5. Dónde se almacenan y cómo se protegen</h2>
           <p className="text-sm text-ink-2">
-            Los datos se almacenan con Supabase (infraestructura de base de datos y autenticación), con acceso
-            restringido por fila según el negocio y el rol de cada persona (un negocio nunca puede ver los datos de
-            otro) y autenticación propia por cuenta. Dentro de cada negocio, quién puede ver costos, finanzas o
-            datos de clientes depende del rol asignado por quien administra la cuenta.
+            Los datos se almacenan en infraestructura con controles de acceso por negocio: un negocio nunca puede
+            ver los datos de otro, y cada persona accede con su propia cuenta autenticada. Dentro de cada negocio,
+            quién puede ver costos, finanzas o datos de clientes depende del rol asignado por quien administra la
+            cuenta.
           </p>
         </section>
 

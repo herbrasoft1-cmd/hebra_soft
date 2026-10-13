@@ -82,6 +82,65 @@ más grande: faltaban 2 de 4 pestañas del mockup).
   por persona.
 - `npm run lint`/`test` (78/78)/`build` pasan limpio.
 
+## Mejora fuera del roadmap — Notificaciones reales (2026-10-13)
+
+El botón de la campana era decorativo desde siempre (sin `onClick`, sin backend). Se construyó con
+señales que ya son reales y baratas de calcular, gateadas por el mismo permiso que ya protege cada
+pantalla:
+
+- Insumos bajo punto de reorden y órdenes de compra por aprobar (`view_costs`).
+- Pedidos vencidos sin enviar (`manage_orders`).
+- Facturas rechazadas pendientes de reintentar (`view_finance`).
+- Invitaciones de equipo pendientes de aceptar (`owner`).
+- Badge con el conteo en la campana; panel (`Sheet`) con cada notificación enlazando a su pantalla.
+- **Pendiente de activar/conectar** (requieren cálculos más pesados, no caben en cada carga de
+  página): insumo agotado cruzado con la receta de un pedido específico; tejedora con más horas
+  comprometidas que disponibles esta semana. Documentado en `src/lib/notifications.ts`.
+- `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
+## Mejora fuera del roadmap — Mostrar contraseña y validación de complejidad (2026-10-13)
+
+- Nuevo `PasswordInput` (botón de ojo para mostrar/ocultar) en los campos de contraseña de login y
+  registro.
+- Nuevo `PasswordStrength` en registro: checklist en vivo (mínimo 8 caracteres, una mayúscula, un
+  número, un carácter especial), con confirmación verde "Contraseña segura" cuando se cumple todo.
+- Las reglas viven en un solo lugar (`src/lib/password.ts`, con prueba) y el servidor (`signUp`)
+  las aplica también — nunca se confía solo en la validación del formulario.
+- `npm run lint`/`test` (83/83, +5 nuevas)/`build` pasan limpio.
+
+## Mejora fuera del roadmap — Pulido final de portada y autenticación (2026-10-13)
+
+Última ronda de ajustes sobre la portada/login/registro:
+
+- Enlace "← Inicio" explícito en el layout de autenticación (antes solo el logo era clicable, poco
+  obvio) — visible en login y registro.
+- Las 4 tarjetas de función de la portada dejaron de verse genéricas: cada una con su color de
+  acento (barra superior + ícono), un detalle corto en mayúsculas, numeración "01–04", y "Caja y
+  finanzas" como tarjeta oscura para romper la monotonía de las otras 3.
+- Sombra de texto sutil (cálida sobre fondo claro, oscura sobre las bandas `bg-night`) en los
+  títulos principales de la portada, pedida explícitamente por el usuario.
+- `npm run lint`/`test` (78/78)/`build` pasan limpio.
+
+## Mejora fuera del roadmap — Rediseño premium de portada y autenticación (2026-10-13)
+
+Ajustes pedidos sobre el trabajo anterior: quitar menciones de tecnología de la política de
+privacidad, textos del pie más neutros, crédito de la agencia, y un nivel de pulido "enterprise"
+(más producción, sin cambiar la identidad cálida/artesanal de HEBRA) en portada, login y registro.
+
+- `/privacidad`: ya no menciona la infraestructura técnica específica, descrita en términos
+  neutros (controles de acceso, autenticación).
+- Pie de la portada: "Software de gestión." (antes explicaba qué NO era, en tono defensivo) +
+  línea "Hecho por Jormelia Soft" enlazada a jormeliasoft.com.
+- **Portada (`/`) rediseñada**: tarjeta ilustrativa del costeo real en el hero (mismo patrón visual
+  del simulador de precio real, claramente etiquetada "Ejemplo"), flujo numerado de 4 pasos con
+  línea conectora, fondo con degradados suaves, banda oscura de CTA final — mismo lenguaje visual
+  que ya usa el resto de la app (tarjetas `bg-night`, sin sombras, tipografía Fraunces), no una
+  estética corporativa genérica.
+- **Login y registro**: mismo tratamiento de fondo con degradados; registro pasó de una sola
+  columna (con scroll vertical en móvil) a campos emparejados en 2 columnas — queda sin scroll en
+  los tamaños de pantalla probados.
+- `npm run lint`/`test` (78/78)/`build` pasan limpio.
+
 ## Mejora fuera del roadmap — Logo nuevo, pantalla de inicio y política de privacidad (2026-10-13)
 
 El usuario pidió reemplazar el logo del software y agregar una pantalla pública de inicio (hoy `/`

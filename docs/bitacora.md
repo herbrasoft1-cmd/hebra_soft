@@ -921,3 +921,111 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     (cuenta owner) redirige correctamente a `/inicio`; `/privacidad` renderiza las 8 secciones;
     `/login`, `/offline`, `/registro` muestran el logo nuevo sin errores de consola.
   - `npm run lint`/`test` (78/78)/`build` pasan limpio.
+
+- **Rediseño premium de portada, login y registro (2026-10-13).** Ronda de ajustes rápidos sobre el
+  trabajo de logo/portada anterior, varios pedidos sueltos del usuario en la misma sesión:
+  - Quitar de `/privacidad` cualquier mención de tecnología específica (el usuario fue explícito:
+    "ni Supabase ni ninguna otra") — la sección 5 ahora describe las protecciones en términos
+    neutros (controles de acceso por negocio, autenticación por cuenta) sin nombrar infraestructura.
+  - Pie de página de la portada: "Software de uso privado — no es un servicio público de
+    autorregistro abierto" (tono defensivo, explicando qué NO es) → "Software de uso privado." →
+    finalmente "Software de gestión." (2 iteraciones pedidas por el usuario). Se agregó una línea
+    "Hecho por Jormelia Soft" enlazada a jormeliasoft.com.
+  - El usuario preguntó "¿ya se ve enterprise?" — en vez de asumir, se le preguntó qué significaba
+    eso en este contexto (¿más producción/pulido, o un lenguaje visual corporativo distinto?) dado
+    que "Enterprise" ya es el nombre de esta fase del proyecto (prefijo `Ent-` en todos los
+    mockups) y cambiar a una paleta azul/gris genérica rompería la identidad cálida que ya tiene
+    toda la app. El usuario pidió la recomendación: más producción/pulido manteniendo la identidad
+    de marca (terracota/crema/Fraunces), no un cambio de lenguaje visual.
+  - **Portada (`src/app/page.tsx`) reescrita** con ese criterio: hero con tarjeta ilustrativa del
+    costeo real (mismo patrón visual del simulador de precio real de Recetario — stack de barras +
+    desglose Materiales/Mano de obra/Desgaste/Utilidad —, claramente etiquetada "Ejemplo" para no
+    presentar un dato inventado como real), fondo con manchas de degradado suave en los tonos de
+    marca, flujo numerado de 4 pasos conectado con `ThreadLine`, tarjetas de función con hover, y
+    una banda oscura (`bg-night`, mismo tono que las tarjetas de cronómetro/simulador en el resto
+    de la app) con la CTA final.
+  - **`(auth)/layout.tsx`** (compartido por login y registro): mismo fondo con degradados; logo
+    ahora enlaza a `/`; se quitó la tagline para ahorrar espacio vertical; el contenedor pasó de
+    `max-w-sm` a `max-w-md`.
+  - **Registro tenía scroll vertical innecesario** (el usuario lo señaló explícitamente): el
+    formulario apilaba 5 campos en una sola columna. Se reorganizó en pares de 2 columnas (Tu
+    nombre/Correo, Nombre del negocio/Qué haces) dejando Contraseña sola — verificado que a
+    390×844 (viewport móvil real) el `scrollHeight` del body quedó exactamente igual a la altura
+    del viewport (844px): cero scroll, antes tenía scroll visible.
+  - `npm run lint`/`test` (78/78)/`build` pasan limpio.
+
+- **Pulido final de portada y autenticación (2026-10-13).** Dos pedidos puntuales de UX sobre el
+  trabajo anterior:
+  - "No hay un enlace al inicio ni desde login ni desde registro" — el logo del layout de auth ya
+    enlazaba a `/`, pero no era obvio como enlace. Se agregó un "← Inicio" explícito (mismo patrón
+    `IconBack` que ya usa `/privacidad`) arriba a la izquierda, además de mantener el logo clicable.
+  - "Las 4 cards se ven genéricas, dale sombra a los títulos" — se les dio identidad propia:
+    `TONE_STYLES` mapea cada función a un acento de color ya existente en la paleta (primary/
+    success/warning), con una barra de 1px arriba de la tarjeta y el ícono en ese tono; "Caja y
+    finanzas" rompe el patrón con una tarjeta oscura (`bg-night`) en vez de un cuarto tono —
+    variedad visual sin inventar un color nuevo fuera del sistema. Cada tarjeta ganó un detalle
+    corto en mayúsculas (ej. "POR SEDE Y POR LOTE") y una numeración "01–04" en la esquina. Los
+    títulos principales (`h1` del hero, ambos `h2` de sección) ganaron `text-shadow` sutil —
+    cálido sobre fondo claro, oscuro sobre las bandas `bg-night` — vía `style` inline (Tailwind no
+    trae utilidad de text-shadow en este proyecto).
+  - Verificado en escritorio y móvil (390×844): acentos de color visibles, tarjeta oscura
+    diferenciada, enlace "Inicio" funcional desde login (confirmado con `waitForURL`, el primer
+    intento de prueba dio un falso negativo por una condición de carrera en el script, no un bug
+    real de la app).
+  - `npm run lint`/`test` (78/78)/`build` pasan limpio.
+
+- **Mostrar contraseña y validación de complejidad (2026-10-13).** El usuario pidió, en sus
+  palabras, "la opción del ojo de ver contraseña" y algo que avise "que debe tener mínimo un
+  número, letra en mayúscula, un carácter especial" — un checklist de requisitos de contraseña.
+  - Reglas centralizadas en `src/lib/password.ts` (`PASSWORD_RULES` + `passwordMeetsAllRules`),
+    con prueba nueva (`password.test.ts`, 5 casos) — un solo lugar para que el checklist visual y
+    la validación del servidor nunca puedan desincronizarse.
+  - `IconEye`/`IconEyeOff` nuevos en `icons.tsx`; `PasswordInput` (`src/components/
+    password-input.tsx`) envuelve el input con un botón de mostrar/ocultar, soporta uso controlado
+    (con `value`/`onChange`, para que el checklist pueda leer el valor en vivo) o sin controlar.
+  - `PasswordStrength` (`src/components/password-strength.tsx`): checklist en vivo mientras no se
+    cumplen todas las reglas (cada ítem en gris con punto, o verde con check al cumplirse), y una
+    sola línea verde "Contraseña segura" una vez que se cumple todo — para no dejar una lista de 4
+    checks verdes ocupando espacio permanentemente.
+  - **Decisión de alcance, no pedida explícitamente pero necesaria:** el ojo se agregó tanto a
+    login como a registro (pedido correcto, útil en cualquier campo de contraseña), pero el
+    checklist de complejidad **solo en registro** — exigir complejidad al iniciar sesión no tendría
+    sentido, bloquearía a cuentas existentes cuya contraseña es válida pero fue creada antes de
+    esta regla.
+  - `signUp` (`src/app/(auth)/actions.ts`) reemplazó su único chequeo (`password.length < 8`) por
+    `passwordMeetsAllRules()` — la validación real nunca depende solo de lo que valide el
+    navegador.
+  - **Verificado en vivo:** login con el ojo mostrando/ocultando el texto correctamente; registro
+    con "abc" mostró las 4 reglas en gris sin cumplir; con "Abcdefg1!" cambió a "Contraseña segura"
+    en verde.
+  - `npm run lint`/`test` (83/83, +5 nuevas)/`build` pasan limpio.
+
+- **Notificaciones reales (2026-10-13).** El usuario preguntó por qué el botón de la campana en el
+  `TopBar` no hacía nada — se confirmó leyendo el código: era un `<button>` sin `onClick`, nunca
+  conectado a nada, y una búsqueda de "notification" en todo `src/` y `supabase/migrations/` no
+  dio ningún resultado — cero backend. El usuario pidió construirlo "con lo que en el momento es
+  funcional", dejando el resto documentado como pendiente.
+  - `src/lib/notifications.ts` (`getNotifications`): agrega 5 señales reales, cada una gateada por
+    el mismo permiso que ya protege su pantalla (mismo criterio que el resto de la app, nunca un
+    chequeo nuevo inventado): insumos bajo punto de reorden y órdenes de compra por aprobar
+    (`view_costs`), pedidos vencidos sin enviar (`manage_orders`), facturas rechazadas
+    (`view_finance`), invitaciones de equipo pendientes (`owner`, mismo criterio que ya usa
+    `member-row.tsx` para quién gestiona el equipo).
+  - **Documentado explícitamente como pendiente** (no construido, por ser más costoso de calcular
+    en cada carga de página): insumo agotado cruzado con la receta de un pedido específico (ya
+    existe la lógica en `blockedOrders`/`ordersAtRisk`, pero necesita las consultas completas de
+    productos que hoy solo se piden en Analítica/Insumos); tejedora con más horas comprometidas
+    que disponibles esta semana (necesita disponibilidad + horas comprometidas, igual que el
+    panel de Capacidad de Pedidos).
+  - `NotificationsButton` (`src/components/notifications-button.tsx`, nuevo): badge con el conteo
+    sobre el ícono de campana; al hacer clic abre un `Sheet` (mismo patrón ya usado en toda la app
+    para overlays) listando cada notificación con su categoría y enlace a la pantalla real.
+  - `(app)/layout.tsx` calcula las notificaciones server-side (junto a las demás consultas del
+    layout) y las pasa a `TopBar` como prop — mismo patrón de datos ya usado para
+    `activeOrders`/`locations`, sin fetch adicional en el cliente.
+  - **Verificado con las 3 cuentas de rol:** `owner` vio badge "3" con "2 insumos por debajo del
+    punto de reorden", "1 factura rechazada, pendiente de reintentar" y "2 invitaciones
+    pendientes de aceptar" — las 3 cifras coinciden con el estado real de los datos de prueba
+    acumulados en sesiones anteriores. `ventas` y `tejedora` vieron "No tienes notificaciones
+    nuevas" (ninguna señal falsa, el gating por permiso funciona).
+  - `npm run lint`/`test` (83/83)/`build` pasan limpio.

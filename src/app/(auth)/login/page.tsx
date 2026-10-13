@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useActionState } from "react";
+import { PasswordInput } from "@/components/password-input";
 import { signIn, type AuthState } from "../actions";
 
 function LoginForm() {
@@ -28,7 +29,7 @@ function LoginForm() {
       </label>
       <label className="field">
         Contraseña
-        <input className="input" name="password" type="password" autoComplete="current-password" required />
+        <PasswordInput name="password" autoComplete="current-password" />
       </label>
       {state.error && (
         <p role="alert" className="rounded-xl bg-primary-soft p-3 text-sm text-primary-hover">

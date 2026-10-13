@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/nav";
 import { InstallPrompt, OfflineBanner } from "@/components/pwa";
 import { FloatingTimer, TimerProvider } from "@/components/timer";
 import { getActiveLocationId } from "@/lib/location";
+import { getNotifications } from "@/lib/notifications";
 import { getSession } from "@/lib/tenant";
 import { ROLE_LABEL } from "@/lib/roles";
 import { getIndustryModule } from "@/modules";
@@ -14,14 +15,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const { supabase, user, tenant, role } = await getSession();
   const mod = getIndustryModule(tenant.industry);
 
-  const [{ count }, { data: locations }, activeLocationId] = await Promise.all([
+  const activeLocationId = await getActiveLocationId();
+
+  const [{ count }, { data: locations }, notifications] = await Promise.all([
     supabase
       .from("orders")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tenant.id)
       .neq("status", "enviado"),
     supabase.from("locations").select("id, name").eq("tenant_id", tenant.id).order("name"),
-    getActiveLocationId(),
+    getNotifications(supabase, tenant.id, role, activeLocationId),
   ]);
 
   const userName = (user.user_metadata?.full_name as string | undefined) || user.email || "Tú";
@@ -49,6 +52,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             userId={user.id}
             userName={userName}
             roleLabel={ROLE_LABEL[role]}
+            notifications={notifications}
           />
           <OfflineBanner />
           <main className="mx-auto w-full max-w-6xl flex-1 px-5 pt-5 pb-40 md:px-8 md:pb-10">{children}</main>

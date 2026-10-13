@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { passwordMeetsAllRules } from "@/lib/password";
 import { createClient } from "@/lib/supabase/server";
 
 export type AuthState = { error?: string; message?: string };
@@ -38,7 +39,9 @@ export async function signUp(_: AuthState, formData: FormData): Promise<AuthStat
 
   // Si viene de una invitación, se une al negocio del que invitó: no hace falta nombre de negocio.
   if (!invite && businessName.length < 2) return { error: "Escribe el nombre de tu negocio." };
-  if (password.length < 8) return { error: "La contraseña debe tener al menos 8 caracteres." };
+  if (!passwordMeetsAllRules(password)) {
+    return { error: "La contraseña debe tener mínimo 8 caracteres, una mayúscula, un número y un carácter especial." };
+  }
 
   const redirectTo = new URL("/auth/callback", await siteOrigin());
   if (invite) redirectTo.searchParams.set("invite", invite);

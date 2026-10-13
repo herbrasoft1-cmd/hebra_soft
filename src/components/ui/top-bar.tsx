@@ -2,9 +2,10 @@
 
 import { usePathname } from "next/navigation";
 import { AccountMenu } from "@/components/account-menu";
-import { IconBell } from "@/components/icons";
+import { NotificationsButton } from "@/components/notifications-button";
 import { Avatar } from "@/components/ui/avatar";
 import { Tooltip } from "@/components/ui/tooltip";
+import type { Notification } from "@/lib/notifications";
 
 type LocationOpt = { id: string; name: string };
 
@@ -35,6 +36,7 @@ export function TopBar({
   userId,
   userName,
   roleLabel,
+  notifications,
 }: {
   businessName: string;
   recipeLabel: string;
@@ -44,6 +46,7 @@ export function TopBar({
   userId: string;
   userName: string;
   roleLabel: string;
+  notifications: Notification[];
 }) {
   const path = usePathname();
   const label = currentLabel(path, recipeLabel);
@@ -91,11 +94,7 @@ export function TopBar({
               </select>
             </form>
           )}
-          <Tooltip label="Notificaciones" side="bottom">
-            <button type="button" aria-label="Notificaciones" className="icon-btn size-[38px] border border-border-strong bg-surface">
-              <IconBell size={15} />
-            </button>
-          </Tooltip>
+          <NotificationsButton notifications={notifications} />
         </div>
       </div>
     </>

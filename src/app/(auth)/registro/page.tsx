@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useActionState } from "react";
+import { Suspense, useActionState, useState } from "react";
+import { PasswordInput } from "@/components/password-input";
+import { PasswordStrength } from "@/components/password-strength";
 import { INDUSTRY_OPTIONS } from "@/modules";
 import { signUp, type AuthState } from "../actions";
 
 function RegisterForm() {
   const [state, action, pending] = useActionState<AuthState, FormData>(signUp, {});
+  const [password, setPassword] = useState("");
   const params = useSearchParams();
   const next = params.get("next");
   const invite = params.get("invite");
@@ -29,12 +32,18 @@ function RegisterForm() {
       <h1 className="font-display text-2xl">{invite ? "Acepta la invitación" : "Crea tu cuenta"}</h1>
       {next && <input type="hidden" name="next" value={next} />}
       {invite && <input type="hidden" name="invite" value={invite} />}
-      <label className="field">
-        Tu nombre
-        <input className="input" name="name" autoComplete="name" required />
-      </label>
+      <div className={invite ? "" : "grid gap-3.5 sm:grid-cols-2"}>
+        <label className="field">
+          Tu nombre
+          <input className="input" name="name" autoComplete="name" required />
+        </label>
+        <label className="field">
+          Correo
+          <input className="input" name="email" type="email" autoComplete="email" required />
+        </label>
+      </div>
       {!invite && (
-        <>
+        <div className="grid gap-3.5 sm:grid-cols-2">
           <label className="field">
             Nombre de tu negocio
             <input className="input" name="business" placeholder="Ej: Hilos y Ovillos" required />
@@ -49,16 +58,13 @@ function RegisterForm() {
               ))}
             </select>
           </label>
-        </>
+        </div>
       )}
       <label className="field">
-        Correo
-        <input className="input" name="email" type="email" autoComplete="email" required />
+        Contraseña
+        <PasswordInput name="password" autoComplete="new-password" minLength={8} value={password} onChange={setPassword} />
       </label>
-      <label className="field">
-        Contraseña (mínimo 8 caracteres)
-        <input className="input" name="password" type="password" autoComplete="new-password" minLength={8} required />
-      </label>
+      <PasswordStrength password={password} />
       {state.error && (
         <p role="alert" className="rounded-xl bg-primary-soft p-3 text-sm text-primary-hover">
           {state.error}
