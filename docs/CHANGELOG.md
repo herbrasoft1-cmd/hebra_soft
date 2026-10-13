@@ -82,6 +82,27 @@ más grande: faltaban 2 de 4 pestañas del mockup).
   por persona.
 - `npm run lint`/`test` (78/78)/`build` pasan limpio.
 
+## Mejora fuera del roadmap — Auditoría mockup-vs-real, Fase 3: Insumos → Inventario (2026-10-13)
+
+`supplies` ya era por-lote-por-sede desde la migración 0001 (sin migración nueva): la reescritura
+fue de presentación, pasando de tarjetas por insumo a una tabla por lote, fiel a
+`Ent-Inventario.dc.html`.
+
+- `supplies-view.tsx`: tabla (`DataTable`) con columnas Insumo | Sede (solo con "Todas las sedes"
+  activo) | Lote | Stock vs. reorden | Costo u. | Valor | Estado.
+- Estado de 3 niveles (Agotado/Reordenar/Disponible) reemplaza el booleano "por agotarse" anterior.
+- `ProgressBar` ganó un `markerPct` opcional (línea vertical de punto de reorden), sin afectar sus
+  otros usos.
+- Botón renombrado "Nueva compra" → "Registrar compra".
+- **Bug real encontrado y corregido en el componente compartido `DataTable`:** las columnas no
+  tenían separación horizontal (se veían pegadas, ej. "ValorEstado") — afectaba también la tabla
+  "Rentabilidad por producto" de Analítica/Inicio. Corregido con padding horizontal en el propio
+  componente.
+- Fuera de esta fase (documentado, no inventado): KPI "Rotación promedio" (no hay historial de
+  consumo por período, solo stock actual); botón "Revisar"/ETA en órdenes de compra; mover
+  "Transferir entre sedes" al header (se queda donde ya funciona, sin duplicar el punto de entrada).
+- `npm run lint`/`test` (78/78)/`build` pasan limpio.
+
 ## Mejora fuera del roadmap — Auditoría mockup-vs-real, Fase 2: Analítica (2026-10-13)
 
 El plan original proponía mover el panel ejecutivo de `/inicio` a `/analitica` (que es donde el

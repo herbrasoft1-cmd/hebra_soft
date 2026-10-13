@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { IconOvillo, IconPlus, IconTrash } from "@/components/icons";
+import { type Column, DataTable } from "@/components/ui/data-table";
 import { EmptyState } from "@/components/ui/page-header";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { ProgressBar } from "@/components/ui/progress-bar";
@@ -14,8 +15,24 @@ import type { Location, PurchaseOrder, Supplier, Supply, Unit } from "@/lib/type
 import { deleteSupply, saveSupply } from "./actions";
 import { PurchaseOrdersPanel } from "./purchase-orders-panel";
 
+type SupplyRow = Supply & { location_name: string | null };
+
+type Status = "agotado" | "reordenar" | "disponible";
+const STATUS_LABEL: Record<Status, string> = { agotado: "Agotado", reordenar: "Reordenar", disponible: "Disponible" };
+const STATUS_TONE: Record<Status, string> = {
+  agotado: "bg-danger-soft text-danger-ink",
+  reordenar: "bg-warning-soft text-warning-ink",
+  disponible: "bg-success-soft text-success-ink",
+};
+function statusOf(s: SupplyRow): Status {
+  if (Number(s.quantity_remaining) <= 0) return "agotado";
+  if (Number(s.low_stock_threshold) > 0 && Number(s.quantity_remaining) <= Number(s.low_stock_threshold)) return "reordenar";
+  return "disponible";
+}
+
 export function SuppliesView({
   canSeeCosts,
+  showLocationColumn,
   supplies,
   units,
   examples,
@@ -33,7 +50,8 @@ export function SuppliesView({
   locations,
 }: {
   canSeeCosts: boolean;
-  supplies: Supply[];
+  showLocationColumn: boolean;
+  supplies: SupplyRow[];
   units: Unit[];
   examples: string;
   suppliers: Supplier[];
@@ -50,7 +68,7 @@ export function SuppliesView({
   locations: Location[];
 }) {
   const [q, setQ] = useState("");
-  const [editing, setEditing] = useState<Supply | "new" | null>(null);
+  const [editing, setEditing] = useState<SupplyRow | "new" | null>(null);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -94,7 +112,7 @@ export function SuppliesView({
             </label>
             {canSeeCosts && (
               <button className="btn-primary" onClick={() => setEditing("new")}>
-                <IconPlus size={18} /> Nueva compra
+                <IconPlus size={18} /> Registrar compra
               </button>
             )}
           </div>
@@ -123,61 +141,7 @@ export function SuppliesView({
               }
             />
           ) : (
-            <ul className="grid gap-2.5 md:grid-cols-2">
-              {filtered.map((s) => {
-                const ratio = s.quantity_purchased > 0 ? s.quantity_remaining / s.quantity_purchased : 0;
-                const low =
-                  s.low_stock_threshold > 0 ? s.quantity_remaining <= s.low_stock_threshold : ratio < 0.4;
-                const u = UNIT_LABEL[s.unit];
-                const card = (
-                  <div className="flex flex-col gap-2.5 px-4 py-3.5 text-left">
-                    <div className="flex items-center gap-3">
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
-                        <IconOvillo size={20} />
-                      </span>
-                      <span className="flex min-w-0 flex-1 flex-col">
-                        <span className="truncate text-[15px] font-semibold">{s.name}</span>
-                        <span className="truncate text-xs text-muted">
-                          {[s.brand, s.lot_color].filter(Boolean).join(" · ") || "Sin marca"}
-                        </span>
-                      </span>
-                      {canSeeCosts && (
-                        <span className="flex flex-col items-end">
-                          <span className="text-[15px] font-semibold tabular-nums">{unitMoney(Number(s.unit_cost))}</span>
-                          <span className="text-[11px] text-muted">por {u.long}</span>
-                        </span>
-                      )}
-                    </div>
-                    <ProgressBar value={Math.round(ratio * 100)} tone={low ? "warning" : "success"} />
-                    <div className="flex justify-between text-xs text-ink-2">
-                      <span>
-                        Quedan {Number(s.quantity_remaining)} {u.short}
-                        {low && <strong className="ml-1 text-primary-hover">· por agotarse</strong>}
-                      </span>
-                      {canSeeCosts && (
-                        <span>
-                          Compra: {Number(s.quantity_purchased)} {u.short} · {money(s.total_cost)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-                return (
-                  <li key={s.id}>
-                    {canSeeCosts ? (
-                      <button
-                        onClick={() => setEditing(s)}
-                        className="card w-full transition-all hover:-translate-y-0.5 hover:border-border-strong"
-                      >
-                        {card}
-                      </button>
-                    ) : (
-                      <div className="card">{card}</div>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+            <SuppliesTable supplies={filtered} canSeeCosts={canSeeCosts} showLocationColumn={showLocationColumn} onEdit={setEditing} />
           )}
         </div>
 
@@ -209,6 +173,89 @@ export function SuppliesView({
       </Sheet>
     </div>
   );
+}
+
+/** Tabla por lote/sede, fiel a Ent-Inventario.dc.html: cada fila es un lote concreto en una sede
+ * concreta (supplies ya es por-lote-por-sede desde la migración 0001, no hace falta agrupar). */
+function SuppliesTable({
+  supplies,
+  canSeeCosts,
+  showLocationColumn,
+  onEdit,
+}: {
+  supplies: SupplyRow[];
+  canSeeCosts: boolean;
+  showLocationColumn: boolean;
+  onEdit: (s: SupplyRow) => void;
+}) {
+  const columns: Column<SupplyRow>[] = [
+    {
+      key: "name",
+      label: "Insumo",
+      render: (s) =>
+        canSeeCosts ? (
+          <button type="button" onClick={() => onEdit(s)} className="flex items-center gap-2 text-left font-medium hover:underline">
+            <IconOvillo size={16} className="shrink-0 text-primary" />
+            {s.name}
+          </button>
+        ) : (
+          <span className="flex items-center gap-2 font-medium">
+            <IconOvillo size={16} className="shrink-0 text-primary" />
+            {s.name}
+          </span>
+        ),
+    },
+    ...(showLocationColumn ? [{ key: "sede", label: "Sede", render: (s: SupplyRow) => s.location_name ?? "—" } as Column<SupplyRow>] : []),
+    { key: "lote", label: "Lote", render: (s) => [s.brand, s.lot_color].filter(Boolean).join(" · ") || "—" },
+    {
+      key: "stock",
+      label: "Stock vs. reorden",
+      render: (s) => {
+        const u = UNIT_LABEL[s.unit];
+        const min = Number(s.low_stock_threshold);
+        // Mismo criterio que el mockup: % sobre el doble del punto de reorden, con la línea
+        // marcando el 50% (= el punto de reorden exacto). Sin umbral configurado, solo barra llena.
+        const pct = min > 0 ? Math.min(100, (Number(s.quantity_remaining) / (min * 2)) * 100) : 100;
+        const status = statusOf(s);
+        return (
+          <div className="flex min-w-32 flex-col gap-1">
+            <span className="text-xs text-ink-2">
+              {Number(s.quantity_remaining)} {u.short}
+              {min > 0 ? ` · mín. ${min}` : ""}
+            </span>
+            <ProgressBar
+              value={pct}
+              tone={status === "agotado" ? "danger" : status === "reordenar" ? "warning" : "success"}
+              markerPct={min > 0 ? 50 : undefined}
+            />
+          </div>
+        );
+      },
+    },
+    ...(canSeeCosts
+      ? [{ key: "costo", label: "Costo u.", align: "right", render: (s: SupplyRow) => unitMoney(Number(s.unit_cost)) } as Column<SupplyRow>]
+      : []),
+    ...(canSeeCosts
+      ? [
+          {
+            key: "valor",
+            label: "Valor",
+            align: "right",
+            render: (s: SupplyRow) => money(Number(s.quantity_remaining) * Number(s.unit_cost)),
+          } as Column<SupplyRow>,
+        ]
+      : []),
+    {
+      key: "estado",
+      label: "Estado",
+      render: (s) => {
+        const status = statusOf(s);
+        return <span className={`chip ${STATUS_TONE[status]}`}>{STATUS_LABEL[status]}</span>;
+      },
+    },
+  ];
+
+  return <DataTable columns={columns} rows={supplies} rowKey={(s) => s.id} />;
 }
 
 function SupplyForm({

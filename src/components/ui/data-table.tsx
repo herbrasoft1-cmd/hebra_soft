@@ -25,7 +25,7 @@ export function DataTable<T>({
             {columns.map((c) => (
               <th
                 key={c.key}
-                className={`pb-2.5 text-[13px] font-medium text-muted ${c.align === "right" ? "text-right" : "text-left"}`}
+                className={`px-2 pb-2.5 text-[13px] font-medium text-muted first:pl-0 last:pr-0 ${c.align === "right" ? "text-right" : "text-left"}`}
               >
                 {c.label}
               </th>
@@ -36,7 +36,10 @@ export function DataTable<T>({
           {rows.map((row) => (
             <tr key={rowKey(row)} className="border-b border-divider last:border-0">
               {columns.map((c) => (
-                <td key={c.key} className={`py-3 ${c.align === "right" ? "text-right tabular-nums" : "text-left"}`}>
+                <td
+                  key={c.key}
+                  className={`px-2 py-3 first:pl-0 last:pr-0 ${c.align === "right" ? "text-right tabular-nums" : "text-left"}`}
+                >
                   {c.render(row)}
                 </td>
               ))}

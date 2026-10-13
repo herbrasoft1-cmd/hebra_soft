@@ -22,7 +22,7 @@ export default async function SuppliesPage({ searchParams }: { searchParams: Pro
   const activeLocationId = await getActiveLocationId();
   const canSeeCosts = canFully(role, "view_costs");
 
-  let query = supabase.from("supplies").select("*", { count: "exact" }).eq("tenant_id", tenant.id);
+  let query = supabase.from("supplies").select("*, locations(name)", { count: "exact" }).eq("tenant_id", tenant.id);
   if (activeLocationId) query = query.eq("location_id", activeLocationId);
 
   const [{ data, count }, { data: allSupplies }, { data: suppliers }, { data: openPOs }, { data: activeOrders }, { data: locations }] =
@@ -94,13 +94,19 @@ export default async function SuppliesPage({ searchParams }: { searchParams: Pro
 
   // Quien no puede ver costos (ej. tejedora) nunca debe recibir unit_cost/total_cost en el payload
   // que llega al navegador, aunque la consulta ya haya traído la fila completa del servidor.
-  const visibleSupplies = ((data ?? []) as Supply[]).map((s) => (canSeeCosts ? s : { ...s, unit_cost: 0, total_cost: 0 }));
+  type SupplyRow = Supply & { locations: { name: string } | null };
+  const visibleSupplies = ((data ?? []) as SupplyRow[]).map((s) => {
+    const { locations, ...rest } = s;
+    const base = canSeeCosts ? rest : { ...rest, unit_cost: 0, total_cost: 0 };
+    return { ...base, location_name: locations?.name ?? null };
+  });
 
   return (
     <>
       <PageHeader title="Insumos" subtitle="Lo que compras en volumen y usas por partes, por sede y por lote." />
       <SuppliesView
         canSeeCosts={canSeeCosts}
+        showLocationColumn={!activeLocationId}
         supplies={visibleSupplies}
         units={mod.defaultUnits}
         examples={mod.supplyExamples}

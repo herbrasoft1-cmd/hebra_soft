@@ -799,4 +799,46 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     (0,5 h) de qa.visual... a qa.tejedora... equilibra la semana", botón "Aplicar cambio"
     funcional); `ventas` sigue siendo redirigida de `/analitica` a `/inicio`.
   - `npm run lint`/`test` (78/78)/`build` pasan limpio.
-  - `npm run lint`/`test` (74/74)/`build` pasan limpio.
+
+- **Auditoría mockup-vs-real, Fase 3: Insumos → Inventario (2026-10-13).** Hallazgo clave
+  confirmado al leer `supabase/migrations/0001_hebra_schema.sql` y `0012_inventario.sql` antes de
+  tocar nada: `supplies` ya es por-lote-por-sede desde el MVP (`brand`/`lot_color`/`location_id`/
+  `quantity_remaining`/`quantity_purchased`/`total_cost`/`low_stock_threshold` por fila) — no hizo
+  falta ninguna migración nueva, la brecha con `Ent-Inventario.dc.html` era 100% de presentación
+  (tarjetas por insumo vs. tabla por lote).
+  - `supplies-view.tsx` reescrita: tabla (`DataTable`) con columnas Insumo, Sede (solo visible
+    cuando el selector global está en "Todas las sedes" — confirmado que esa consulta ya devuelve
+    todos los lotes sin filtrar cuando `activeLocationId` es `null`, cero consultas nuevas), Lote
+    (de `brand`/`lot_color`), Stock vs. reorden, Costo u., Valor, Estado.
+  - Estado de 3 niveles (Agotado/Reordenar/Disponible, calculado de `quantity_remaining` vs.
+    `low_stock_threshold`) reemplaza el booleano "por agotarse" que tenía antes.
+  - `ProgressBar` (`src/components/ui/progress-bar.tsx`) ganó un prop opcional `markerPct` — línea
+    vertical fija marcando el punto de reorden exacto (% = stock / (mínimo×2), con el mínimo al
+    50%), mismo criterio visual del mockup. Opcional y sin valor por defecto, no rompe ningún otro
+    uso del componente (Finanzas, Analítica, Recetario).
+  - Botón renombrado "Nueva compra" → "Registrar compra" (texto del mockup).
+  - **Bug real encontrado en el propio proceso de verificación visual, no solo desajuste de
+    mockup:** el componente compartido `DataTable` no tenía ningún padding horizontal entre
+    columnas — en la tabla nueva de Insumos, "Valor" y "Estado" se veían pegados como una sola
+    palabra "ValorEstado". Revisando el mismo componente en Analítica/Inicio (tabla "Rentabilidad
+    por producto") se confirmó el mismo bug ahí también ("CostoMargen"), pasado por alto en la
+    verificación visual de la Fase 2 porque es sutil con pocas columnas. Corregido con `px-2
+    first:pl-0 last:pr-0` en el propio `data-table.tsx` — arregla ambas pantallas a la vez.
+  - **Nota de proceso, bug falso detectado y descartado:** al verificar el selector de sede con
+    Playwright, una primera prueba pareció mostrar que cambiar a "Principal" no filtraba la tabla
+    (seguían apareciendo lotes de Bogotá). Antes de reportarlo como bug, se depuró con
+    `waitForResponse` + inspección directa de la cookie `hebra_location` — confirmó que el flujo
+    real (`<select>` → `form.requestSubmit()` → server action → cookie → refetch) sí funciona
+    correctamente; las primeras capturas solo fueron tomadas antes de que la transición terminara
+    de asentarse. Con una espera adecuada, el filtro por sede funciona perfecto: 1 fila, columna
+    "Sede" oculta, KPIs recalculados.
+  - **Fuera de esta fase, a propósito (documentado, no inventado):** KPI "Rotación promedio" — no
+    hay ningún dato histórico de consumo por período en el esquema, solo una foto del stock actual,
+    así que inventar esa cifra sería adivinar; botón "Revisar" y campo de fecha estimada (ETA) en
+    órdenes de compra; mover "Transferir entre sedes" al encabezado de la página (se queda donde ya
+    funciona, dentro del panel de compras, para no duplicar el punto de entrada ni la lógica).
+  - **Verificado de punta a punta:** tabla correcta para `owner` con "Todas las sedes" (columna
+    Sede visible, 2 filas, chips "Reordenar"); tabla filtrada a 1 fila sin columna Sede al elegir
+    "Principal"; `tejedora` ve la tabla sin columnas de costo y sin botón "Registrar compra"
+    (filas no clicables); el sheet de edición sigue abriendo y guardando igual que antes.
+  - `npm run lint`/`test` (78/78)/`build` pasan limpio.
