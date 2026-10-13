@@ -52,6 +52,24 @@ runtime. Por eso hay que configurarlas en dos lugares distintos según cómo se 
 4. Verificar el dominio/ruta asignado por Cloudflare y, si aplica, apuntar el dominio propio desde
    el dashboard (*Settings → Domains & Routes*).
 
+## Configurar "Workers Builds" (despliegue automático desde GitHub)
+
+Cloudflare separa el despliegue en dos comandos configurables en el dashboard (*Workers & Pages →
+el proyecto `hebra` → Settings → Build*), y **el valor por defecto que propone Cloudflare para
+Next.js no sirve para un proyecto con OpenNext**:
+
+- **Build command:** poner `npm run build:cf` (o `npx opennextjs-cloudflare build`) — **no** dejar
+  el default `npm run build`, que solo corre `next build` normal y nunca genera la carpeta
+  `.open-next/`.
+- **Deploy command:** dejar el default `npx wrangler deploy` — Wrangler detecta solo que es un
+  proyecto OpenNext (por `open-next.config.ts` y el `main` de `wrangler.jsonc`) y internamente llama
+  a `opennextjs-cloudflare deploy` por su cuenta.
+
+**Si aparece el error `ERROR Could not find compiled Open Next config, did you run the build
+command?`** es exactamente este problema: el Build command configurado no corrió
+`opennextjs-cloudflare build`, así que el paso de deploy no encuentra nada que subir. La solución es
+cambiar el campo **Build command** en el dashboard a `npm run build:cf`, no un cambio de código.
+
 ## Notas
 
 - `compatibility_flags: ["nodejs_compat", ...]` en `wrangler.jsonc` es obligatorio: sin él, varias
