@@ -35,7 +35,7 @@ Como son `NEXT_PUBLIC_*`, Next.js las incrusta en el bundle **durante el build**
 runtime. Por eso hay que configurarlas en dos lugares distintos según cómo se despliegue:
 
 1. **Build automático desde GitHub (recomendado, "Workers Builds"):** en el dashboard de
-   Cloudflare → Workers & Pages → el proyecto `hebra` → *Settings → Variables and Secrets* →
+   Cloudflare → Workers & Pages → el proyecto `hebra-soft` → *Settings → Variables and Secrets* →
    agregar ambas como variables de **build** (no solo de runtime), con los valores reales del
    proyecto de Supabase (Project Settings → API).
 2. **Deploy manual desde esta máquina (`npm run deploy`):** copiar `.env.example` → `.env.local`
@@ -55,7 +55,7 @@ runtime. Por eso hay que configurarlas en dos lugares distintos según cómo se 
 ## Configurar "Workers Builds" (despliegue automático desde GitHub)
 
 Cloudflare separa el despliegue en dos comandos configurables en el dashboard (*Workers & Pages →
-el proyecto `hebra` → Settings → Build*), y **el valor por defecto que propone Cloudflare para
+el proyecto `hebra-soft` → Settings → Build*), y **el valor por defecto que propone Cloudflare para
 Next.js no sirve para un proyecto con OpenNext**:
 
 - **Build command:** poner `npm run build:cf` (o `npx opennextjs-cloudflare build`) — **no** dejar
