@@ -77,7 +77,7 @@ export function AppSidebar({
   const groups = ["OPERACIÓN", "NEGOCIO"] as const;
 
   return (
-    <aside className="sticky top-0 hidden h-dvh w-[248px] shrink-0 flex-col gap-5 bg-sidebar-bg px-3.5 py-5 md:flex">
+    <aside className="sticky top-0 hidden h-dvh w-[248px] shrink-0 flex-col gap-4 bg-sidebar-bg px-3.5 py-4 md:flex">
       <Link
         href="/inicio"
         className="flex items-center gap-3 rounded-[14px] border border-sidebar-border bg-sidebar-raised p-2 text-left transition-colors hover:bg-sidebar-active"
@@ -107,7 +107,7 @@ export function AppSidebar({
       <nav aria-label="Principal" className="flex flex-1 flex-col gap-0.5 overflow-y-auto">
         {groups.map((group) => (
           <div key={group} className="flex flex-col gap-0.5">
-            <div className="px-3 pt-4 pb-1.5 text-[11px] font-semibold tracking-wide text-sidebar-label uppercase">{group}</div>
+            <div className="px-3 pt-3 pb-1 text-[11px] font-semibold tracking-wide text-sidebar-label uppercase">{group}</div>
             {items
               .filter((it) => it.group === group)
               .map((it) => {
@@ -118,7 +118,7 @@ export function AppSidebar({
                     key={it.href}
                     href={it.href}
                     aria-current={active ? "page" : undefined}
-                    className={`relative flex min-h-10 items-center gap-3 rounded-[10px] px-3 text-[14px] transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/40 ${
+                    className={`relative flex min-h-9 items-center gap-3 rounded-[10px] px-3 text-[14px] transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/40 ${
                       active ? "bg-sidebar-active font-semibold text-sidebar-text-active" : "text-sidebar-text-2 hover:bg-sidebar-active/60"
                     }`}
                   >
@@ -137,11 +137,11 @@ export function AppSidebar({
         ))}
       </nav>
 
-      <div className="mt-auto flex flex-col gap-3">
+      <div className="mt-auto flex flex-col gap-2.5">
         <MiniTimer />
         <Tooltip label="Editar perfil, ayuda y cerrar sesión" side="top" full>
           <AccountMenu userId={userId} userName={userName} roleLabel={ROLE_LABEL[role]} avatarUrl={userAvatarUrl}>
-            <div className="flex w-full items-center gap-2.5 rounded-[10px] border-t border-sidebar-border px-1.5 pt-3 pb-0.5 transition-colors hover:bg-sidebar-active/60">
+            <div className="flex w-full items-center gap-2.5 rounded-[10px] border-t border-sidebar-border px-1.5 pt-2.5 pb-0.5 transition-colors hover:bg-sidebar-active/60">
               <Avatar id={userId} name={userName} avatarUrl={userAvatarUrl} size={32} />
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="truncate text-[13px] font-medium text-sidebar-text">{userName}</span>

@@ -1262,3 +1262,11 @@ partir de la comparación de Pedidos/Producción contra `Ent-Produccion.dc.html`
     confirmó que "Crea tu cuenta" desde el login preserva el `invite` en la URL. Se canceló la
     invitación de prueba al terminar para no dejar basura en el panel real de Equipo.
   - `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
+- **Scroll innecesario en el sidebar (2026-10-13).** El usuario lo vio en su pantalla real; medido
+  con Playwright antes de tocar nada: a 800px de alto de ventana el menú entraba justo, a 720px
+  (resolución de laptop común) se pasaba por 30px y aparecía la barra. Se recortaron espacios en
+  `AppSidebar` (gaps, padding de encabezados de grupo, alto de ítem 40→36px, padding del bloque de
+  cuenta) — verificado que ahora entra sin scroll hasta 680px, con las cuentas owner (10 ítems) y
+  tejedora (6 ítems) para confirmar que no quedó apretado en ningún caso. `npm run lint`/`test`
+  (83/83)/`build` pasan limpio.

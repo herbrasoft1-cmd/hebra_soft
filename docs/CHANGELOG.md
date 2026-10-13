@@ -2,6 +2,15 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Ajuste — Scroll innecesario en el sidebar (2026-10-13)
+
+El usuario reportó un scroll vertical en el menú lateral. Medido con Playwright: a 800px de alto
+de ventana entraba justo, pero a 720px (resolución de laptop común) se pasaba por 30px y aparecía
+la barra. Se recortaron espacios en `AppSidebar` (gaps de la columna, padding de los encabezados
+de grupo, alto de cada ítem de 40 a 36px, padding del bloque de cuenta) — ahora entra sin scroll
+hasta 680px de alto, verificado con las cuentas owner (10 ítems) y tejedora (6 ítems, sin apretar).
+`npm run lint`/`test` (83/83)/`build` pasan limpio.
+
 ## Cierra el autorregistro abierto, agrega código corto de invitación (2026-10-13)
 
 El usuario detectó que, ya en producción, cualquiera podía crear un negocio nuevo desde
