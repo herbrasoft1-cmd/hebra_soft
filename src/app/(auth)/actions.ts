@@ -33,44 +33,31 @@ export async function signIn(_: AuthState, formData: FormData): Promise<AuthStat
 export async function signUp(_: AuthState, formData: FormData): Promise<AuthState> {
   const supabase = await createClient();
   const invite = String(formData.get("invite") ?? "").trim() || null;
-  const businessName = String(formData.get("business") ?? "").trim();
-  const industry = String(formData.get("industry") ?? "crochet");
   const password = String(formData.get("password") ?? "");
 
-  // Si viene de una invitación, se une al negocio del que invitó: no hace falta nombre de negocio.
-  if (!invite && businessName.length < 2) return { error: "Escribe el nombre de tu negocio." };
+  // HEBRA es de uso privado, no un SaaS de autorregistro: solo se puede crear cuenta
+  // aceptando una invitación (código o enlace) de alguien que ya administra un negocio.
+  // No es solo un gate de UI: esta acción también lo exige aunque se la invoque directo.
+  if (!invite) return { error: "Necesitas una invitación para crear tu cuenta." };
   if (!passwordMeetsAllRules(password)) {
     return { error: "La contraseña debe tener mínimo 8 caracteres, una mayúscula, un número y un carácter especial." };
   }
 
   const redirectTo = new URL("/auth/callback", await siteOrigin());
-  if (invite) redirectTo.searchParams.set("invite", invite);
+  redirectTo.searchParams.set("invite", invite);
 
   const { data, error } = await supabase.auth.signUp({
     email: String(formData.get("email") ?? "").trim(),
     password,
     options: {
       emailRedirectTo: redirectTo.toString(),
-      // Se guardan para crear el negocio después de confirmar el correo
-      data: {
-        full_name: String(formData.get("name") ?? "").trim(),
-        business_name: businessName,
-        industry,
-      },
+      data: { full_name: String(formData.get("name") ?? "").trim() },
     },
   });
   if (error) return { error: error.message };
 
-  // Si el proyecto no exige confirmar correo, ya hay sesión.
-  if (data.session) {
-    if (invite) redirect(`/invitar/${invite}`);
-    const { error: rpcError } = await supabase.rpc("create_tenant", {
-      p_name: businessName,
-      p_industry: industry,
-    });
-    if (rpcError) return { error: rpcError.message };
-    redirect("/inicio");
-  }
+  // Si el proyecto no exige confirmar correo, ya hay sesión: va directo a aceptar la invitación.
+  if (data.session) redirect(`/invitar/${invite}`);
 
   return { message: "Te enviamos un correo para confirmar tu cuenta. Ábrelo y luego inicia sesión." };
 }

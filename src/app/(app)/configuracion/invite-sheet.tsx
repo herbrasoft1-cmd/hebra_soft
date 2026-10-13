@@ -11,21 +11,21 @@ import { createInvitation, type InviteState } from "./team-actions";
 export function InviteSheet({ locations }: { locations: Location[] }) {
   const [open, setOpen] = useState(false);
   const [state, action] = useActionState<InviteState, FormData>(createInvitation, {});
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"link" | "code" | null>(null);
   const link = state.invitation ? `${window.location.origin}/invitar/${state.invitation.token}` : null;
+  const code = state.invitation?.code ?? null;
 
-  const copy = async () => {
-    if (!link) return;
+  const copy = async (value: string, which: "link" | "code") => {
     try {
-      await navigator.clipboard.writeText(link);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(value);
+      setCopied(which);
+      setTimeout(() => setCopied(null), 2000);
     } catch {}
   };
 
   const close = () => {
     setOpen(false);
-    setCopied(false);
+    setCopied(null);
   };
 
   return (
@@ -34,16 +34,31 @@ export function InviteSheet({ locations }: { locations: Location[] }) {
         <IconPlus size={18} /> Invitar
       </button>
       <Sheet open={open} onClose={close} title="Invitar a tu equipo">
-        {link ? (
+        {link && code ? (
           <div className="flex flex-col gap-4">
             <p className="text-sm text-ink-2">
-              Comparte este enlace — solo funciona para el correo que invitaste y vence en 7 días.
+              Solo funciona para el correo que invitaste y vence en 7 días.
             </p>
-            <div className="flex items-center gap-2">
-              <input className="input" readOnly value={link} onFocus={(e) => e.currentTarget.select()} />
-              <button onClick={copy} className="btn-ghost shrink-0 px-4">
-                {copied ? <IconCheck size={18} /> : "Copiar"}
-              </button>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-semibold text-ink-2">Código para decirle o escribirle (más fácil por WhatsApp)</span>
+              <div className="flex items-center gap-2">
+                <span className="input flex-1 text-center font-mono text-lg font-semibold tracking-[0.2em]">
+                  {code.slice(0, 4)}-{code.slice(4)}
+                </span>
+                <button onClick={() => copy(code, "code")} className="btn-ghost shrink-0 px-4">
+                  {copied === "code" ? <IconCheck size={18} /> : "Copiar"}
+                </button>
+              </div>
+              <p className="text-xs text-muted">Lo escribe en hebrasoft.com → Tengo una invitación.</p>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-semibold text-ink-2">O el enlace directo</span>
+              <div className="flex items-center gap-2">
+                <input className="input" readOnly value={link} onFocus={(e) => e.currentTarget.select()} />
+                <button onClick={() => copy(link, "link")} className="btn-ghost shrink-0 px-4">
+                  {copied === "link" ? <IconCheck size={18} /> : "Copiar"}
+                </button>
+              </div>
             </div>
             <button onClick={close} className="btn-primary">
               Listo

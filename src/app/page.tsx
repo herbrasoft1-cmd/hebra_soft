@@ -105,7 +105,7 @@ export default async function Home() {
               <Link href="/login" className="btn-primary min-h-12 px-7 text-[15px]">
                 Iniciar sesión
               </Link>
-              <Link href="/registro" className="btn-ghost min-h-12 px-7 text-[15px]">
+              <Link href="/invitar" className="btn-ghost min-h-12 px-7 text-[15px]">
                 Tengo una invitación
               </Link>
             </div>
@@ -229,7 +229,7 @@ export default async function Home() {
             <Link href="/login" className="btn-primary min-h-12 px-7 text-[15px]">
               Iniciar sesión
             </Link>
-            <Link href="/registro" className="btn min-h-12 bg-white/10 px-7 text-[15px] text-on-night hover:bg-white/15">
+            <Link href="/invitar" className="btn min-h-12 bg-white/10 px-7 text-[15px] text-on-night hover:bg-white/15">
               Tengo una invitación
             </Link>
           </div>

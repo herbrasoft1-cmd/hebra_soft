@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useActionState, useState } from "react";
 import { PasswordInput } from "@/components/password-input";
 import { PasswordStrength } from "@/components/password-strength";
-import { INDUSTRY_OPTIONS } from "@/modules";
 import { signUp, type AuthState } from "../actions";
 
 function RegisterForm() {
@@ -14,6 +13,24 @@ function RegisterForm() {
   const params = useSearchParams();
   const next = params.get("next");
   const invite = params.get("invite");
+
+  if (!invite) {
+    return (
+      <div className="flex flex-col items-center gap-3 text-center">
+        <h1 className="font-display text-2xl">Necesitas una invitación</h1>
+        <p className="text-ink-2">
+          HEBRA es de uso privado: pedile a quien administra tu negocio que te invite, con el código o el enlace que
+          te comparta.
+        </p>
+        <Link href="/invitar" className="btn-primary mt-1 w-full">
+          Tengo un código
+        </Link>
+        <Link href="/login" className="text-sm font-semibold text-primary">
+          Ya tengo cuenta
+        </Link>
+      </div>
+    );
+  }
 
   if (state.message) {
     return (
@@ -29,37 +46,17 @@ function RegisterForm() {
 
   return (
     <form action={action} className="flex flex-col gap-4">
-      <h1 className="font-display text-2xl">{invite ? "Acepta la invitación" : "Crea tu cuenta"}</h1>
+      <h1 className="font-display text-2xl">Acepta la invitación</h1>
       {next && <input type="hidden" name="next" value={next} />}
-      {invite && <input type="hidden" name="invite" value={invite} />}
-      <div className={invite ? "" : "grid gap-3.5 sm:grid-cols-2"}>
-        <label className="field">
-          Tu nombre
-          <input className="input" name="name" autoComplete="name" required />
-        </label>
-        <label className="field">
-          Correo
-          <input className="input" name="email" type="email" autoComplete="email" required />
-        </label>
-      </div>
-      {!invite && (
-        <div className="grid gap-3.5 sm:grid-cols-2">
-          <label className="field">
-            Nombre de tu negocio
-            <input className="input" name="business" placeholder="Ej: Hilos y Ovillos" required />
-          </label>
-          <label className="field">
-            ¿Qué haces?
-            <select className="input" name="industry" defaultValue="crochet">
-              {INDUSTRY_OPTIONS.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      )}
+      <input type="hidden" name="invite" value={invite} />
+      <label className="field">
+        Tu nombre
+        <input className="input" name="name" autoComplete="name" required />
+      </label>
+      <label className="field">
+        Correo
+        <input className="input" name="email" type="email" autoComplete="email" required />
+      </label>
       <label className="field">
         Contraseña
         <PasswordInput name="password" autoComplete="new-password" minLength={8} value={password} onChange={setPassword} />

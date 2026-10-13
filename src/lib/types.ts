@@ -29,6 +29,7 @@ export type Invitation = {
   role: Role;
   location_id: string | null;
   token: string;
+  code: string;
   invited_by: string | null;
   created_at: string;
   expires_at: string;

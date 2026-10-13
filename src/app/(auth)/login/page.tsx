@@ -11,13 +11,14 @@ function LoginForm() {
   const params = useSearchParams();
   const next = params.get("next");
   // Si next es /invitar/<token> (así llega quien sigue un enlace de invitación sin sesión),
-  // hay que pasar el token también como "invite" o /registro pedirá nombre de negocio y
-  // crearía uno nuevo en vez de unir a la persona al que la invitó.
+  // hay que pasar el token también como "invite" o /registro no va a saber a qué negocio unirla.
+  // Sin token a mano (nadie llegó siguiendo una invitación), manda a /invitar a pedirlo: HEBRA
+  // es de uso privado, no hay registro abierto.
   const inviteToken = next?.match(/^\/invitar\/(.+)$/)?.[1];
   const registerQuery = new URLSearchParams();
   if (next) registerQuery.set("next", next);
   if (inviteToken) registerQuery.set("invite", inviteToken);
-  const registerHref = registerQuery.size > 0 ? `/registro?${registerQuery.toString()}` : "/registro";
+  const registerHref = inviteToken ? `/registro?${registerQuery.toString()}` : "/invitar";
 
   return (
     <form action={action} className="flex flex-col gap-4">

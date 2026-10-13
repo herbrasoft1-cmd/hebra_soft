@@ -2,6 +2,29 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Cierra el autorregistro abierto, agrega código corto de invitación (2026-10-13)
+
+El usuario detectó que, ya en producción, cualquiera podía crear un negocio nuevo desde
+`/registro` sin invitación — HEBRA es software privado de un solo cliente, no un SaaS de
+autoregistro. Cambios:
+
+- `supabase/migrations/0019_codigo_invitacion.sql`: `invitations` gana columna `code` (8
+  caracteres, con backfill). `create_invitation` también lo genera; nueva función
+  `get_invitation_by_code` resuelve el código al token existente (misma exposición que el link,
+  la aceptación real sigue exigiendo que el correo coincida).
+- Nueva pantalla `/invitar` (código, sin token en la URL) — quien recibe el código lo escribe ahí
+  y se redirige al flujo de `/invitar/[token]` ya existente.
+- `/registro` sin `?invite=...` ya no muestra el formulario de "crear negocio nuevo": muestra un
+  aviso y lleva a `/invitar`. El `signUp` (server action) también rechaza la solicitud sin
+  invitación — no es solo un gate de UI, cierra el camino aunque se invoque la acción directo.
+- La portada y el login apuntan a `/invitar` en vez de `/registro`.
+- En Equipo → Invitar, el código ahora se muestra grande junto al link, para compartir por
+  WhatsApp o decirlo de palabra.
+- Verificado de punta a punta con Playwright contra datos reales: se generó una invitación, se
+  tomó el código mostrado, se resolvió en `/invitar`, llegó al flujo de aceptación existente y el
+  link "Crea tu cuenta" preservó el token — se canceló la invitación de prueba al terminar.
+- `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
 ## Infraestructura — Dominio propio hebrasoft.com (2026-10-13)
 
 Agregado `"routes": [{ "pattern": "hebrasoft.com", "custom_domain": true }]` a `wrangler.jsonc`

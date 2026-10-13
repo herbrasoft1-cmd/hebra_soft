@@ -1237,3 +1237,28 @@ partir de la comparación de Pedidos/Producción contra `Ent-Produccion.dc.html`
     es una limitación de la app externa, no un bug de HEBRA. Para instalar en el celular hay que
     abrir el link directo en Chrome/Safari.
   - `npm run lint`/`test` (83/83) pasan limpio.
+
+- **Cierra el autorregistro abierto, código corto de invitación (2026-10-13).** El usuario, ya
+  probando en producción, notó que `/registro` dejaba crear un negocio nuevo sin ninguna
+  invitación y que el botón "Tengo una invitación" de la portada en realidad mandaba a ese mismo
+  formulario abierto — ningún lado pedía de verdad un código o token. Propuso que invitar fuera
+  generar un código corto para compartir, en vez de solo el link largo; se acordó con el usuario
+  antes de tocar nada ("¿Sigo con esto?" → "si").
+  - Migración `0019_codigo_invitacion.sql`: columna `code` en `invitations`, `create_invitation`
+    la genera, nueva función `get_invitation_by_code`. Verificado contra el historial de
+    migraciones real (no asumido): `create_invitation` había sido redefinida después de la 0003
+    por `0008_fix_invite_token.sql` (permiso solo-owner, no admin; `gen_random_uuid()` en vez de
+    `gen_random_bytes()` porque pgcrypto no está disponible en el search_path restringido de estas
+    funciones security definer) — la nueva versión se basó en esa, no en la original desactualizada.
+  - Nueva pantalla `/invitar` (código) con su propio `Shell` compartido (extraído del que ya
+    usaba `/invitar/[token]`, antes duplicado).
+  - `/registro` sin `invite` muestra un aviso en vez del formulario de negocio nuevo; `signUp`
+    (server action) también lo rechaza del lado del servidor, no solo oculta la UI.
+  - Portada y login actualizados para apuntar a `/invitar`.
+  - `InviteSheet` (Equipo) ahora muestra el código grande junto al link existente.
+  - **Verificado de punta a punta con Playwright contra la cuenta real**, no solo mirando código:
+    se generó una invitación de prueba real, se extrajo el código del DOM, se resolvió en
+    `/invitar` hasta llegar al flujo de aceptación ya existente con el token correcto, y se
+    confirmó que "Crea tu cuenta" desde el login preserva el `invite` en la URL. Se canceló la
+    invitación de prueba al terminar para no dejar basura en el panel real de Equipo.
+  - `npm run lint`/`test` (83/83)/`build` pasan limpio.
