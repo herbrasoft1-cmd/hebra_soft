@@ -15,6 +15,7 @@ import {
   IconOvillo,
   IconRecetario,
   IconWallet,
+  Logo,
 } from "@/components/icons";
 import { MiniTimer } from "@/components/timer";
 import { canFully } from "@/lib/permissions";
@@ -79,8 +80,8 @@ export function AppSidebar({
         href="/inicio"
         className="flex items-center gap-3 rounded-[14px] border border-sidebar-border bg-sidebar-raised p-2 text-left transition-colors hover:bg-sidebar-active"
       >
-        <span className="flex size-[38px] shrink-0 items-center justify-center rounded-[10px] bg-primary text-white">
-          <IconOvillo size={22} />
+        <span className="flex size-[38px] shrink-0 items-center justify-center rounded-[10px] bg-surface">
+          <Logo size={24} />
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="truncate text-[14px] font-semibold text-sidebar-text">{businessName}</span>
