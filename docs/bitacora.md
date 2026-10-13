@@ -1131,3 +1131,26 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     disponibilidad diaria de la persona" — HEBRA solo tiene capacidad semanal real
     (`weeklyAvailableHours`), no diaria, así que inventar la parte diaria sería adivinar.
   - `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
+- **Auditoría mockup-vs-real, Fase 8: Inicio tejedora — última de las 8 pantallas (2026-10-13).**
+  - `OrderTimerButton` (`pedidos/order-timer-button.tsx`) ganó un prop `size="sm"|"lg"` — "Mi
+    turno" usa `lg` (64px, acción principal) sin afectar el tamaño chico que sigue usando el
+    Kanban de Pedidos.
+  - `ShiftTimerCard` (`inicio/shift-timer-card.tsx`) reescrita para fusionar el bloque claro
+    (id/cliente/título/"Ver detalle", antes separado en `shift-home.tsx`) con la tarjeta oscura del
+    cronómetro en una sola tarjeta "hero", fiel al mockup.
+  - `shift-home.tsx`: cabecera agrega la sede activa real junto a la fecha (consulta nueva a
+    `locations` solo cuando hay una sede seleccionada en el selector global — si es "Todas las
+    sedes" no se muestra nada, en vez de inventar un valor). Se decidió explícitamente NO derivar
+    "turno mañana/tarde" de la hora del sistema: HEBRA no tiene datos reales de horario de turno,
+    así que inventarlo sería adivinar, no sería un dato real. "Después" gana un punto de color por
+    estado (`STATUS_DOT`, mismo patrón ya usado en `board.tsx`/Analítica).
+  - **Verificado en vivo con la cuenta tejedora:** la tarjeta "hero" renderiza correcta (un solo
+    bloque oscuro con ID, chip de fecha, título, cliente, botón de cronómetro grande de 64px,
+    barra de progreso, estado), "Pasos del patrón" muestra "1 de 3" con el progreso real
+    acumulado de sesiones anteriores.
+  - `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
+**Con esta fase se cierran las 8 pantallas de la auditoría mockup-vs-real** (Equipo, Analítica,
+Insumos, Recetario, Finanzas, Portal de seguimiento, Pedido móvil, Inicio tejedora) iniciada a
+partir de la comparación de Pedidos/Producción contra `Ent-Produccion.dc.html`.

@@ -82,6 +82,20 @@ más grande: faltaban 2 de 4 pestañas del mockup).
   por persona.
 - `npm run lint`/`test` (78/78)/`build` pasan limpio.
 
+## Mejora fuera del roadmap — Auditoría mockup-vs-real, Fase 8: Inicio tejedora (2026-10-13)
+
+Última de las 8 pantallas auditadas contra sus mockups.
+
+- `OrderTimerButton` ganó `size="lg"` (64px): "Mi turno" usa el tamaño grande como acción
+  principal; el Kanban de Pedidos sigue con el tamaño chico de siempre.
+- El bloque claro (id/cliente/título) y la tarjeta oscura del cronómetro, antes separados, se
+  fusionaron en una sola tarjeta "hero" (`ShiftTimerCard`), fiel al mockup.
+- Cabecera con la sede activa real (cuando hay una sede seleccionada) junto a la fecha. "Turno"
+  (mañana/tarde) se dejó fuera a propósito: HEBRA no tiene datos reales de horario por turno,
+  derivarlo de la hora actual sería adivinar.
+- "Después" gana un punto de color por estado (mismo patrón ya usado en Pedidos/Analítica).
+- `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
 ## Mejora fuera del roadmap — Auditoría mockup-vs-real, Fase 7: Pedido móvil (2026-10-13)
 
 - `OrderTimeline`: el paso activo ahora muestra el % real de avance (cronómetro) dentro del nodo,
