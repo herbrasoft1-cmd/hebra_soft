@@ -62,6 +62,26 @@ la tarjeta había acumulado demasiados botones.
   `/pedidos/[id]`.
 - `npm run lint`/`test` (78/78, +4 nuevas)/`build` pasan limpio.
 
+## Mejora fuera del roadmap — Auditoría mockup-vs-real en 8 pantallas, Fase 1: Equipo (2026-10-13)
+
+El usuario pidió repetir, para el resto de la app, la comparación mockup-vs-real ya hecha en
+Pedidos. 8 agentes de solo lectura compararon cada mockup contra su pantalla real; se aprobó
+implementar todo en orden de más a menos complejo, empezando por Equipo/Configuración (la brecha
+más grande: faltaban 2 de 4 pestañas del mockup).
+
+- Migración `0016`: `list_members` ahora también devuelve `last_sign_in_at` y
+  `two_factor_enabled` (de `auth.users`/`auth.mfa_factors`, datos reales).
+- Pestañas nuevas en Equipo: "Integraciones" (catálogo de 9 conectores, todos "No conectada
+  todavía" con botón deshabilitado — mismo criterio honesto que la facturación electrónica de la
+  Fase 6, nunca un "Conectado" falso) y "Plan y seguridad" (conteos reales de miembros/sedes/
+  facturas del mes, sin inventar un cupo de plan; sin los 4 toggles de seguridad del mockup
+  porque un toggle que no aplica nada de verdad es peor que no tenerlo).
+- "Actividad" se movió dentro de "Plan y seguridad" (como en el mockup) y ganó botón "Exportar
+  CSV".
+- Tabla de miembros: columna "Último acceso" (tiempo relativo real) y chip "2FA activo/pendiente"
+  por persona.
+- `npm run lint`/`test` (78/78)/`build` pasan limpio.
+
 ## Fase 8 — Móvil por rol y portal del cliente (2026-10-11)
 
 Las Fases 6 y 7 siguen excluidas, así que el roadmap saltó directo de la 5 a la 8. Los 3 mockups

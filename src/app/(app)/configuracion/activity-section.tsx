@@ -1,7 +1,9 @@
+"use client";
+
 import { ROLE_LABEL } from "@/lib/roles";
 import type { Role } from "@/lib/types";
 
-type AuditEntry = {
+export type AuditEntry = {
   id: string;
   email: string | null;
   action: string;
@@ -37,13 +39,37 @@ function describe(entry: AuditEntry): string {
   }
 }
 
+function csvEscape(v: string) {
+  return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+}
+
+function downloadCsv(entries: AuditEntry[]) {
+  const header = ["Fecha", "Quién", "Qué"];
+  const lines = entries.map((e) =>
+    [new Date(e.created_at).toLocaleString("es-CO"), e.email ?? "Alguien", describe(e)].map(csvEscape).join(","),
+  );
+  const csv = [header.join(","), ...lines].join("\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "hebra-actividad.csv";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
 export function ActivitySection({ entries }: { entries: AuditEntry[] }) {
   if (entries.length === 0) return null;
   return (
     <section className="card flex flex-col gap-3 p-5">
-      <div>
-        <h2 className="font-display text-xl font-semibold">Actividad</h2>
-        <p className="text-sm text-ink-2">Los últimos cambios importantes en este negocio.</p>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="font-display text-xl font-semibold">Actividad</h2>
+          <p className="text-sm text-ink-2">Los últimos cambios importantes en este negocio.</p>
+        </div>
+        <button type="button" onClick={() => downloadCsv(entries)} className="btn-ghost min-h-10 px-4 text-sm">
+          Exportar CSV
+        </button>
       </div>
       <ul className="flex flex-col gap-0.5">
         {entries.map((e) => (

@@ -17,6 +17,8 @@ export type Membership = {
   joined_at: string;
   location_id: string | null;
   location_name: string | null;
+  last_sign_in_at: string | null;
+  two_factor_enabled: boolean;
 };
 
 export type Invitation = {

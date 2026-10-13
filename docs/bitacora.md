@@ -738,4 +738,41 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     inventario de prueba solo para ver un chip condicional ya probado en el mismo componente
     (`Tooltip`) y con el mismo dato (`outOfStockByProduct`) para el filtro "En riesgo".
   - `npm run lint`/`test` (78/78, +4 nuevas de `suggestedRefund`)/`build` pasan limpio.
+
+- **Auditoría mockup-vs-real en el resto de la app, Fase 1: Equipo (2026-10-13).** El usuario pidió
+  repetir, para las 8 pantallas restantes, la misma comparación mockup-vs-real ya hecha en
+  Pedidos/Producción. Se delegó en 8 agentes de solo lectura (uno por `docs/mockups/*.dc.html`
+  contra su pantalla real) que devolvieron hallazgos priorizados con citas de línea. El usuario
+  aprobó implementar todo, de más a menos complejo (plan guardado en
+  `C:\Users\T460s\.claude\plans\smooth-riding-phoenix.md`), empezando por Equipo/Configuración —
+  la brecha más profunda de las 8: faltaban 2 de las 4 pestañas que define
+  `Ent-Equipo.dc.html` ("Integraciones" y "Plan y seguridad").
+  - Dos decisiones de alcance confirmadas con el usuario antes de construir, para no inventar
+    datos/estados falsos (mismo criterio que la facturación electrónica real de la Fase 6):
+    **Integraciones** se construye como catálogo de 9 conectores en estado real "No conectada
+    todavía" (sin fingir un "Conectado"); **Plan y seguridad** muestra conteos reales de uso
+    (miembros/sedes/facturas del mes) en vez de un cupo de plan inventado, y **sin** los 4 toggles
+    de seguridad del mockup (SSO/2FA obligatoria/restricción por IP/aprobación de exportaciones)
+    porque un toggle que no aplica nada de verdad da una falsa sensación de seguridad.
+  - Migración `0016`: `list_members` (RPC `security definer` ya existente) ahora también devuelve
+    `last_sign_in_at` (de `auth.users`) y `two_factor_enabled` (`exists` sobre
+    `auth.mfa_factors` con `status='verified'`) — ambos datos reales, mismo patrón ya usado para
+    leer `auth.users.email`.
+  - Nuevo `src/lib/format.ts`: `relativeTime()` ("Hace 12 min"/"Hace 3 h"/"Hace 5 días"), reutilizado
+    en la columna "Último acceso" de `member-row.tsx`.
+  - Nuevo `integrations-section.tsx`: WhatsApp Business, Instagram Shopping, Wompi, Coordinadora,
+    Shopify, Siigo, Alegra, Google Drive, API y webhooks — cada tarjeta con botón "Próximamente"
+    deshabilitado, documentando el punto de conexión futuro sin fingir que ya funciona.
+  - Nuevo `plan-section.tsx`: 3 conteos reales (miembros/sedes/facturas generadas este mes, esta
+    última vía una consulta nueva a `invoices` filtrada por el mes en curso) + `ActivitySection`
+    movida aquí dentro (como en el mockup), con botón nuevo "Exportar CSV" (mismo patrón que
+    `export-csv-button.tsx` de Finanzas).
+  - Terminología: se mantuvo "Titular" (no se revirtió a "Propietaria" del mockup) — decisión
+    explícita de una sesión anterior, no un error a corregir.
+  - **Verificado de punta a punta con datos reales:** las 4 pestañas renderizan correctamente; la
+    tabla de miembros muestra "Hace 2 días"/"Hace 19 h" (tiempo relativo real) y "2FA pendiente"
+    para las 3 cuentas de prueba (ninguna tiene 2FA activo, dato honesto); Integraciones muestra
+    las 9 tarjetas con "No conectada"; Plan muestra "3 miembros · 2 sedes · 1 factura generada este
+    mes" (conteos reales, no inventados) y la actividad con el botón de exportar CSV.
+  - `npm run lint`/`test` (78/78)/`build` pasan limpio.
   - `npm run lint`/`test` (74/74)/`build` pasan limpio.

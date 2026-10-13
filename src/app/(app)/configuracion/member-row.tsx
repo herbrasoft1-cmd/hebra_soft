@@ -1,6 +1,7 @@
 "use client";
 
 import { IconTrash } from "@/components/icons";
+import { relativeTime } from "@/lib/format";
 import { ROLE_LABEL } from "@/lib/roles";
 import type { Membership, Role } from "@/lib/types";
 import { removeMember, updateMemberRole } from "./team-actions";
@@ -29,8 +30,13 @@ export function MemberRow({
           {isSelf && <span className="ml-1.5 text-xs font-normal text-muted">(tú)</span>}
         </span>
         <span className="text-xs text-muted">
-          {member.location_name ?? "Todas"} · desde {new Date(member.joined_at).toLocaleDateString("es-CO")}
+          {member.location_name ?? "Todas"} · desde {new Date(member.joined_at).toLocaleDateString("es-CO")} ·{" "}
+          {relativeTime(member.last_sign_in_at)}
         </span>
+      </span>
+
+      <span className={`chip text-xs ${member.two_factor_enabled ? "bg-success-soft text-success-ink" : "bg-surface-muted text-muted"}`}>
+        2FA {member.two_factor_enabled ? "activo" : "pendiente"}
       </span>
 
       {canEditRole ? (

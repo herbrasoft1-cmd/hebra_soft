@@ -7,7 +7,6 @@ import { canFully } from "@/lib/permissions";
 import { getSession } from "@/lib/tenant";
 import type { Invitation, Location, Membership, SalesChannel } from "@/lib/types";
 import { INDUSTRY_OPTIONS } from "@/modules";
-import { ActivitySection } from "./activity-section";
 import { updateTenant } from "./actions";
 import { ChannelsSection } from "./channels-section";
 import { EquipoTabs } from "./equipo-tabs";
@@ -20,18 +19,22 @@ export default async function SettingsPage() {
   const { supabase, tenant, user, role } = await getSession();
   if (!canFully(role, "view_finance")) redirect("/inicio");
 
-  const [{ data: members }, { data: invitations }, { data: activity }, { data: locations }, { data: channels }] = await Promise.all([
-    supabase.rpc("list_members", { p_tenant_id: tenant.id }),
-    supabase
-      .from("invitations")
-      .select("*")
-      .eq("tenant_id", tenant.id)
-      .is("accepted_at", null)
-      .order("created_at", { ascending: false }),
-    supabase.rpc("list_audit_log", { p_tenant_id: tenant.id, p_limit: 50 }),
-    supabase.from("locations").select("*").eq("tenant_id", tenant.id).order("name"),
-    supabase.from("sales_channels").select("*").eq("tenant_id", tenant.id).order("created_at"),
-  ]);
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+
+  const [{ data: members }, { data: invitations }, { data: activity }, { data: locations }, { data: channels }, { count: invoicesThisMonth }] =
+    await Promise.all([
+      supabase.rpc("list_members", { p_tenant_id: tenant.id }),
+      supabase
+        .from("invitations")
+        .select("*")
+        .eq("tenant_id", tenant.id)
+        .is("accepted_at", null)
+        .order("created_at", { ascending: false }),
+      supabase.rpc("list_audit_log", { p_tenant_id: tenant.id, p_limit: 50 }),
+      supabase.from("locations").select("*").eq("tenant_id", tenant.id).order("name"),
+      supabase.from("sales_channels").select("*").eq("tenant_id", tenant.id).order("created_at"),
+      supabase.from("invoices").select("id", { count: "exact", head: true }).eq("tenant_id", tenant.id).gte("created_at", monthStart),
+    ]);
 
   return (
     <>
@@ -98,11 +101,9 @@ export default async function SettingsPage() {
           viewerRole={role}
           viewerId={user.id}
           locations={(locations ?? []) as Location[]}
+          invoicesThisMonth={invoicesThisMonth ?? 0}
+          activity={activity ?? []}
         />
-      </div>
-
-      <div className="mt-6">
-        <ActivitySection entries={activity ?? []} />
       </div>
 
       <div className="mt-6 max-w-sm">
