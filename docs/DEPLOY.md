@@ -52,6 +52,14 @@ runtime. Por eso hay que configurarlas en dos lugares distintos según cómo se 
 4. Verificar el dominio/ruta asignado por Cloudflare y, si aplica, apuntar el dominio propio desde
    el dashboard (*Settings → Domains & Routes*).
 
+## Después de cambiar variables de entorno en el dashboard
+
+`NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` se incrustan en el código **durante el
+build**, no se leen en runtime. Si se agregan o cambian en *Settings → Variables and Secrets*,
+hace falta un **build nuevo**, no solo un "Retry" del build fallido anterior (puede reusar capas
+cacheadas de un build que corrió sin esas variables). Si el sitio sigue devolviendo `error code:
+1101` después de guardar las variables y reintentar, forzar un build con un commit nuevo.
+
 ## Configurar "Workers Builds" (despliegue automático desde GitHub)
 
 Cloudflare separa el despliegue en dos comandos configurables en el dashboard (*Workers & Pages →
