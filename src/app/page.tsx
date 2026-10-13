@@ -65,27 +65,31 @@ export default async function Home() {
 
   return (
     <main className="pt-safe flex min-h-dvh flex-col overflow-x-hidden bg-bg">
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-6 md:px-8">
-        <span className="flex items-center gap-2.5">
-          <Logo size={32} />
-          <span className="font-display text-xl font-semibold">hebra</span>
-        </span>
-        <Link href="/login" className="btn-primary min-h-10 px-5 text-sm">
-          Iniciar sesión
-        </Link>
-      </header>
-
-      {/* Hero */}
-      <section className="relative">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
-        >
-          <div className="absolute top-[-10%] left-[-10%] size-[420px] rounded-full bg-primary-soft opacity-70 blur-3xl md:size-[560px]" />
-          <div className="absolute right-[-12%] top-[8%] size-[360px] rounded-full bg-success-soft opacity-60 blur-3xl md:size-[480px]" />
+      {/* Encabezado + hero comparten un mismo fondo: la foto cubre desde arriba del todo, sin
+          cortes ni barras separando el encabezado del resto. */}
+      <div className="relative">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+          <img
+            src="/brand/hero-yarn.jpg"
+            alt=""
+            className="absolute inset-0 size-full object-cover object-top opacity-95 blur-[1px]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-bg/0 via-bg/15 to-bg" />
+          <div className="absolute top-[-10%] left-[-10%] size-[420px] rounded-full bg-primary-soft opacity-40 blur-3xl md:size-[560px]" />
+          <div className="absolute right-[-12%] top-[8%] size-[360px] rounded-full bg-success-soft opacity-30 blur-3xl md:size-[480px]" />
         </div>
 
-        <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 py-10 md:px-8 md:py-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-6">
+        <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-6 md:px-8">
+          <span className="flex items-center gap-2.5">
+            <Logo size={32} />
+            <span className="font-display text-xl font-semibold">hebra</span>
+          </span>
+          <Link href="/login" className="btn-primary min-h-10 px-5 text-sm">
+            Iniciar sesión
+          </Link>
+        </header>
+
+        <div className="relative z-10 mx-auto grid w-full max-w-6xl gap-10 px-5 py-10 md:px-8 md:py-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-6">
           <div className="flex flex-col items-start gap-5 text-left">
             <span className="chip border border-border-strong bg-surface text-[13px] font-semibold text-ink-2">
               Gestión integral de negocio
@@ -118,7 +122,7 @@ export default async function Home() {
           </div>
 
           {/* Tarjeta ilustrativa: mismo patrón visual del simulador de precio real */}
-          <div className="flex flex-col gap-3 rounded-[26px] border border-border bg-night p-6 text-on-night md:p-7">
+          <div className="shadow-tab flex flex-col gap-3 rounded-[26px] border border-white/10 bg-night/90 p-6 text-on-night backdrop-blur-xl md:p-7">
             <div className="flex items-center justify-between">
               <span className="text-[13px] font-semibold text-on-night-muted">Así se calcula un precio en HEBRA</span>
               <span className="chip bg-white/10 text-[11px] text-on-night-muted">Ejemplo</span>
@@ -147,7 +151,7 @@ export default async function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Cómo funciona */}
       <section className="mx-auto w-full max-w-5xl px-5 pt-4 pb-14 md:px-8">

@@ -1154,3 +1154,17 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
 **Con esta fase se cierran las 8 pantallas de la auditoría mockup-vs-real** (Equipo, Analítica,
 Insumos, Recetario, Finanzas, Portal de seguimiento, Pedido móvil, Inicio tejedora) iniciada a
 partir de la comparación de Pedidos/Producción contra `Ent-Produccion.dc.html`.
+
+- **Foto de fondo en el hero de la portada, fuera del roadmap (2026-10-13).** El usuario pidió usar
+  una foto de ovillos de lana como fondo del hero de `/`, desenfocada y semitransparente, cubriendo
+  solo la zona superior (no toda la página). Primer intento invisible por un bug real de CSS: la
+  capa decorativa usaba `z-index: -10`, que la deja detrás del propio fondo opaco de `<main>`
+  (contexto de apilamiento, no un problema de opacidad) — corregido con `z-0`/`z-10` explícito.
+  Luego, iterando sobre feedback directo: imagen más visible y extendida para cubrir también la
+  franja del encabezado (como si el logo/botón fueran una barra flotando sobre la foto), después se
+  quitó la barra translúcida que había quedado detrás del encabezado para que todo quedara
+  uniforme, y por último se bajó el desenfoque de `blur-[2px]` a `blur-[1px]` a pedido del usuario.
+  Para cerrar, se ajustó la card "Así se calcula un precio en HEBRA" (antes `bg-night` opaco con
+  borde genérico, se veía pegada encima de la foto) a `bg-night/90 backdrop-blur-xl` con
+  `border-white/10` y `shadow-tab`, dejando que el tono cálido del fondo se filtre levemente para
+  mejor armonía visual. `npm run lint`/`test` (83/83)/`build` pasan limpio en cada iteración.

@@ -82,6 +82,27 @@ más grande: faltaban 2 de 4 pestañas del mockup).
   por persona.
 - `npm run lint`/`test` (78/78)/`build` pasan limpio.
 
+## Mejora fuera del roadmap — Foto de fondo en el hero de la portada (2026-10-13)
+
+- Nueva imagen (`public/brand/hero-yarn.jpg`, comprimida de 642 KB a 108 KB) como fondo
+  desenfocado y semitransparente solo en la zona del hero de `/` — se desvanece hacia el crema de
+  la app antes de llegar a "Todo tu taller, en un solo lugar", no cubre toda la página.
+- **Bug real corregido en el camino:** la capa decorativa usaba `z-index: -10`, lo que la dejaba
+  completamente invisible detrás del propio fondo opaco de `<main>` (un contexto de apilamiento
+  clásico de CSS) — no era un problema de opacidad, la imagen nunca se veía en absoluto.
+  Corregido con `z-0` en la capa decorativa y `z-10` explícito en el contenido del hero.
+- Iteraciones de ajuste fino pedidas tras la primera versión: imagen más visible (opacidad 95%,
+  degradado suavizado) y extendida hacia arriba para cubrir también la franja del encabezado, en
+  vez de quedar recortada antes de él; luego se quitó la barra translúcida que se había puesto
+  detrás del logo/botón "Iniciar sesión" para que el encabezado quedara unificado con el resto del
+  fondo en vez de verse como una franja aparte; por último se redujo el desenfoque de `blur-[2px]`
+  a `blur-[1px]` para que la textura de la foto se note más.
+- La card "Así se calcula un precio en HEBRA" del hero pasó de `bg-night` opaco con borde genérico
+  a `bg-night/90 backdrop-blur-xl` con `border-white/10` y `shadow-tab` (la única sombra permitida
+  por el sistema de diseño) — deja que el tono cálido de la foto se filtre levemente en vez de
+  verse como un rectángulo negro pegado encima.
+- `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
 ## Mejora fuera del roadmap — Auditoría mockup-vs-real, Fase 8: Inicio tejedora (2026-10-13)
 
 Última de las 8 pantallas auditadas contra sus mockups.
