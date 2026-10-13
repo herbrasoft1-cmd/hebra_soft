@@ -28,7 +28,32 @@ type Tracking = {
   tenant_name: string;
   tenant_logo_url: string | null;
   tenant_whatsapp: string | null;
+  assignee_first_name: string | null;
+  steps_total: number;
+  steps_done: number;
+  current_step_name: string | null;
 };
+
+/** Sub-texto del paso activo: usa el avance real de "Mi turno" (quién teje, cuántos pasos lleva)
+ * cuando hay datos — si el patrón no tiene pasos cargados o nadie está asignado, cae a un
+ * mensaje genérico en vez de inventar un dato que no existe. */
+function activeStepDetail(t: Tracking): string {
+  if (t.status === "espera") {
+    return "Ya confirmamos tu pedido y está en la lista para empezar.";
+  }
+  if (t.status === "proceso") {
+    const who = t.assignee_first_name ? `${t.assignee_first_name} lo está tejiendo a mano` : "Lo estamos tejiendo a mano";
+    if (t.steps_total > 0) {
+      const pct = Math.round((t.steps_done / t.steps_total) * 100);
+      return `${who} — va en el ${pct}% (${t.steps_done} de ${t.steps_total} pasos)${t.current_step_name ? `. Sigue: ${t.current_step_name}` : ""}.`;
+    }
+    return `${who} ahora mismo.`;
+  }
+  if (t.status === "calidad") {
+    return "Revisión final y últimos detalles antes de enviarlo.";
+  }
+  return "";
+}
 
 export default async function TrackingPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
@@ -37,6 +62,7 @@ export default async function TrackingPage({ params }: { params: Promise<{ token
   const tracking = data as Tracking | null;
   if (!tracking) notFound();
 
+  const displayTitle = tracking.product_name ?? tracking.title;
   const currentIdx = STEPS.findIndex((s) => s.status === tracking.status);
   const wa = whatsappLink(tracking.tenant_whatsapp, `Hola, te escribo por mi pedido "${tracking.title}".`);
   const payWa = whatsappLink(
@@ -47,22 +73,23 @@ export default async function TrackingPage({ params }: { params: Promise<{ token
   return (
     <main className="flex min-h-dvh justify-center bg-surface-muted px-4 py-8">
       <div className="flex w-full max-w-md flex-col gap-6">
-        <header className="flex flex-col items-center gap-2 text-center">
+        <header className="flex flex-col items-center gap-3 rounded-[26px] bg-primary-soft px-5 py-7 text-center">
           {tracking.tenant_logo_url ? (
             <Image src={tracking.tenant_logo_url} alt={tracking.tenant_name} width={56} height={56} unoptimized className="rounded-full object-cover" />
           ) : (
             <Logo size={48} />
           )}
-          <span className="font-display text-lg font-semibold">{tracking.tenant_name}</span>
-          <p className="text-sm text-ink-2">
-            Hola{tracking.customer_first_name ? ` ${tracking.customer_first_name}` : ""}, tu pedido va por buen camino.
-          </p>
+          <span className="text-sm font-medium text-ink-2">{tracking.tenant_name}</span>
+          <h1 className="font-display text-2xl leading-tight font-semibold">
+            Hola{tracking.customer_first_name ? ` ${tracking.customer_first_name}` : ""}, tu {displayTitle.toLowerCase()} va por buen
+            camino.
+          </h1>
         </header>
 
         <section className="card flex flex-col gap-4 p-5">
           <div>
             <span className="font-mono text-xs text-muted">#{tracking.order_id.slice(0, 6).toUpperCase()}</span>
-            <h1 className="font-display text-xl font-semibold">{tracking.product_name ?? tracking.title}</h1>
+            <p className="font-display text-xl font-semibold">{displayTitle}</p>
           </div>
 
           <ol className="flex flex-col gap-0">
@@ -77,13 +104,20 @@ export default async function TrackingPage({ params }: { params: Promise<{ token
                   </div>
                   <div className="pb-5">
                     <p className={`text-sm ${active ? "font-semibold text-ink" : done ? "text-ink-2" : "text-muted"}`}>{s.label}</p>
-                    {active && <p className="text-xs text-muted">Va en proceso ahora mismo.</p>}
+                    {active && <p className="max-w-xs text-xs text-muted">{activeStepDetail(tracking)}</p>}
                   </div>
                 </li>
               );
             })}
           </ol>
-          {tracking.due_date && <p className="text-sm text-ink-2">Entrega estimada: {new Date(tracking.due_date + "T00:00:00").toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" })}</p>}
+          {tracking.due_date && (
+            <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-muted px-3.5 py-3">
+              <span className="text-sm text-ink-2">Entrega estimada</span>
+              <span className="font-display text-[15px] font-semibold">
+                {new Date(tracking.due_date + "T00:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "long" })}
+              </span>
+            </div>
+          )}
         </section>
 
         <section className="flex flex-col gap-2">
@@ -93,15 +127,18 @@ export default async function TrackingPage({ params }: { params: Promise<{ token
               <Image src={tracking.progress_photo_url} alt="Avance del pedido" fill unoptimized className="object-cover" />
             </div>
           ) : (
-            <div className="flex aspect-video items-center justify-center rounded-2xl border border-dashed border-border-strong text-center text-sm text-muted">
-              Todavía no hay foto de avance
+            <div className="flex aspect-video flex-col items-center justify-center gap-1 rounded-2xl border border-dashed border-border-strong text-center text-sm text-muted">
+              <span>Todavía no hay foto de avance</span>
+              {tracking.assignee_first_name && tracking.status === "proceso" && (
+                <span className="text-xs">La sube {tracking.assignee_first_name} desde su turno.</span>
+              )}
             </div>
           )}
         </section>
 
         <section className="card flex flex-col gap-3 p-5">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted">{tracking.title}</span>
+            <span className="text-muted">{displayTitle}</span>
             <span className="font-semibold tabular-nums">{money(tracking.total)}</span>
           </div>
           {tracking.total - tracking.balance > 0 && (

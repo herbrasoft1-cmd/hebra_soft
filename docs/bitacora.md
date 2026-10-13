@@ -1095,3 +1095,21 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     pendiente de verificar hasta que el usuario ejecute la migración `0017` (crea el bucket de
     Storage que `uploadAvatar` necesita).
   - `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
+- **Auditoría mockup-vs-real, Fase 6: Portal de seguimiento (2026-10-13).** `get_order_tracking`
+  (migración `0013`, Fase 8) nunca unía `product_steps`/`order_step_progress` de "Mi turno" —
+  migración `0018` la extiende con tejedora asignada (primer nombre) y avance real de pasos. El
+  timeline ahora muestra, en el paso activo, el dato real en vez de un texto fijo. Bug real
+  corregido de paso: la tarjeta de precio usaba `tracking.title` mientras el encabezado usaba
+  `tracking.product_name ?? tracking.title` — unificado. Encabezado con bloque de fondo propio y
+  "Entrega estimada" como pastilla.
+  - **Nota de migración:** el primer intento de `0018` falló con "cannot change return type of
+    existing function" (mismo problema ya documentado para `list_members`/`list_audit_log`) —
+    corregido agregando `drop function if exists get_order_tracking(text);` antes del `create`.
+  - **Verificado en vivo:** se avanzó el pedido de prueba `#B5F445` (Amigurumi Osito, asignado a
+    `qa.tejedora`, con 1 de 3 pasos ya marcados desde "Mi turno" en una sesión anterior) a "En
+    proceso" y se extrajo el link de seguimiento interceptando `navigator.clipboard.writeText`
+    (el botón "Compartir seguimiento" no muestra el token en pantalla). El portal mostró "QA lo
+    está tejiendo a mano — va en el 33% (1 de 3 pasos). Sigue: Cuerpo." — coincide exactamente con
+    el estado real de los pasos.
+  - `npm run lint`/`test` (83/83)/`build` pasan limpio.

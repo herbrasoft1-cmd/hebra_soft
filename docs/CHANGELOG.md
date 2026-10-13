@@ -82,6 +82,23 @@ más grande: faltaban 2 de 4 pestañas del mockup).
   por persona.
 - `npm run lint`/`test` (78/78)/`build` pasan limpio.
 
+## Mejora fuera del roadmap — Auditoría mockup-vs-real, Fase 6: Portal de seguimiento (2026-10-13)
+
+`get_order_tracking` nunca unía `product_steps`/`order_step_progress` (de "Mi turno", Fase 8)
+aunque esas tablas existen exactamente para esto — el portal mostraba 4 pasos genéricos sin quién
+teje el pedido ni cuánto avanzó de verdad.
+
+- Migración `0018`: `get_order_tracking` ahora también devuelve la tejedora asignada (primer
+  nombre), total/hechos de pasos del patrón y el siguiente paso pendiente.
+- El paso activo del timeline muestra el dato real: "{tejedora} lo está tejiendo a mano — va en el
+  {%} ({hechos} de {total} pasos). Sigue: {paso}." — sin inventar nada si el patrón no tiene pasos
+  cargados o nadie está asignado (cae a un mensaje genérico).
+- Encabezado con jerarquía más clara (bloque con fondo propio, saludo más grande) y "Entrega
+  estimada" como pastilla con su propio fondo, en vez de texto plano.
+- **Bug real corregido:** la tarjeta de precio usaba `tracking.title`, el encabezado usaba
+  `tracking.product_name ?? tracking.title` — unificado a una sola fuente (`displayTitle`).
+- `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
 ## Corrección — Lectura de perfil propio sin depender del access token (2026-10-13)
 
 `auth.updateUser()` actualiza la base de datos, pero el access token de la sesión actual conserva
