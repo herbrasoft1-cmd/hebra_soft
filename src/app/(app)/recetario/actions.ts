@@ -40,6 +40,42 @@ export async function updateProduct(formData: FormData) {
   revalidatePath("/recetario");
 }
 
+/** Clona un patrón completo (receta + insumos) como punto de partida para una variante nueva
+ * (ej. "Osito café" → "Osito café (copia)"), sin publicar ninguna versión todavía — el precio
+ * sugerido queda igual al original hasta que alguien lo ajuste y publique de nuevo. */
+export async function duplicateProduct(formData: FormData) {
+  const { supabase, tenant, role } = await getSession();
+  if (!canFully(role, "edit_recipes")) throw new Error("No tienes permiso para duplicar patrones.");
+  const id = String(formData.get("id"));
+
+  const { data: original, error: fetchError } = await supabase
+    .from("products")
+    .select("name, category, notes, labor_seconds, target_margin_pct, sale_price")
+    .eq("id", id)
+    .eq("tenant_id", tenant.id)
+    .single();
+  if (fetchError || !original) throw new Error("No se encontró el patrón a duplicar.");
+
+  const { data: lines } = await supabase.from("product_supplies").select("supply_id, quantity").eq("product_id", id);
+
+  const { data: copy, error: insertError } = await supabase
+    .from("products")
+    .insert({ ...original, name: `${original.name} (copia)`, tenant_id: tenant.id })
+    .select("id")
+    .single();
+  if (insertError || !copy) throw new Error("No se pudo duplicar el patrón.");
+
+  if (lines && lines.length > 0) {
+    const { error: linesError } = await supabase
+      .from("product_supplies")
+      .insert(lines.map((l) => ({ tenant_id: tenant.id, product_id: copy.id, supply_id: l.supply_id, quantity: l.quantity })));
+    if (linesError) throw new Error("El patrón se duplicó, pero no se pudieron copiar sus insumos.");
+  }
+
+  revalidatePath("/recetario");
+  redirect(`/recetario/${copy.id}`);
+}
+
 export async function deleteProduct(formData: FormData) {
   const { supabase, tenant, role } = await getSession();
   if (!canFully(role, "edit_recipes")) throw new Error("No tienes permiso para eliminar este patrón.");

@@ -7,7 +7,7 @@ import { useTimer } from "@/components/timer";
 import { averageSecondsPerPiece, costBreakdown } from "@/lib/costing";
 import { UNIT_LABEL, clock, duration, money, unitMoney } from "@/lib/format";
 import type { Membership, Product, ProductStep, ProductSupply, ProductVersion, SalesChannel, Supply } from "@/lib/types";
-import { addProductStep, deleteProduct, removeProductStep, removeRecipeLine, updateProduct, upsertRecipeLine } from "../actions";
+import { addProductStep, deleteProduct, duplicateProduct, removeProductStep, removeRecipeLine, updateProduct, upsertRecipeLine } from "../actions";
 import { CostingSimulator } from "./costing-simulator";
 
 type Props = {
@@ -62,6 +62,7 @@ export function RecipeEditor(props: Props) {
   const perPiece = averageSecondsPerPiece(timerSessions.map((s) => ({ userId: s.user_id, orderId: s.order_id, seconds: s.seconds })));
   const sortedPerPiece = [...perPiece].sort((a, b) => a.avgSeconds - b.avgSeconds);
   const fastest = sortedPerPiece[0];
+  const slowest = sortedPerPiece[sortedPerPiece.length - 1];
   const overallAvgSeconds = perPiece.length > 0 ? perPiece.reduce((s, p) => s + p.avgSeconds, 0) / perPiece.length : liveSeconds;
   const savingsIfAllFastest =
     fastest && perPiece.length > 1
@@ -80,12 +81,20 @@ export function RecipeEditor(props: Props) {
           {soldLast90Days > 0 && perPiece.length > 0 && " · "}
           {perPiece.length > 0 && `tiempo promedio ${duration(Math.round(overallAvgSeconds))}`}
         </span>
-        {latestVersion && (
-          <span className="chip bg-surface-muted text-ink-2">
-            Versión {latestVersion.version_number} · vigente
-            {editor && daysAgo !== null && ` · editado por ${editor.email.split("@")[0]} hace ${daysAgo} día${daysAgo === 1 ? "" : "s"}`}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {latestVersion && (
+            <span className="chip bg-surface-muted text-ink-2">
+              Versión {latestVersion.version_number} · vigente
+              {editor && daysAgo !== null && ` · editado por ${editor.email.split("@")[0]} hace ${daysAgo} día${daysAgo === 1 ? "" : "s"}`}
+            </span>
+          )}
+          <form action={duplicateProduct}>
+            <input type="hidden" name="id" value={product.id} />
+            <SubmitButton className="btn-ghost min-h-9 px-3 text-[13px]" pendingText="Duplicando…">
+              Duplicar como variante
+            </SubmitButton>
+          </form>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
@@ -331,7 +340,10 @@ export function RecipeEditor(props: Props) {
               <div className="card flex flex-col gap-3 p-4">
                 {sortedPerPiece.map((p) => {
                   const m = memberById.get(p.userId);
-                  const pct = fastest ? Math.round((fastest.avgSeconds / p.avgSeconds) * 100) : 100;
+                  // El ancho representa cuánto tardó (quien más tardó llena la barra), no al revés
+                  // — bug encontrado al comparar con Ent-Costeo.dc.html: antes la más rápida
+                  // llegaba al 100%, invirtiendo la lectura visual.
+                  const pct = slowest ? Math.round((p.avgSeconds / slowest.avgSeconds) * 100) : 100;
                   return (
                     <div key={p.userId} className="grid grid-cols-[1fr_auto] items-center gap-3 text-sm">
                       <span className="min-w-0 truncate">{m?.email.split("@")[0] ?? "Ex miembro"}</span>

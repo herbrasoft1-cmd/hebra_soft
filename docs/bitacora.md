@@ -842,3 +842,32 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     "Principal"; `tejedora` ve la tabla sin columnas de costo y sin botón "Registrar compra"
     (filas no clicables); el sheet de edición sigue abriendo y guardando igual que antes.
   - `npm run lint`/`test` (78/78)/`build` pasan limpio.
+
+- **Auditoría mockup-vs-real, Fase 4: Recetario → Costeo (2026-10-13).**
+  - **Bug real corregido (no solo desajuste de mockup):** `recipe-editor.tsx`, sección "Tiempo real
+    por tejedora" — el % de ancho de la barra se calculaba como `fastest.avgSeconds /
+    p.avgSeconds`, lo que hacía que la persona MÁS RÁPIDA llenara la barra al 100% y las demás
+    proporcionalmente menos. Invertido a `p.avgSeconds / slowest.avgSeconds` (la más lenta al
+    100%), que es la lectura visual correcta y la que usa el mockup.
+  - Nueva acción `duplicateProduct` (`recetario/actions.ts`) + botón "Duplicar como variante" en el
+    encabezado del editor: clona nombre/categoría/notas/tiempo/margen/precio del producto y sus
+    líneas de `product_supplies`, redirige al nuevo patrón (mismo patrón de `createProduct`).
+  - **Segundo bug real, encontrado verificando el primero:** el primer intento de
+    `duplicateProduct` sí creaba el producto copia pero dejaba la receta vacía — el insert a
+    `product_supplies` no incluía `tenant_id` (columna requerida ahí, confirmado comparando con
+    `upsertRecipeLine` que sí la manda) y el `error` de ese insert no se estaba revisando en
+    absoluto, así que la falla era completamente silenciosa: la UI mostraba "Duplicando…" y
+    redirigía con normalidad, sin ningún indicio de que la receta no se había copiado. Se detectó
+    solo porque el simulador de precio de la copia mostraba "Materiales $0" en vez de $3.200.
+    Corregido: se agrega `tenant_id: tenant.id` a cada línea y se revisa `linesError`, lanzando
+    "El patrón se duplicó, pero no se pudieron copiar sus insumos." si falla — verificado de nuevo,
+    ahora la copia trae la receta completa y el mismo precio sugerido que el original ($16.100).
+  - **Fuera de esta fase, a propósito:** mover "Publicar precio" al encabezado (ya vive en el panel
+    lateral `sticky`, visible todo el tiempo al hacer scroll — mover solo la posición no mejora
+    nada real y arriesga romper el estado del simulador); persistir "Gastos fijos de la sede" como
+    dato real del negocio (hoy es un input manual no guardado — requeriría un campo nuevo en
+    `tenants`/`locations`, se queda pendiente); SKU (no existe en el modelo de `products` todavía).
+  - **Nota de proceso:** se crearon 2 patrones de prueba ("Amigurumi Osito (copia)") durante la
+    verificación de `duplicateProduct` (uno antes del fix, con receta vacía; uno después, correcto)
+    — ambos se eliminaron al cerrar la fase para no dejar basura de prueba en el tenant QA.
+  - `npm run lint`/`test` (78/78)/`build` pasan limpio.

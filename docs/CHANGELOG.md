@@ -82,6 +82,25 @@ más grande: faltaban 2 de 4 pestañas del mockup).
   por persona.
 - `npm run lint`/`test` (78/78)/`build` pasan limpio.
 
+## Mejora fuera del roadmap — Auditoría mockup-vs-real, Fase 4: Recetario → Costeo (2026-10-13)
+
+- **Bug real corregido:** la barra de "Tiempo real por tejedora" (`recipe-editor.tsx`) calculaba el
+  % de ancho al revés — la persona más rápida llenaba la barra al 100% en vez de la más lenta.
+  Invertido para que el ancho represente cuánto tardó cada quien, fiel a `Ent-Costeo.dc.html`.
+- Nueva acción `duplicateProduct`: clona un patrón completo (receta + insumos) como
+  "{nombre} (copia)", botón "Duplicar como variante" en el encabezado del editor.
+- **Bug real encontrado en la propia verificación del punto anterior:** el primer intento de
+  `duplicateProduct` copiaba el producto pero no sus líneas de insumos — el insert a
+  `product_supplies` le faltaba `tenant_id` (columna requerida, mismo patrón que
+  `upsertRecipeLine`) y el error no se estaba revisando, así que fallaba en silencio. Corregido:
+  se agrega `tenant_id` y se revisa el error, lanzando un mensaje claro si falla.
+- Fuera de esta fase (documentado, no inventado): mover "Publicar precio" al encabezado (ya es
+  visible permanentemente por estar en el panel lateral `sticky`, así que el beneficio real es
+  bajo frente al riesgo de reestructurar el estado del simulador); persistir "Gastos fijos de la
+  sede" como dato real (requeriría un campo nuevo en `tenants`/`locations`); SKU (no existe en el
+  modelo de `products`).
+- `npm run lint`/`test` (78/78)/`build` pasan limpio.
+
 ## Mejora fuera del roadmap — Auditoría mockup-vs-real, Fase 3: Insumos → Inventario (2026-10-13)
 
 `supplies` ya era por-lote-por-sede desde la migración 0001 (sin migración nueva): la reescritura
