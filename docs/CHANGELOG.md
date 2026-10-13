@@ -82,6 +82,24 @@ más grande: faltaban 2 de 4 pestañas del mockup).
   por persona.
 - `npm run lint`/`test` (78/78)/`build` pasan limpio.
 
+## Mejora fuera del roadmap — Auditoría mockup-vs-real, Fase 2: Analítica (2026-10-13)
+
+El plan original proponía mover el panel ejecutivo de `/inicio` a `/analitica` (que es donde el
+mockup `Ent-Dashboard.dc.html` y el nav lo ubican). El usuario corrigió eso a mitad de
+implementación: **`/inicio` no se toca**. Se revirtió ese cambio y en su lugar `/analitica` quedó
+con una copia fiel del mismo panel (KPIs, gráfico ingresos/utilidad, "Necesitan atención",
+rentabilidad por producto, ventas por canal, inventario crítico) — Titular/Administración ven el
+mismo contenido en ambos lugares.
+
+- `/analitica` reescrita completa con el contenido fiel al mockup.
+- Se agregaron las 2 acciones que el mockup pedía y faltaban, ambas conectadas a funcionalidad
+  real ya existente (sin duplicar lógica): "Reasignar automáticamente" en "Necesitan atención"
+  (enlaza a `/pedidos?view=capacity`, que ahora soporta abrir directo en la vista Capacidad — la
+  sugerencia real ya existía ahí, `suggestReassignment`/`applySuggestion`, de la Fase 3) y "Crear
+  orden de compra" en "Inventario crítico" (enlaza a `/insumos`, donde ya vive el flujo real de
+  órdenes de compra).
+- `npm run lint`/`test` (78/78)/`build` pasan limpio.
+
 ## Fase 8 — Móvil por rol y portal del cliente (2026-10-11)
 
 Las Fases 6 y 7 siguen excluidas, así que el roadmap saltó directo de la 5 a la 8. Los 3 mockups

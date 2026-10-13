@@ -1,182 +1,410 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { IconChart, IconTrendUp } from "@/components/icons";
-import { RankingBars, TrendBars } from "@/components/charts";
-import { EmptyState, PageHeader } from "@/components/ui/page-header";
+import { RevenueProfitChart, Sparkline } from "@/components/charts";
+import { AlertRow } from "@/components/ui/alert-row";
+import { type Column, DataTable } from "@/components/ui/data-table";
+import { KpiCard } from "@/components/ui/kpi-card";
+import { Panel } from "@/components/ui/panel";
+import { ProgressBar } from "@/components/ui/progress-bar";
+import {
+  channelBreakdown,
+  ordersAtRisk,
+  periodChangePct,
+  productProfitability,
+  type DailyPoint,
+  type ProductProfitability,
+} from "@/lib/analytics";
 import { costBreakdown } from "@/lib/costing";
-import { money, shortMonth } from "@/lib/format";
+import { compactMoney, money } from "@/lib/format";
+import { getActiveLocationId } from "@/lib/location";
 import { canFully } from "@/lib/permissions";
+import { committedHours, estimatedHours, weeklyAvailableHours } from "@/lib/production";
 import { getSession } from "@/lib/tenant";
+import type { Order, OrderStatus } from "@/lib/types";
+import { getIndustryModule } from "@/modules";
 
 export const metadata = { title: "Analítica" };
 
-type TxRow = { type: "ingreso" | "gasto"; category: string; amount: number; occurred_on: string };
-type OrderRow = { product_id: string | null; price: number; quantity: number; created_at: string; products: { name: string } | null };
-type ProductRow = {
-  sale_price: number | null;
-  labor_seconds: number;
-  product_supplies: { quantity: number; supplies: { unit_cost: number } | null }[];
+// =============================================================================
+// Panel ejecutivo (Titular, Administración): KPIs reales, tendencias, necesitan
+// atención, rentabilidad por producto, ventas por canal, inventario crítico —
+// ver docs/mockups/Ent-Dashboard.dc.html. Mismo contenido que ExecutivePanel en
+// /inicio (a propósito: el usuario pidió no tocar /inicio) — aquí vive la
+// versión fiel al mockup y al nav, que es "Analítica".
+// =============================================================================
+
+const SERIES_DAYS = 365;
+const STATUS_DOT: Record<OrderStatus, string> = {
+  espera: "bg-border-strong",
+  proceso: "bg-accent",
+  calidad: "bg-success",
+  enviado: "bg-ink",
 };
 
-const monthKey = (iso: string) => {
-  const d = new Date(iso + "T00:00:00");
-  return `${d.getFullYear()}-${d.getMonth()}`;
+type OrderRow = Pick<
+  Order,
+  "id" | "title" | "quantity" | "price" | "status" | "due_date" | "paid" | "product_id" | "channel" | "created_at" | "assigned_to"
+>;
+type ProductRow = {
+  id: string;
+  name: string;
+  sale_price: number | null;
+  target_margin_pct: number;
+  labor_seconds: number;
+  product_supplies: { quantity: number; supplies: { unit_cost: number; quantity_remaining: number; name: string } | null }[];
 };
 
 export default async function AnalyticsPage() {
-  const { supabase, tenant, role } = await getSession();
+  const session = await getSession();
+  const { supabase, tenant, role, user } = session;
   if (!canFully(role, "view_finance")) redirect("/inicio");
+  const mod = getIndustryModule(tenant.industry);
 
   const now = new Date();
-  const periodStart = new Date(now.getFullYear(), now.getMonth() - 5, 1);
-  const periodStartIso = periodStart.toISOString().slice(0, 10);
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
-  const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().slice(0, 10);
+  const todayIso = now.toISOString().slice(0, 10);
+  const tomorrowIso = new Date(now.getTime() + 86400000).toISOString().slice(0, 10);
+  const seriesStart = new Date(now.getTime() - SERIES_DAYS * 86400000).toISOString().slice(0, 10);
+  const period30Start = new Date(now.getTime() - 29 * 86400000).toISOString().slice(0, 10);
+  const prevPeriod30Start = new Date(now.getTime() - 59 * 86400000).toISOString().slice(0, 10);
+  const activeLocationId = await getActiveLocationId();
 
-  const [{ data: tx }, { data: orders }, { data: products }] = await Promise.all([
-    supabase
-      .from("transactions")
-      .select("type, category, amount, occurred_on")
-      .eq("tenant_id", tenant.id)
-      .gte("occurred_on", periodStartIso),
-    supabase
-      .from("orders")
-      .select("product_id, price, quantity, created_at, products(name)")
-      .eq("tenant_id", tenant.id)
-      .gte("created_at", periodStartIso),
+  let txQuery = supabase
+    .from("transactions")
+    .select("amount, occurred_on")
+    .eq("tenant_id", tenant.id)
+    .eq("type", "ingreso")
+    .gte("occurred_on", seriesStart);
+  let ordersQuery = supabase
+    .from("orders")
+    .select("id, title, quantity, price, status, due_date, paid, product_id, channel, created_at, assigned_to, customers(name)")
+    .eq("tenant_id", tenant.id)
+    .gte("created_at", seriesStart);
+  let suppliesQuery = supabase
+    .from("supplies")
+    .select("id, name, quantity_remaining, low_stock_threshold, locations(name)")
+    .eq("tenant_id", tenant.id);
+  if (activeLocationId) {
+    txQuery = txQuery.eq("location_id", activeLocationId);
+    ordersQuery = ordersQuery.eq("location_id", activeLocationId);
+    suppliesQuery = suppliesQuery.eq("location_id", activeLocationId);
+  }
+
+  const [{ data: tx }, { data: orders }, { data: products }, { data: supplies }, { data: availability }] = await Promise.all([
+    txQuery,
+    ordersQuery,
     supabase
       .from("products")
-      .select("sale_price, labor_seconds, product_supplies(quantity, supplies(unit_cost))")
+      .select("id, name, sale_price, target_margin_pct, labor_seconds, product_supplies(quantity, supplies(unit_cost, quantity_remaining, name))")
       .eq("tenant_id", tenant.id),
+    suppliesQuery,
+    supabase.from("availability").select("user_id, hours").eq("tenant_id", tenant.id),
   ]);
 
-  const transactions = (tx ?? []) as TxRow[];
-  const orderRows = (orders ?? []) as unknown as OrderRow[];
+  const txRows = tx ?? [];
+  const orderRows = (orders ?? []) as unknown as (OrderRow & { customers: { name: string } | null })[];
   const productRows = (products ?? []) as unknown as ProductRow[];
-  const hasAnyData = transactions.length > 0 || orderRows.length > 0;
+  const supplyRows = (supplies ?? []) as unknown as { id: string; name: string; quantity_remaining: number; low_stock_threshold: number; locations: { name: string } | null }[];
+  const hasAnyData = txRows.length > 0 || orderRows.length > 0;
 
-  // Ventas por mes (últimos 6 meses, incluido el actual)
-  const months = Array.from({ length: 6 }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1);
-    return { key: `${d.getFullYear()}-${d.getMonth()}`, label: shortMonth(d) };
+  // --- KPI 1: ventas del período (30 días vs. los 30 anteriores) ---------
+  const incomeByDay = new Map<string, number>();
+  for (const t of txRows) incomeByDay.set(t.occurred_on, (incomeByDay.get(t.occurred_on) ?? 0) + Number(t.amount));
+  const sumIncome = (from: string, to: string) =>
+    txRows.filter((t) => t.occurred_on >= from && t.occurred_on < to).reduce((s, t) => s + Number(t.amount), 0);
+  const income30 = sumIncome(period30Start, tomorrowIso);
+  const incomePrev30 = sumIncome(prevPeriod30Start, period30Start);
+  const salesDelta = periodChangePct(income30, incomePrev30);
+  const salesSparkline = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date(now.getTime() - (13 - i) * 86400000).toISOString().slice(0, 10);
+    return incomeByDay.get(d) ?? 0;
   });
-  const incomeByMonth = new Map<string, number>();
-  const expenseByCategory = new Map<string, number>();
-  for (const t of transactions) {
-    if (t.type === "ingreso") {
-      const key = monthKey(t.occurred_on);
-      incomeByMonth.set(key, (incomeByMonth.get(key) ?? 0) + Number(t.amount));
-    } else {
-      expenseByCategory.set(t.category, (expenseByCategory.get(t.category) ?? 0) + Number(t.amount));
-    }
-  }
-  const revenueTrend = months.map((m) => ({ label: m.label, value: incomeByMonth.get(m.key) ?? 0 }));
 
-  // Productos más vendidos del período
-  const revenueByProduct = new Map<string, number>();
-  for (const o of orderRows) {
-    if (!o.product_id) continue;
-    const name = o.products?.name ?? "Sin nombre";
-    revenueByProduct.set(name, (revenueByProduct.get(name) ?? 0) + Number(o.price) * Number(o.quantity));
-  }
-  const topProducts = Array.from(revenueByProduct.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([label, value]) => ({ label, value }));
-
-  const topExpenses = Array.from(expenseByCategory.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 6)
-    .map(([label, value]) => ({ label, value }));
-
-  // Insights: comparación mes vs mes anterior, mayor gasto, margen real promedio
-  const thisMonthIncome = transactions
-    .filter((t) => t.type === "ingreso" && t.occurred_on >= monthStart)
-    .reduce((s, t) => s + Number(t.amount), 0);
-  const prevMonthIncome = transactions
-    .filter((t) => t.type === "ingreso" && t.occurred_on >= prevMonthStart && t.occurred_on < monthStart)
-    .reduce((s, t) => s + Number(t.amount), 0);
-  const incomeChangePct = prevMonthIncome > 0 ? Math.round(((thisMonthIncome - prevMonthIncome) / prevMonthIncome) * 100) : null;
-
-  const totalExpense = Array.from(expenseByCategory.values()).reduce((s, v) => s + v, 0);
-  const topExpenseShare = topExpenses[0] && totalExpense > 0 ? Math.round((topExpenses[0].value / totalExpense) * 100) : null;
-
+  // --- KPI 2: margen bruto del período (sobre pedidos pagados con patrón) ---
   const pricedProducts = productRows.filter((p) => p.sale_price && p.sale_price > 0);
-  const margins = pricedProducts
-    .map((p) => {
-      const b = costBreakdown({
+  const costByProduct = new Map(
+    pricedProducts.map((p) => [
+      p.id,
+      costBreakdown({
         lines: p.product_supplies.map((l) => ({ quantity: Number(l.quantity), unitCost: Number(l.supplies?.unit_cost ?? 0) })),
         laborSeconds: p.labor_seconds,
         hourlyRate: Number(tenant.hourly_rate),
         toolWearPct: Number(tenant.tool_wear_pct),
-      });
-      return b.total > 0 ? ((Number(p.sale_price) - b.total) / Number(p.sale_price)) * 100 : null;
-    })
-    .filter((m): m is number => m !== null);
-  const avgMargin = margins.length > 0 ? Math.round(margins.reduce((s, m) => s + m, 0) / margins.length) : null;
+      }).total,
+    ]),
+  );
+  const marginFor = (from: string, to: string) => {
+    const sold = orderRows.filter((o) => o.paid && o.product_id && costByProduct.has(o.product_id) && o.created_at >= from && o.created_at < to);
+    const revenue = sold.reduce((s, o) => s + Number(o.price) * o.quantity, 0);
+    const cost = sold.reduce((s, o) => s + (costByProduct.get(o.product_id!) ?? 0) * o.quantity, 0);
+    return revenue > 0 ? ((revenue - cost) / revenue) * 100 : null;
+  };
+  const margin30 = marginFor(period30Start, tomorrowIso);
+  const marginPrev30 = marginFor(prevPeriod30Start, period30Start);
+  const marginDeltaPts = margin30 !== null && marginPrev30 !== null ? Math.round(margin30 - marginPrev30) : null;
 
-  const insights: string[] = [];
-  if (incomeChangePct !== null) {
-    insights.push(
-      incomeChangePct >= 0
-        ? `Tus ventas subieron ${incomeChangePct}% este mes frente al anterior.`
-        : `Tus ventas bajaron ${Math.abs(incomeChangePct)}% este mes frente al anterior.`,
-    );
+  // --- KPI 3: pedidos activos por estado + en riesgo -------------------
+  const activeOrders = orderRows.filter((o) => o.status !== "enviado");
+  const byStatus = { espera: 0, proceso: 0, calidad: 0 } as Record<"espera" | "proceso" | "calidad", number>;
+  for (const o of activeOrders) if (o.status !== "enviado") byStatus[o.status]++;
+
+  const outOfStockByProduct = new Map<string, string>();
+  for (const p of productRows) {
+    const empty = p.product_supplies.find((l) => Number(l.supplies?.quantity_remaining ?? 0) <= 0);
+    if (empty?.supplies) outOfStockByProduct.set(p.id, empty.supplies.name);
   }
-  if (topProducts[0]) {
-    insights.push(`${topProducts[0].label} es tu producto más vendido del período, con ${money(topProducts[0].value)} en ingresos.`);
+
+  // Quién está sobrecargada esta semana (comprometido > disponible), para la regla de
+  // "Necesitan atención" — totales reales, no un reparto día a día inventado.
+  const productLaborById = new Map(productRows.map((p) => [p.id, p.labor_seconds]));
+  const assignedUserIds = new Set(orderRows.map((o) => o.assigned_to).filter((id): id is string => Boolean(id)));
+  const overloadedUserIds = new Set(
+    Array.from(assignedUserIds).filter((userId) => {
+      const available = weeklyAvailableHours(availability ?? [], userId);
+      const committed = committedHours(
+        orderRows.map((o) => ({
+          id: o.id,
+          title: o.title,
+          assigned_to: o.assigned_to,
+          status: o.status,
+          estimatedHoursValue: o.product_id ? estimatedHours(productLaborById.get(o.product_id) ?? 0, o.quantity) : 0,
+          loggedSeconds: 0, // el panel compara comprometido total, no lo ya avanzado por pedido
+        })),
+        userId,
+      );
+      return committed > available;
+    }),
+  );
+
+  const riskItems = ordersAtRisk(activeOrders, outOfStockByProduct, now, { overloadedUserIds });
+  const riskyOrderIds = new Set(riskItems.map((r) => r.orderId));
+
+  // --- KPI 4: cartera pendiente -------------------------------------
+  const unpaidOrders = orderRows.filter((o) => !o.paid && o.status !== "enviado");
+  const pendingAmount = unpaidOrders.reduce((s, o) => s + Number(o.price) * o.quantity, 0);
+
+  // --- Gráfico ingresos y utilidad: serie diaria real, 365 días --------
+  const overallMarginFraction = pricedProducts.length > 0 ? (marginFor(seriesStart, tomorrowIso) ?? 0) / 100 : 0;
+  const daily: DailyPoint[] = Array.from({ length: SERIES_DAYS }, (_, i) => {
+    const d = new Date(now.getTime() - (SERIES_DAYS - 1 - i) * 86400000).toISOString().slice(0, 10);
+    const income = incomeByDay.get(d) ?? 0;
+    return { date: d, income, profit: income * overallMarginFraction };
+  });
+
+  // --- Rentabilidad por producto -----------------------------------
+  const unitsSold = new Map<string, number>();
+  for (const o of orderRows) {
+    if (o.paid && o.product_id) unitsSold.set(o.product_id, (unitsSold.get(o.product_id) ?? 0) + o.quantity);
   }
-  if (topExpenses[0] && topExpenseShare !== null) {
-    insights.push(`${topExpenses[0].label} es tu mayor gasto: ${topExpenseShare}% de lo que gastaste este período.`);
-  }
-  if (avgMargin !== null) {
-    insights.push(
-      `Tu margen real promedio en el recetario es ${avgMargin}%, calculado sobre ${pricedProducts.length} producto${pricedProducts.length === 1 ? "" : "s"} con precio.`,
-    );
-  }
+  const profitability = productProfitability(
+    productRows.map((p) => ({
+      id: p.id,
+      name: p.name,
+      sale_price: p.sale_price,
+      target_margin_pct: Number(p.target_margin_pct),
+      labor_seconds: p.labor_seconds,
+      lines: p.product_supplies.map((l) => ({ quantity: Number(l.quantity), unitCost: Number(l.supplies?.unit_cost ?? 0) })),
+    })),
+    unitsSold,
+    Number(tenant.hourly_rate),
+    Number(tenant.tool_wear_pct),
+  );
+  const worstBelowTarget = [...profitability].reverse().find((p) => p.belowTarget);
+
+  // --- Ventas por canal (pedidos pagados del período) -------------------
+  const channels = channelBreakdown(
+    orderRows.filter((o) => o.paid && o.created_at >= period30Start).map((o) => ({ channel: o.channel, price: o.price, quantity: o.quantity })),
+  );
+
+  // --- Inventario crítico -----------------------------------------
+  const criticalStock = supplyRows
+    .filter((s) => Number(s.quantity_remaining) <= Number(s.low_stock_threshold))
+    .sort((a, b) => Number(a.quantity_remaining) - Number(b.quantity_remaining))
+    .slice(0, 4);
+
+  const firstName = (user.user_metadata?.full_name as string | undefined)?.split(" ")[0];
+  const hour = Number(new Intl.DateTimeFormat("es-CO", { hour: "numeric", hour12: false, timeZone: "America/Bogota" }).format(now));
+  const greeting = hour < 12 ? "Buenos días" : hour < 19 ? "Hola" : "Buenas noches";
+  const attentionCount = riskyOrderIds.size;
+
+  const profitColumns: Column<ProductProfitability>[] = [
+    { key: "name", label: "Producto", render: (p) => <span className="font-medium">{p.name}</span> },
+    { key: "units", label: "Unid.", align: "right", render: (p) => String(p.units) },
+    { key: "price", label: "Precio", align: "right", render: (p) => money(p.price) },
+    { key: "cost", label: "Costo", align: "right", render: (p) => <span className="text-muted">{money(p.cost)}</span> },
+    {
+      key: "margin",
+      label: "Margen",
+      render: (p) => (
+        <div className="flex items-center gap-2.5">
+          <div className="flex-1">
+            <ProgressBar value={Math.max(0, p.marginPct)} tone={p.belowTarget ? "warning" : "success"} />
+          </div>
+          <span className={`w-12 shrink-0 text-right text-[13px] font-semibold tabular-nums ${p.belowTarget ? "text-warning-ink" : ""}`}>
+            {p.marginPct.toFixed(1).replace(".", ",")}%
+          </span>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <>
-      <PageHeader title="Analítica" subtitle="Lo que dicen tus números de los últimos 6 meses." />
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-1.5">
+          <h1 className="font-display text-[30px] leading-tight md:text-[36px]">
+            {greeting}
+            {firstName ? `, ${firstName}` : ""}
+          </h1>
+          <p className="text-[15px] text-ink-2">
+            {attentionCount > 0
+              ? `Tienes ${attentionCount} pedido${attentionCount === 1 ? "" : "s"} que necesita${attentionCount === 1 ? "" : "n"} atención.`
+              : "Nada necesita atención urgente hoy."}
+          </p>
+        </div>
+      </div>
 
       {!hasAnyData ? (
-        <EmptyState
-          icon={IconChart}
-          title="Todavía no hay datos suficientes"
-          text="Registra ventas y gastos en Caja, y crea pedidos: aquí vas a ver tendencias e insights de tu negocio."
-        />
+        <div className="card flex flex-col items-center gap-2 p-10 text-center">
+          <p className="font-display text-xl">Todavía no hay datos suficientes</p>
+          <p className="text-sm text-muted">Registra ventas en Caja y crea pedidos: aquí vas a ver tu panel ejecutivo completo.</p>
+        </div>
       ) : (
-        <div className="flex flex-col gap-6">
-          {insights.length > 0 && (
-            <ul className="grid gap-3 sm:grid-cols-2">
-              {insights.map((text) => (
-                <li key={text} className="card flex items-start gap-3 p-4">
-                  <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-success-soft text-success-ink">
-                    <IconTrendUp size={14} />
-                  </span>
-                  <p className="text-sm text-ink-2">{text}</p>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <TrendBars title="Ventas por mes" data={revenueTrend} format="compact" />
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            <RankingBars
-              title="Productos más vendidos"
-              data={topProducts}
-              tone="primary"
-              emptyText="Aún no tienes pedidos con un patrón del recetario asociado."
+        <>
+          <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+            <KpiCard
+              label="Ventas · 30 días"
+              value={compactMoney(income30)}
+              delta={salesDelta !== null ? { text: `${Math.abs(salesDelta)}%`, positive: salesDelta >= 0 } : undefined}
+            >
+              <Sparkline data={salesSparkline} className="h-9 w-full text-primary" />
+            </KpiCard>
+            <KpiCard
+              label="Margen bruto"
+              value={margin30 !== null ? `${margin30.toFixed(1).replace(".", ",")}%` : "—"}
+              delta={marginDeltaPts !== null ? { text: `${Math.abs(marginDeltaPts)} pts`, positive: marginDeltaPts >= 0 } : undefined}
             />
-            <RankingBars
-              title="Gastos por categoría"
-              data={topExpenses}
-              tone="sage"
-              emptyText="Aún no has registrado gastos en Caja."
+            <KpiCard
+              label="Pedidos activos"
+              value={String(activeOrders.length)}
+              delta={attentionCount > 0 ? { text: `${attentionCount} en riesgo`, positive: false } : undefined}
+            >
+              <div className="flex h-2 gap-0.5 overflow-hidden rounded-[4px]">
+                {(["espera", "proceso", "calidad"] as const).map(
+                  (s) => byStatus[s] > 0 && <div key={s} className={STATUS_DOT[s]} style={{ flex: byStatus[s] }} />,
+                )}
+              </div>
+              <span className="text-xs text-muted">
+                {byStatus.espera} espera · {byStatus.proceso} {mod.timer.activeVerb.toLowerCase()} · {byStatus.calidad} calidad
+              </span>
+            </KpiCard>
+            <KpiCard
+              label="Cartera pendiente"
+              value={money(pendingAmount)}
+              delta={unpaidOrders.length > 0 ? { text: `${unpaidOrders.length} pedidos`, positive: false } : undefined}
             />
           </div>
-        </div>
+
+          <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+            <RevenueProfitChart daily={daily} todayIso={todayIso} />
+            <Panel
+              title="Necesitan atención"
+              action={
+                <Link href="/pedidos" className="text-[13px] font-medium hover:underline">
+                  Ver pedidos
+                </Link>
+              }
+            >
+              {riskItems.length === 0 ? (
+                <p className="py-6 text-center text-sm text-muted">Nada necesita atención por ahora.</p>
+              ) : (
+                <div className="flex flex-col gap-2.5">
+                  {riskItems.slice(0, 6).map((r, i) => (
+                    <AlertRow key={`${r.orderId}-${i}`} tone={r.severity === "alta" ? "danger" : "warning"} title={r.title} detail={r.text} />
+                  ))}
+                  {overloadedUserIds.size > 0 && (
+                    <Link
+                      href="/pedidos?view=capacity"
+                      className="btn-ghost min-h-10 w-full text-center text-sm"
+                    >
+                      Reasignar automáticamente
+                    </Link>
+                  )}
+                </div>
+              )}
+            </Panel>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+            <Panel title="Rentabilidad por producto" action={<Link href="/recetario" className="text-[13px] font-medium hover:underline">Abrir recetario</Link>}>
+              {profitability.length === 0 ? (
+                <p className="py-6 text-center text-sm text-muted">Pon precio a tus patrones en Recetario para ver su rentabilidad aquí.</p>
+              ) : (
+                <>
+                  <DataTable columns={profitColumns} rows={profitability} rowKey={(p) => p.id} />
+                  {worstBelowTarget && (
+                    <p className="rounded-xl bg-surface-muted p-3 text-[13px] text-ink-2">
+                      <strong className="text-ink">{worstBelowTarget.name}</strong> está por debajo de tu margen objetivo (
+                      {money(worstBelowTarget.price)} con costo {money(worstBelowTarget.cost)}). Sube el precio o baja el costo para
+                      volver al rango.
+                    </p>
+                  )}
+                </>
+              )}
+            </Panel>
+
+            <div className="flex flex-col gap-4">
+              <Panel title="Ventas por canal">
+                {channels.length === 0 ? (
+                  <p className="py-6 text-center text-sm text-muted">Aún no hay ventas pagadas este período.</p>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {channels.map((c) => (
+                      <div key={c.channel} className="flex flex-col gap-1.5">
+                        <div className="flex justify-between text-sm">
+                          <span>{c.channel}</span>
+                          <span className="font-semibold tabular-nums">
+                            {Math.round(c.pct)}% · {compactMoney(c.amount)}
+                          </span>
+                        </div>
+                        <ProgressBar value={c.pct} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Panel>
+              <Panel
+                title="Inventario crítico"
+                action={
+                  <Link href="/insumos" className="text-[13px] font-medium hover:underline">
+                    Ver todo
+                  </Link>
+                }
+              >
+                {criticalStock.length === 0 ? (
+                  <p className="py-6 text-center text-sm text-muted">Nada por debajo del mínimo.</p>
+                ) : (
+                  <div className="flex flex-col gap-2.5">
+                    {criticalStock.map((s) => (
+                      <div key={s.id} className="flex justify-between text-sm">
+                        <span>
+                          {s.name}
+                          {s.locations?.name ? ` · ${s.locations.name}` : ""}
+                        </span>
+                        <span className={`font-semibold ${Number(s.quantity_remaining) <= 0 ? "text-danger-ink" : "text-warning-ink"}`}>
+                          {Number(s.quantity_remaining)}
+                        </span>
+                      </div>
+                    ))}
+                    <Link href="/insumos" className="btn-ghost min-h-10 w-full text-center text-sm">
+                      Crear orden de compra
+                    </Link>
+                  </div>
+                )}
+              </Panel>
+            </div>
+          </div>
+        </>
       )}
-    </>
+    </div>
   );
 }

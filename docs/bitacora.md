@@ -775,4 +775,28 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     las 9 tarjetas con "No conectada"; Plan muestra "3 miembros · 2 sedes · 1 factura generada este
     mes" (conteos reales, no inventados) y la actividad con el botón de exportar CSV.
   - `npm run lint`/`test` (78/78)/`build` pasan limpio.
+
+- **Auditoría mockup-vs-real, Fase 2: Analítica (2026-10-13).** El plan aprobado para esta fase era
+  mover el `ExecutivePanel` de `/inicio` a `/analitica` (el mockup `Ent-Dashboard.dc.html` y el
+  propio nav lo ubican ahí, no en Inicio). A mitad de implementación el usuario corrigió: **no se
+  puede modificar el panel de Inicio**, punto. Se revirtió el cambio en `inicio/page.tsx` (`git
+  checkout`, limpio) y, preguntando de nuevo con `AskUserQuestion` cómo seguir, se eligió la opción
+  de dejar `/analitica` como una **copia fiel** del mismo contenido en vez de un movimiento — ambas
+  pantallas muestran el mismo panel para Titular/Administración.
+  - `analitica/page.tsx` reescrita completa con el contenido de `ExecutivePanel` (KPIs, gráfico de
+    ingresos/utilidad, paneles de riesgo/rentabilidad/canales/inventario), gateada igual que antes
+    (`canFully(role, "view_finance")`, redirige a `/inicio` si no).
+  - Se agregaron las 2 acciones del mockup que faltaban, **sin inventar lógica nueva**: encontrado
+    que `suggestReassignment()`/`applySuggestion()` (Fase 3, `src/lib/production.ts`) y el flujo de
+    órdenes de compra de Insumos ya resuelven exactamente lo que el mockup pedía con
+    "Reasignar automáticamente" y "Crear orden de compra" — solo faltaba el punto de entrada desde
+    Analítica. Se agregó soporte de deep-link `?view=capacity` en `pedidos/board.tsx`
+    (`useSearchParams` siembra el estado inicial de la vista) para que "Reasignar
+    automáticamente" enlace directo a la vista Capacidad real, en vez de duplicar la heurística.
+  - **Verificado de punta a punta:** `/inicio` sigue mostrando el panel ejecutivo sin cambios;
+    `/analitica` muestra el mismo panel más los 2 botones nuevos; `/pedidos?view=capacity` abre
+    directo en la pestaña Capacidad con una sugerencia real ("Mover el pedido Amigurumi Osito
+    (0,5 h) de qa.visual... a qa.tejedora... equilibra la semana", botón "Aplicar cambio"
+    funcional); `ventas` sigue siendo redirigida de `/analitica` a `/inicio`.
+  - `npm run lint`/`test` (78/78)/`build` pasan limpio.
   - `npm run lint`/`test` (74/74)/`build` pasan limpio.

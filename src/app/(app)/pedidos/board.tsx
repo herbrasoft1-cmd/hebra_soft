@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useMemo, useOptimistic, useState, useTransition } from "react";
 import { ordersAtRisk } from "@/lib/analytics";
 import { IconArrowRight, IconDots, IconPlus, IconTrash } from "@/components/icons";
@@ -90,10 +91,17 @@ export function Board({
     (state, { id, status }: { id: string; status: OrderStatus }) =>
       state.map((o) => (o.id === id ? { ...o, status } : o)),
   );
+  const searchParams = useSearchParams();
   const [tab, setTab] = useState<OrderStatus>("proceso");
   const [editing, setEditing] = useState<Order | "new" | null>(null);
   const [dragOver, setDragOver] = useState<OrderStatus | null>(null);
-  const [view, setView] = useState<"board" | "capacity" | "cancelled">("board");
+  // Permite deep-linking desde fuera (ej. /pedidos?view=capacity desde el botón
+  // "Reasignar automáticamente" de Analítica), reutilizando la vista Capacidad real
+  // en vez de duplicar su lógica.
+  const initialView = searchParams.get("view");
+  const [view, setView] = useState<"board" | "capacity" | "cancelled">(
+    initialView === "capacity" || initialView === "cancelled" ? initialView : "board",
+  );
   const [search, setSearch] = useState("");
   const [tejedoraFilter, setTejedoraFilter] = useState("");
   const [channelFilter, setChannelFilter] = useState("");
