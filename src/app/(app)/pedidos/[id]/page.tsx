@@ -119,7 +119,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
       <section className="card flex flex-col gap-3 p-4">
         <div className="flex items-center gap-3">
-          {assignee ? <Avatar id={assignee.user_id} name={assignee.email} size={36} /> : <Avatar id="sin-asignar" name="?" size={36} />}
+          {assignee ? (
+            <Avatar id={assignee.user_id} name={assignee.email} avatarUrl={assignee.avatar_url} size={36} />
+          ) : (
+            <Avatar id="sin-asignar" name="?" size={36} />
+          )}
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="truncate text-sm font-medium">{assignee?.email.split("@")[0] ?? "Sin asignar"}</span>
             {pct !== null && (

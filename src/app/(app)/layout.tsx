@@ -17,7 +17,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const activeLocationId = await getActiveLocationId();
 
-  const [{ count }, { data: locations }, notifications] = await Promise.all([
+  const [{ count }, { data: locations }, notifications, { data: myProfile }] = await Promise.all([
     supabase
       .from("orders")
       .select("id", { count: "exact", head: true })
@@ -25,9 +25,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       .neq("status", "enviado"),
     supabase.from("locations").select("id, name").eq("tenant_id", tenant.id).order("name"),
     getNotifications(supabase, tenant.id, role, activeLocationId),
+    // Consulta directa en vez de user.user_metadata: el access token de la sesión actual puede
+    // llevar un nombre/foto desactualizados justo después de guardarlos (ver migración 0017).
+    supabase.rpc("get_my_profile").maybeSingle(),
   ]);
 
-  const userName = (user.user_metadata?.full_name as string | undefined) || user.email || "Tú";
+  const profile = myProfile as { full_name: string | null; avatar_url: string | null } | null;
+  const userName = profile?.full_name || (user.user_metadata?.full_name as string | undefined) || user.email || "Tú";
+  const userAvatarUrl = profile?.avatar_url ?? (user.user_metadata?.avatar_url as string | undefined) ?? null;
 
   return (
     <TimerProvider>
@@ -39,6 +44,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           role={role}
           userId={user.id}
           userName={userName}
+          userAvatarUrl={userAvatarUrl}
           activeOrders={count ?? 0}
         />
         <div className="flex min-w-0 flex-1 flex-col">
@@ -51,6 +57,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             onSetLocation={setActiveLocation}
             userId={user.id}
             userName={userName}
+            userAvatarUrl={userAvatarUrl}
             roleLabel={ROLE_LABEL[role]}
             notifications={notifications}
           />

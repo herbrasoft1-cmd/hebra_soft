@@ -60,6 +60,7 @@ export function AppSidebar({
   role,
   userId,
   userName,
+  userAvatarUrl,
   activeOrders,
 }: {
   businessName: string;
@@ -68,6 +69,7 @@ export function AppSidebar({
   role: Role;
   userId: string;
   userName: string;
+  userAvatarUrl?: string | null;
   activeOrders: number;
 }) {
   const path = usePathname();
@@ -138,9 +140,9 @@ export function AppSidebar({
       <div className="mt-auto flex flex-col gap-3">
         <MiniTimer />
         <Tooltip label="Editar perfil, ayuda y cerrar sesión" side="top" full>
-          <AccountMenu userId={userId} userName={userName} roleLabel={ROLE_LABEL[role]}>
+          <AccountMenu userId={userId} userName={userName} roleLabel={ROLE_LABEL[role]} avatarUrl={userAvatarUrl}>
             <div className="flex w-full items-center gap-2.5 rounded-[10px] border-t border-sidebar-border px-1.5 pt-3 pb-0.5 transition-colors hover:bg-sidebar-active/60">
-              <Avatar id={userId} name={userName} size={32} />
+              <Avatar id={userId} name={userName} avatarUrl={userAvatarUrl} size={32} />
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="truncate text-[13px] font-medium text-sidebar-text">{userName}</span>
                 <span className="truncate text-[12px] text-sidebar-muted">{ROLE_LABEL[role]}</span>

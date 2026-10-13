@@ -48,7 +48,7 @@ const DUE_TONE: Record<"late" | "warn" | "ok", string> = {
 };
 
 type ProductOpt = { id: string; name: string; sale_price: number | null; labor_seconds: number };
-type Crew = { user_id: string; email: string };
+type Crew = { user_id: string; email: string; avatar_url: string | null };
 
 export function Board({
   orders,
@@ -432,7 +432,7 @@ function OrderCard({
 
       <div className="flex items-center gap-2.5">
         {assignee ? (
-          <Avatar id={assignee.user_id} name={assignee.email} size={28} />
+          <Avatar id={assignee.user_id} name={assignee.email} avatarUrl={assignee.avatar_url} size={28} />
         ) : (
           <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-dashed border-border-strong text-[10px] text-muted">
             —

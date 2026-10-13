@@ -16,7 +16,18 @@ function initialsOf(name: string) {
     .join("");
 }
 
-export function Avatar({ id, name, size = 36 }: { id: string; name: string; size?: number }) {
+export function Avatar({ id, name, size = 36, avatarUrl }: { id: string; name: string; size?: number; avatarUrl?: string | null }) {
+  if (avatarUrl) {
+    return (
+      <img
+        src={avatarUrl}
+        alt=""
+        aria-hidden="true"
+        className="shrink-0 rounded-full object-cover"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
   return (
     <span
       className="flex shrink-0 items-center justify-center rounded-full font-semibold text-white"

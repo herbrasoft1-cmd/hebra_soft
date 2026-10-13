@@ -82,6 +82,38 @@ más grande: faltaban 2 de 4 pestañas del mockup).
   por persona.
 - `npm run lint`/`test` (78/78)/`build` pasan limpio.
 
+## Corrección — Lectura de perfil propio sin depender del access token (2026-10-13)
+
+`auth.updateUser()` actualiza la base de datos, pero el access token de la sesión actual conserva
+los datos viejos como claims hasta su próximo refresh natural — así que el nombre/foto recién
+guardados no se veían de inmediato en sidebar/topbar (que leían `user.user_metadata`).
+
+- Se intentó primero forzar un refresh de sesión server-side (`auth.refreshSession()`) tras guardar
+  — **descartado**: rota el refresh token y puede desincronizar al cliente del navegador, que lleva
+  su propio ciclo de refresh en paralelo (causó una invalidación real de sesión en pruebas).
+- Solución adoptada: nueva función `get_my_profile()` (migración `0017`) que lee
+  `full_name`/`avatar_url` directo de `auth.users`, igual criterio que `list_members` ya usa para
+  el resto del equipo — siempre fresca, sin tocar el ciclo de vida del token. `(app)/layout.tsx` la
+  usa en vez de `user.user_metadata` para el nombre/foto propios.
+- `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
+## Mejora fuera del roadmap — Foto de perfil y rediseño de "Mi cuenta" (2026-10-13)
+
+- Nueva función: foto de perfil por persona (antes no existía — el círculo de iniciales era fijo).
+  Migración `0017`: bucket de Storage `avatars` (carpeta por `user_id`, lectura pública, escritura
+  solo del propio dueño) + `list_members` extendida con `avatar_url` (de
+  `auth.users.raw_user_meta_data`, mismo lugar que el nombre).
+  - La foto se ve en todo lugar que hoy muestra a una persona del equipo: sidebar/topbar propios,
+    asignado en una tarjeta de Pedidos, detalle de pedido, vista de Capacidad — no solo en "Mi
+    cuenta".
+  - `Avatar` ahora acepta `avatarUrl` opcional (imagen si existe, iniciales si no, sin romper
+    ningún uso existente del componente).
+- **Rediseño de "Mi cuenta":** ya no es una lista de campos de texto plano. Avatar grande con
+  overlay de cámara al pasar el mouse/tocar (sube la foto sin un `<input>` suelto), nombre con
+  edición en línea (ver → "Editar" → formulario con Guardar/Cancelar), fila de Ayuda con ícono y
+  chevron, botón claro de cerrar sesión.
+- `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
 ## Mejora fuera del roadmap — Auditoría mockup-vs-real, Fase 5: Finanzas (2026-10-13)
 
 - Botón "+ Emitir factura" en el header de `/finanzas` (antes el flujo solo vivía en el Kanban de

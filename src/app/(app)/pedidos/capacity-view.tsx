@@ -9,7 +9,7 @@ import { applySuggestion, upsertAvailability } from "./actions";
 
 const WEEKDAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
-type Member = { user_id: string; email: string };
+type Member = { user_id: string; email: string; avatar_url: string | null };
 
 function cellTone(h: number) {
   if (h <= 0) return "bg-surface-muted";
@@ -111,7 +111,7 @@ export function CapacityView({
                     className="mt-1.5 grid grid-cols-[170px_repeat(7,1fr)_64px] items-center gap-1.5 rounded-lg px-1 py-0.5 text-sm"
                   >
                     <span className="flex min-w-0 items-center gap-2">
-                      <Avatar id={m.user_id} name={m.email} size={26} />
+                      <Avatar id={m.user_id} name={m.email} avatarUrl={m.avatar_url} size={26} />
                       <span className="truncate">{m.email}</span>
                     </span>
                     {Array.from({ length: 7 }, (_, weekday) => {

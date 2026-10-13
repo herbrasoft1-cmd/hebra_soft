@@ -251,6 +251,13 @@ export function ThreadLine({ className = "" }: { className?: string }) {
   );
 }
 
+export const IconCamera = (p: P) => (
+  <Base {...p}>
+    <path d="M4 8h3l1.6-2.4A2 2 0 0 1 10.3 4.6h3.4a2 2 0 0 1 1.7 1l1.6 2.4H20a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z" />
+    <circle cx="12" cy="13.5" r="3.5" />
+  </Base>
+);
+
 export const IconEye = (p: P) => (
   <Base {...p}>
     <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z" />

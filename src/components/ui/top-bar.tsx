@@ -35,6 +35,7 @@ export function TopBar({
   onSetLocation,
   userId,
   userName,
+  userAvatarUrl,
   roleLabel,
   notifications,
 }: {
@@ -45,6 +46,7 @@ export function TopBar({
   onSetLocation: (formData: FormData) => void;
   userId: string;
   userName: string;
+  userAvatarUrl?: string | null;
   roleLabel: string;
   notifications: Notification[];
 }) {
@@ -56,9 +58,9 @@ export function TopBar({
       {/* Celular: sin barra lateral visible, así que la cuenta vive en un botón flotante. */}
       <div className="fixed top-[calc(env(safe-area-inset-top)+12px)] right-4 z-30 md:hidden">
         <Tooltip label="Mi cuenta" side="bottom">
-          <AccountMenu userId={userId} userName={userName} roleLabel={roleLabel}>
+          <AccountMenu userId={userId} userName={userName} roleLabel={roleLabel} avatarUrl={userAvatarUrl}>
             <span className="block rounded-full ring-2 ring-surface">
-              <Avatar id={userId} name={userName} size={34} />
+              <Avatar id={userId} name={userName} avatarUrl={userAvatarUrl} size={34} />
             </span>
           </AccountMenu>
         </Tooltip>

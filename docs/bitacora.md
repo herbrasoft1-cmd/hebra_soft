@@ -1055,3 +1055,43 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     real del servidor ("Este cliente no tiene NIT/cédula...") sin fabricar ningún éxito — no se
     creó ninguna factura de prueba nueva, nada que limpiar.
   - `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
+- **Foto de perfil y rediseño de "Mi cuenta" (2026-10-13).** El usuario notó que al abrir "Mi
+  cuenta" solo veía el círculo de iniciales, nunca una foto — resultó no ser un bug sino una
+  función que nunca existió (confirmado leyendo `avatar.tsx`: siempre fue iniciales por hash de
+  color, sin ningún campo ni carga de imagen de persona). Se preguntó el alcance antes de construir
+  y el usuario pidió que la foto se vea en todas partes donde aparece una persona del equipo, no
+  solo en su propia cuenta.
+  - Migración `0017`: extiende `list_members` (mismo patrón drop+create de 0007/0016) con
+    `avatar_url` (lee `auth.users.raw_user_meta_data->>'avatar_url'`) y crea el bucket de Storage
+    `avatars` — mismo patrón exacto de los buckets `logos`/`avance` ya existentes, pero la carpeta
+    raíz es el `user_id` de quien sube (validado con `auth.uid()`), no un `tenant_id`, porque la
+    foto es de la persona, no del negocio.
+  - `uploadAvatar` (`account-actions.ts`) replica `uploadLogo` de Configuración: sube a
+    `avatars/<user_id>/avatar.png|jpg`, guarda la URL pública en `user_metadata.avatar_url` vía
+    `supabase.auth.updateUser` (mismo lugar que ya usa `full_name`, sin tabla nueva).
+  - `Avatar` (`ui/avatar.tsx`) gana un prop opcional `avatarUrl` — si existe, `<img
+    object-cover>`; si no, las iniciales de siempre. No rompe ningún uso existente (clientes,
+    pedidos, etc. simplemente no pasan el prop).
+  - **Propagación real, no solo en "Mi cuenta":** se hiló `avatar_url`/`userAvatarUrl` por
+    `(app)/layout.tsx` → `AppSidebar`/`TopBar` (foto propia) y por `Membership`/`Crew` → el
+    asignado de una tarjeta en el Kanban de Pedidos (`board.tsx`), el detalle de pedido
+    (`pedidos/[id]/page.tsx`) y la lista de personas en la vista de Capacidad
+    (`capacity-view.tsx`). Se dejaron fuera a propósito los avatares de **clientes** (pedidos,
+    `clientes/customers-view.tsx`, `inicio/page.tsx`) — esos representan al cliente final, no a una
+    persona del equipo con cuenta en HEBRA, no tiene sentido mostrarles una "foto de perfil" de
+    sistema. También se descartó `src/components/ui/order-card.tsx` por ser código muerto sin
+    ningún import en todo el proyecto (confirmado con una búsqueda) — no se tocó.
+  - **Pedido aparte del usuario, mismo hilo de conversación:** "mejora la ui/ux de mi cuenta que no
+    sea solo texto plano" — `account-menu.tsx` reescrito: avatar grande (76px) con overlay de
+    cámara al pasar el mouse (clic directo sobre la foto para cambiarla, sin un `<input type=file>`
+    suelto visible), nombre con edición en línea (vista → botón "Editar" → formulario con
+    Guardar/Cancelar, en vez de un formulario siempre abierto), fila "Ayuda" con ícono en círculo y
+    chevron (mismo lenguaje visual que el resto de la app), "Cerrar sesión" como botón claro al
+    final. Nuevo `IconCamera` en `icons.tsx`.
+  - **Verificado en vivo:** el nuevo diseño de "Mi cuenta" renderiza correctamente (avatar grande,
+    chip de rol, tarjeta "Tu nombre" con botón "Editar" que abre el formulario en línea con
+    Guardar/Cancelar, fila de Ayuda, botón de cerrar sesión). La subida real de la foto queda
+    pendiente de verificar hasta que el usuario ejecute la migración `0017` (crea el bucket de
+    Storage que `uploadAvatar` necesita).
+  - `npm run lint`/`test` (83/83)/`build` pasan limpio.

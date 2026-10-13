@@ -87,7 +87,7 @@ export default async function OrdersPage() {
         role={role}
         viewerId={user.id}
         members={allMembers}
-        crew={crew.map((m) => ({ user_id: m.user_id, email: m.email }))}
+        crew={crew.map((m) => ({ user_id: m.user_id, email: m.email, avatar_url: m.avatar_url }))}
         availability={(availability ?? []) as Availability[]}
         loggedSecondsByOrder={Object.fromEntries(loggedSecondsByOrder)}
         outOfStockByProduct={outOfStockByProduct}
