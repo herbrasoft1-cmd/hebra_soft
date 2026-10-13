@@ -14,6 +14,7 @@ export type DocRow = {
   total: number;
   status: InvoiceStatus | "enviada";
   errorMessage: string | null;
+  pdfUrl: string | null;
 };
 
 const STATUS_LABEL: Record<DocRow["status"], string> = {
@@ -38,7 +39,11 @@ const TABS = [
 export function DocumentsTable({ docs }: { docs: DocRow[] }) {
   const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("all");
   const [retrying, setRetrying] = useState<string | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  // Sembrado con el error real que ya trae cada fila desde el servidor — antes solo se llenaba
+  // tras un reintento, así que una factura rechazada en la carga inicial no mostraba su motivo.
+  const [errors, setErrors] = useState<Record<string, string>>(() =>
+    Object.fromEntries(docs.filter((d) => d.errorMessage).map((d) => [d.id, d.errorMessage!])),
+  );
   const filtered = docs.filter((d) => tab === "all" || d.kind === tab);
 
   const retry = async (id: string) => {
@@ -90,7 +95,12 @@ export function DocumentsTable({ docs }: { docs: DocRow[] }) {
                   <span className={`chip w-fit text-[11px] ${STATUS_TONE[d.status]}`}>{STATUS_LABEL[d.status]}</span>
                   {errors[d.id] && <span className="text-[11px] text-danger-ink">{errors[d.id]}</span>}
                 </span>
-                <span className="text-right">
+                <span className="flex justify-end gap-1.5">
+                  {d.pdfUrl && (
+                    <a href={d.pdfUrl} target="_blank" rel="noreferrer" className="btn-ghost min-h-9 px-2.5 text-xs">
+                      Ver PDF
+                    </a>
+                  )}
                   {d.kind === "factura" && d.status === "rechazada" && (
                     <button onClick={() => retry(d.id)} disabled={retrying === d.id} className="btn-ghost min-h-9 px-2.5 text-xs">
                       {retrying === d.id ? "…" : "Reintentar"}

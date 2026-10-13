@@ -1029,3 +1029,29 @@ Registro cronológico de trabajo sobre HEBRA. Cada entrada: fecha, qué se hizo,
     acumulados en sesiones anteriores. `ventas` y `tejedora` vieron "No tienes notificaciones
     nuevas" (ninguna señal falsa, el gating por permiso funciona).
   - `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
+- **Auditoría mockup-vs-real, Fase 5: Finanzas (2026-10-13).**
+  - Nuevo `EmitInvoiceButton` (`finanzas/emit-invoice-button.tsx`): botón "+ Emitir factura" en el
+    header de la página (`PageHeader action`), con un `Sheet` que lista los pedidos pagados sin
+    ninguna factura todavía (`invoicedOrderIds` calculado de las facturas ya cargadas, sin consulta
+    nueva) y reutiliza `createInvoice` tal cual — mismo criterio honesto de Fase 6 (nunca inventa
+    un éxito; si falla, muestra el motivo real).
+  - KPI "Ingresos" con variación % vs. mes anterior: nueva consulta liviana a `transactions` del
+    mes previo + `periodChangePct` (ya existía en `src/lib/analytics.ts`, reutilizada tal cual, sin
+    duplicar la fórmula).
+  - Badge "DIAN · habilitado/no habilitado" junto a "Documentos de venta", leyendo
+    `getInvoicingProvider().id !== "none"` — refleja el estado real (hoy siempre "no habilitado",
+    porque no hay proveedor conectado, documentado desde la Fase 6).
+  - **Bug real corregido en `documents-table.tsx`:** `errors` (el estado que pinta el motivo de
+    rechazo bajo el chip) se inicializaba vacío y solo se llenaba tras pulsar "Reintentar" — una
+    factura ya rechazada desde antes no mostraba su error al cargar la página, aunque el dato
+    (`d.errorMessage`) ya viniera del servidor. Corregido sembrando el estado inicial desde los
+    props. También se agregó "Ver PDF" (enlaza a `invoices.pdf_url` cuando existe — dato ya
+    disponible, nunca se exponía en la tabla).
+  - **Verificado de punta a punta:** la factura rechazada de prueba (`FE-0001`, de la Fase 6)
+    mostró su error real ("La facturación electrónica aún no está configurada.") inmediatamente al
+    cargar la página, sin necesitar reintentar; el badge DIAN mostró "no habilitado"; el flujo de
+    "+ Emitir factura" completo (abrir sheet, elegir "Gorro canal-test", confirmar) mostró el error
+    real del servidor ("Este cliente no tiene NIT/cédula...") sin fabricar ningún éxito — no se
+    creó ninguna factura de prueba nueva, nada que limpiar.
+  - `npm run lint`/`test` (83/83)/`build` pasan limpio.

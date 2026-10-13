@@ -82,6 +82,22 @@ más grande: faltaban 2 de 4 pestañas del mockup).
   por persona.
 - `npm run lint`/`test` (78/78)/`build` pasan limpio.
 
+## Mejora fuera del roadmap — Auditoría mockup-vs-real, Fase 5: Finanzas (2026-10-13)
+
+- Botón "+ Emitir factura" en el header de `/finanzas` (antes el flujo solo vivía en el Kanban de
+  Pedidos): selector de pedidos pagados sin factura todavía, reutiliza la misma acción
+  `createInvoice` real (sin inventar éxito — muestra el error real del servidor si el cliente no
+  tiene NIT/cédula).
+- KPI "Ingresos" con variación % vs. mes anterior (mismo patrón ya usado en Analítica).
+- Badge "DIAN · habilitado/no habilitado" junto a "Documentos de venta", reflejando si hay un
+  proveedor de facturación real conectado (`src/lib/invoicing.ts`).
+- **Bug real corregido:** el mensaje de error de una factura rechazada (`error_message`, ya
+  presente en el dato que trae la fila) solo se mostraba después de pulsar "Reintentar" — en la
+  carga inicial de la página, una factura rechazada no mostraba por qué. Corregido sembrando el
+  estado de errores con los datos que ya vienen del servidor. También se expone "Ver PDF" cuando
+  `invoices.pdf_url` existe (dato ya disponible, nunca se renderizaba).
+- `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
 ## Mejora fuera del roadmap — Notificaciones reales (2026-10-13)
 
 El botón de la campana era decorativo desde siempre (sin `onClick`, sin backend). Se construyó con

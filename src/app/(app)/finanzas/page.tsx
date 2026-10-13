@@ -2,15 +2,18 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { KpiCard } from "@/components/ui/kpi-card";
+import { periodChangePct } from "@/lib/analytics";
 import { costBreakdown } from "@/lib/costing";
 import { AGING_BUCKETS, channelCommission, incomeStatement, receivableAging } from "@/lib/finance";
 import { compactMoney, money, whatsappLink } from "@/lib/format";
+import { getInvoicingProvider } from "@/lib/invoicing";
 import { getActiveLocationId } from "@/lib/location";
 import { canFully } from "@/lib/permissions";
 import { computeSaldo } from "@/lib/tracking";
 import { getSession } from "@/lib/tenant";
 import type { Invoice, Order, SalesChannel, Transaction } from "@/lib/types";
 import { DocumentsTable, type DocRow } from "./documents-table";
+import { EmitInvoiceButton } from "./emit-invoice-button";
 import { ExportCsvButton } from "./export-csv-button";
 import { WaterfallChart } from "./waterfall-chart";
 
@@ -52,21 +55,31 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   const prevMes = monthParam(new Date(year, month - 1, 1));
   const nextMes = monthParam(new Date(year, month + 1, 1));
   const today = new Date();
+  const prevMonthStartIso = new Date(year, month - 1, 1).toISOString().slice(0, 10);
 
   const activeLocationId = await getActiveLocationId();
   let txQuery = supabase.from("transactions").select("*").eq("tenant_id", tenant.id).gte("occurred_on", monthStartIso).lt("occurred_on", monthEndIso);
+  let prevIncomeQuery = supabase
+    .from("transactions")
+    .select("amount")
+    .eq("tenant_id", tenant.id)
+    .eq("type", "ingreso")
+    .gte("occurred_on", prevMonthStartIso)
+    .lt("occurred_on", monthStartIso);
   let ordersQuery = supabase
     .from("orders")
     .select("id, title, price, quantity, due_date, paid, created_at, product_id, channel, customers(id, name, whatsapp, document_number)")
     .eq("tenant_id", tenant.id);
   if (activeLocationId) {
     txQuery = txQuery.eq("location_id", activeLocationId);
+    prevIncomeQuery = prevIncomeQuery.eq("location_id", activeLocationId);
     ordersQuery = ordersQuery.eq("location_id", activeLocationId);
   }
 
-  const [{ data: txMonth }, { data: allIncomeTx }, { data: orders }, { data: products }, { data: channels }, { data: invoices }, { data: remissions }] =
+  const [{ data: txMonth }, { data: prevIncomeTx }, { data: allIncomeTx }, { data: orders }, { data: products }, { data: channels }, { data: invoices }, { data: remissions }] =
     await Promise.all([
       txQuery.order("occurred_on", { ascending: false }),
+      prevIncomeQuery,
       supabase.from("transactions").select("order_id, amount").eq("tenant_id", tenant.id).eq("type", "ingreso").not("order_id", "is", null),
       ordersQuery.order("due_date", { ascending: true, nullsFirst: false }).limit(300),
       supabase.from("products").select("id, labor_seconds, product_supplies(quantity, supplies(unit_cost))").eq("tenant_id", tenant.id),
@@ -88,6 +101,8 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
 
   // --- KPIs ---
   const income = txRows.filter((t) => t.type === "ingreso").reduce((s, t) => s + Number(t.amount), 0);
+  const prevIncome = (prevIncomeTx ?? []).reduce((s, t) => s + Number(t.amount), 0);
+  const incomeDelta = periodChangePct(income, prevIncome);
 
   type ProductRow = { id: string; labor_seconds: number; product_supplies: { quantity: number; supplies: { unit_cost: number } | null }[] };
   const productById = new Map((products ?? []).map((p) => [p.id, p as unknown as ProductRow]));
@@ -125,8 +140,9 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
 
   // --- Documentos de venta (facturas + remisiones unificadas) ---
   type InvoiceRow = Invoice & { orders: { title: string; customers: { name: string } | null } | null };
+  const invoiceRows = (invoices ?? []) as unknown as InvoiceRow[];
   const docs: DocRow[] = [
-    ...((invoices ?? []) as unknown as InvoiceRow[]).map((d) => ({
+    ...invoiceRows.map((d) => ({
       kind: "factura" as const,
       id: d.id,
       num: `FE-${String(d.number).padStart(4, "0")}`,
@@ -135,6 +151,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
       total: d.total,
       status: d.status,
       errorMessage: d.error_message,
+      pdfUrl: d.pdf_url,
     })),
     ...((remissions ?? []) as unknown as { id: string; number: number; total: number; created_at: string; orders: { title: string; customers: { name: string } | null } | null }[]).map((r) => ({
       kind: "remision" as const,
@@ -145,8 +162,17 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
       total: r.total,
       status: "enviada" as const,
       errorMessage: null,
+      pdfUrl: null,
     })),
   ].sort((a, b) => (a.date < b.date ? 1 : -1));
+
+  // --- Emitir factura desde Finanzas: pedidos pagados que todavía no tienen ninguna factura ---
+  const invoicedOrderIds = new Set(invoiceRows.map((d) => d.order_id));
+  const eligibleForInvoice = orderRows
+    .filter((o) => o.paid && !invoicedOrderIds.has(o.id))
+    .map((o) => ({ id: o.id, label: `${o.customers?.name ?? "Sin cliente"} — ${o.title}` }));
+
+  const dianEnabled = getInvoicingProvider().id !== "none";
 
   return (
     <>
@@ -163,12 +189,19 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
               →
             </Link>
             <ExportCsvButton rows={txRows} monthLabel={monthLabel} />
+            <EmitInvoiceButton orders={eligibleForInvoice} />
           </div>
         }
       />
 
       <div className="mb-6 grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
-        <KpiCard label="Ingresos" value={compactMoney(income)} />
+        <KpiCard
+          label="Ingresos"
+          value={compactMoney(income)}
+          delta={incomeDelta !== null ? { text: `${Math.abs(incomeDelta)}%`, positive: incomeDelta >= 0 } : undefined}
+        >
+          {incomeDelta !== null && <span className="text-xs text-muted">vs. mes anterior</span>}
+        </KpiCard>
         <KpiCard label="Costo de producción" value={compactMoney(statement.costOfProduction)}>
           <span className="text-xs text-muted">Materiales + mano de obra</span>
         </KpiCard>
@@ -240,7 +273,12 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
 
       <section className="card flex flex-col gap-4 p-5">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-lg font-semibold">Documentos de venta</h2>
+          <div className="flex items-center gap-2.5">
+            <h2 className="font-display text-lg font-semibold">Documentos de venta</h2>
+            <span className={`chip text-[11px] ${dianEnabled ? "bg-success-soft text-success-ink" : "bg-surface-muted text-muted"}`}>
+              DIAN · {dianEnabled ? "habilitado" : "no habilitado"}
+            </span>
+          </div>
         </div>
         <DocumentsTable docs={docs} />
       </section>
