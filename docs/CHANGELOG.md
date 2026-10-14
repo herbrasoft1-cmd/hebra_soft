@@ -2,6 +2,30 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## SEO básico: robots, sitemap, Open Graph (2026-10-13)
+
+El usuario ya creó Google Search Console y verificó el sitio por DNS en Cloudflare (sin cambios de
+código); esto cubre la parte de código:
+
+- `src/app/robots.ts` / `src/app/sitemap.ts` (convención de rutas de metadata de Next): solo `/` y
+  `/privacidad` indexables. Todo lo demás (login, registro, invitar, auth, bienvenida, seguimiento
+  — con token único por cliente, jamás debe indexarse — y todas las pantallas de la app) queda
+  explícitamente en `Disallow`.
+- **Bug real encontrado al probar, no solo asumido**: el proxy de autenticación (`src/proxy.ts`)
+  interceptaba `/robots.txt` y `/sitemap.xml` y los redirigía a `/login` porque no estaban en su
+  lista de rutas públicas ni excluidos del matcher — un rastreador jamás los habría podido leer.
+  Corregido agregándolos al matcher (como ya pasa con `manifest.webmanifest`/`sw.js`), no a la
+  lista de rutas públicas (no tienen nada que ver con sesión de usuario).
+- `src/app/layout.tsx`: `metadataBase`, Open Graph y Twitter Card completos (antes no existían) con
+  una imagen nueva (`public/og-image.jpg`, generada a partir de la misma foto del hero de la
+  portada, con la marca HEBRA).
+- `alternates.canonical` en `/` y `/privacidad`; descripción agregada a `/privacidad` (coincide con
+  el contenido real de la página, Ley 1581 de 2012).
+- `npm run lint`/`test` (83/83)/`build` pasan limpio — el build encontró y descartó un error de
+  TypeScript en un archivo autogenerado de `.next/` (no del código propio), causado por correr
+  `dev` y `build` sobre la misma carpeta al mismo tiempo; se resolvió limpiando `.next/` con el
+  servidor de dev detenido.
+
 ## Copy de la portada más neutral (2026-10-13)
 
 Se saca "artesanales"/"taller" del copy público (hero, chips de confianza, encabezado de

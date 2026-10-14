@@ -53,8 +53,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Excluye estáticos, íconos, manifest y service worker.
+  // Excluye estáticos, íconos, manifest, service worker y los archivos de rastreo
+  // (robots.txt/sitemap.xml no tienen nada que ver con sesión de usuario).
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|icons/|manifest.webmanifest|sw.js|.*\\.(?:png|svg|jpg|jpeg|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|icons/|manifest.webmanifest|sw.js|robots.txt|sitemap.xml|.*\\.(?:png|svg|jpg|jpeg|webp|ico)$).*)",
   ],
 };

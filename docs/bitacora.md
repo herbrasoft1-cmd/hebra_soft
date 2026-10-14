@@ -1318,3 +1318,33 @@ partir de la comparación de Pedidos/Producción contra `Ent-Produccion.dc.html`
     resolvió recortando físicamente el 45% superior de cada imagen (sin texto) antes de subirla,
     no confiando solo en el degradado de CSS para taparla.
   - `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
+- **Copy de la portada más neutral (2026-10-13).** El usuario pidió sacar "artesanales" y ampliar
+  la bajada del hero para que hable más del core del negocio. Se neutralizó también "taller" en el
+  encabezado de funciones y el CTA final (no se tocó solo lo pedido literalmente, para que el
+  mensaje quedara consistente en toda la página). Se dejó a propósito sin tocar el nombre/
+  descripción del manifest de instalación de la PWA (`src/app/manifest.ts`) — ese es el que ve el
+  cliente real al instalar la app, y ese cliente sí es un negocio de tejido.
+
+- **SEO básico: robots, sitemap, Open Graph (2026-10-13).** El usuario ya había creado Google
+  Search Console y verificado el sitio por DNS en Cloudflare; pidió "todo lo que es de código".
+  - Antes de programar nada se preguntó cómo había verificado la propiedad (DNS vs. meta tag),
+    porque de la respuesta dependía si hacía falta agregar una etiqueta de verificación — confirmó
+    DNS, así que no hizo falta.
+  - `robots.ts`/`sitemap.ts` nuevos (convención de rutas de Next): solo `/` y `/privacidad`
+    indexables; todo lo demás explícitamente en `Disallow` (incluido `/seguimiento/`, que lleva un
+    token único por cliente y jamás debe indexarse).
+  - **Bug real encontrado probando en vivo, no asumido**: el proxy de autenticación redirigía
+    `/robots.txt` y `/sitemap.xml` a `/login` porque no estaban en su lista de rutas públicas ni
+    excluidos del matcher — ningún rastreador los habría podido leer nunca. Corregido agregándolos
+    al matcher (mismo trato que `manifest.webmanifest`/`sw.js`), no a `PUBLIC_PATHS` (no tienen
+    nada que ver con sesión).
+  - `layout.tsx` gana `metadataBase` + Open Graph + Twitter Card completos (no existían). Imagen
+    nueva `public/og-image.jpg` generada con PowerShell/System.Drawing a partir de la misma foto
+    del hero de la portada, con la marca HEBRA — consistente con lo que la persona va a ver si
+    entra al link, no una imagen genérica de stock.
+  - **Build falló una vez con un error real pero no del código propio**: un archivo autogenerado
+    de `.next/dev/types/` quedó corrupto por correr `npm run dev` y `npm run build` sobre la misma
+    carpeta `.next/` al mismo tiempo — se resolvió deteniendo el dev server antes de compilar y
+    borrando `.next/`, no hubo que tocar ningún archivo del repo.
+  - `npm run lint`/`test` (83/83)/`build` pasan limpio.

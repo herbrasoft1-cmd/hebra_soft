@@ -5,7 +5,7 @@ import { money } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { ContactForm } from "./contact-form";
 
-export const metadata = { title: "HEBRA — Gestión integral de negocio" };
+export const metadata = { title: "HEBRA — Gestión integral de negocio", alternates: { canonical: "/" } };
 
 const FEATURES = [
   {

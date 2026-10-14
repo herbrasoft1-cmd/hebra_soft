@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { IconBack, Logo } from "@/components/icons";
 
-export const metadata = { title: "Tratamiento de datos y privacidad" };
+export const metadata = {
+  title: "Tratamiento de datos y privacidad",
+  description: "Cómo HEBRA trata los datos de quienes usan el software, conforme a la Ley 1581 de 2012 (Colombia).",
+  alternates: { canonical: "/privacidad" },
+};
 
 export default function PrivacyPage() {
   return (

@@ -3,14 +3,33 @@ import { ServiceWorkerRegister } from "@/components/pwa";
 import { themeInitScript } from "@/components/theme";
 import "./globals.css";
 
+const SITE_URL = "https://hebrasoft.com";
+const DESCRIPTION = "Costea, organiza y cobra con el número real. Gestión integral para tu negocio.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: { default: "HEBRA", template: "%s · HEBRA" },
-  description: "Costea, organiza y cobra con el número real. Gestión integral para tu negocio.",
+  description: DESCRIPTION,
   applicationName: "HEBRA",
   appleWebApp: { capable: true, title: "HEBRA", statusBarStyle: "default" },
   icons: {
     icon: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
     apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  openGraph: {
+    type: "website",
+    locale: "es_CO",
+    url: SITE_URL,
+    siteName: "HEBRA",
+    title: "HEBRA — Gestión integral de negocio",
+    description: DESCRIPTION,
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "HEBRA — El costo real de cada pieza, no una estimación." }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "HEBRA — Gestión integral de negocio",
+    description: DESCRIPTION,
+    images: ["/og-image.jpg"],
   },
 };
 
