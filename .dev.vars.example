@@ -2,3 +2,4 @@
 # con el runtime real de Cloudflare Workers en local. Mismos valores que .env.local.
 NEXT_PUBLIC_SUPABASE_URL=https://TU-PROYECTO.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
+RESEND_API_KEY=re_tu-api-key

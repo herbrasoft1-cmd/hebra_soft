@@ -87,6 +87,16 @@ export function CustomersView({ customers }: { customers: Row[] }) {
                 </label>
               </div>
               <label className="field">
+                Correo (opcional)
+                <input
+                  className="input"
+                  name="email"
+                  type="email"
+                  placeholder="Para avisarle cuando se envíe su pedido"
+                  defaultValue={editing === "new" ? "" : (editing.email ?? "")}
+                />
+              </label>
+              <label className="field">
                 Dirección de envío
                 <textarea className="input min-h-20 py-2.5" name="address" defaultValue={editing === "new" ? "" : (editing.address ?? "")} />
               </label>

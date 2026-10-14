@@ -13,6 +13,7 @@ export async function saveCustomer(formData: FormData) {
     instagram: String(formData.get("instagram") ?? "").trim().replace(/^@/, "") || null,
     address: String(formData.get("address") ?? "").trim() || null,
     document_number: String(formData.get("document_number") ?? "").trim() || null,
+    email: String(formData.get("email") ?? "").trim() || null,
   };
   if (!record.name) return;
   const { error } = id

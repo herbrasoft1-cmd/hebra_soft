@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { IconCaja, IconCheck, IconHebra, IconOvillo, IconRecetario, Logo, ThreadLine } from "@/components/icons";
 import { money } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
+import { ContactForm } from "./contact-form";
 
 export const metadata = { title: "HEBRA — Gestión integral de negocio" };
 
@@ -12,36 +13,30 @@ const FEATURES = [
     title: "Insumos",
     detail: "Por sede y por lote",
     text: "Lo que compras y usas, con el punto de reorden siempre a la vista.",
-    tone: "primary" as const,
+    photo: "/brand/cards/insumos.jpg",
   },
   {
     icon: IconRecetario,
     title: "Recetario",
     detail: "Costo real por pieza",
     text: "Materiales, mano de obra y desgaste, listo para fijar precio.",
-    tone: "success" as const,
+    photo: "/brand/cards/recetario.jpg",
   },
   {
     icon: IconHebra,
     title: "Pedidos",
     detail: "De espera a envío",
     text: "Cronómetro de talento y seguimiento de pedido para tu cliente.",
-    tone: "warning" as const,
+    photo: "/brand/cards/pedidos.jpg",
   },
   {
     icon: IconCaja,
     title: "Caja y finanzas",
     detail: "Estado de resultados",
     text: "Ingresos, gastos y cartera en un solo lugar, con el número real.",
-    tone: "night" as const,
+    photo: "/brand/cards/caja.jpg",
   },
 ];
-
-const TONE_STYLES = {
-  primary: { badge: "bg-primary-soft text-primary", bar: "bg-primary" },
-  success: { badge: "bg-success-soft text-success-ink", bar: "bg-success" },
-  warning: { badge: "bg-warning-soft text-warning-ink", bar: "bg-warning" },
-} as const;
 
 const titleShadow = { textShadow: "0 6px 28px rgba(74, 46, 32, 0.16)" };
 const titleShadowOnNight = { textShadow: "0 6px 28px rgba(0, 0, 0, 0.4)" };
@@ -179,15 +174,26 @@ export default async function Home() {
           <p className="text-[15px] text-ink-2">Cuatro piezas que trabajan juntas, no cuatro herramientas sueltas.</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {FEATURES.map((f, i) =>
-            f.tone === "night" ? (
-              <div
-                key={f.title}
-                className="relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-border bg-night p-6 text-on-night transition-all hover:-translate-y-1"
+          {FEATURES.map((f, i) => (
+            <div
+              key={f.title}
+              className="group relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-2xl border border-border transition-all hover:-translate-y-1"
+            >
+              <img
+                src={f.photo}
+                alt=""
+                className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-night from-0% via-night/75 via-60% to-night/0 to-100%" />
+              <span
+                className="absolute top-4 right-4 z-10 font-display text-sm text-on-night-muted"
+                style={{ textShadow: "0 1px 6px rgba(0,0,0,0.55)" }}
               >
-                <span className="absolute top-5 right-5 font-display text-sm text-on-night-muted">0{i + 1}</span>
-                <span className="flex size-11 items-center justify-center rounded-full bg-white/10 text-on-night">
-                  <f.icon size={21} />
+                0{i + 1}
+              </span>
+              <div className="relative z-10 flex flex-col gap-2.5 p-5 text-on-night">
+                <span className="flex size-10 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm">
+                  <f.icon size={19} />
                 </span>
                 <span className="flex flex-col gap-1">
                   <span className="font-display text-lg font-semibold">{f.title}</span>
@@ -195,24 +201,8 @@ export default async function Home() {
                 </span>
                 <p className="text-sm text-on-night-muted">{f.text}</p>
               </div>
-            ) : (
-              <div
-                key={f.title}
-                className="relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-border bg-surface p-6 transition-all hover:-translate-y-1 hover:border-border-strong"
-              >
-                <div className={`absolute inset-x-0 top-0 h-1 ${TONE_STYLES[f.tone].bar}`} />
-                <span className="absolute top-5 right-5 font-display text-sm text-muted">0{i + 1}</span>
-                <span className={`flex size-11 items-center justify-center rounded-full ${TONE_STYLES[f.tone].badge}`}>
-                  <f.icon size={21} />
-                </span>
-                <span className="flex flex-col gap-1">
-                  <span className="font-display text-lg font-semibold">{f.title}</span>
-                  <span className="text-[11px] font-semibold tracking-wide text-muted uppercase">{f.detail}</span>
-                </span>
-                <p className="text-sm text-ink-2">{f.text}</p>
-              </div>
-            ),
-          )}
+            </div>
+          ))}
         </div>
       </section>
 
@@ -234,6 +224,17 @@ export default async function Home() {
             </Link>
           </div>
         </div>
+      </section>
+
+      {/* Contacto */}
+      <section className="mx-auto w-full max-w-6xl px-5 pb-16 md:px-8">
+        <div className="mb-7 flex flex-col gap-2 text-center">
+          <h2 className="font-display text-[26px] md:text-[30px]" style={titleShadow}>
+            ¿Tenés dudas o querés saber más?
+          </h2>
+          <p className="text-[15px] text-ink-2">Escribinos y te respondemos a tu correo.</p>
+        </div>
+        <ContactForm />
       </section>
 
       <footer className="mx-auto flex w-full max-w-6xl flex-col items-center gap-2 px-5 py-8 text-center text-xs text-muted md:flex-row md:justify-between md:text-left">

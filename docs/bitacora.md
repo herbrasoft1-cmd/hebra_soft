@@ -1270,3 +1270,51 @@ partir de la comparación de Pedidos/Producción contra `Ent-Produccion.dc.html`
   cuenta) — verificado que ahora entra sin scroll hasta 680px, con las cuentas owner (10 ítems) y
   tejedora (6 ítems) para confirmar que no quedó apretado en ningún caso. `npm run lint`/`test`
   (83/83)/`build` pasan limpio.
+
+- **Resend para correos transaccionales + rediseño de las 4 cards de la portada (2026-10-13).** El
+  usuario compartió una API key de Resend (`re_...`, nunca escrita en ningún archivo del repo —
+  solo en `.env.local`/`.dev.vars`, gitignored, y pendiente de cargar como secret en Cloudflare) y
+  pidió que la info llegue a `herbrasoft1@gmail.com` pero que el usuario externo vea
+  `hola@hebrasoft.com`. Antes de programar se preguntó qué correos específicamente, vía
+  `AskUserQuestion` — eligió las 4 opciones (dueño/a por pedido nuevo y factura rechazada, cliente
+  por pedido enviado, reemplazar correos de Supabase, formulario de contacto).
+  - **Hallazgo real que cambió el alcance**: `customers` nunca tuvo columna `email` (solo
+    whatsapp/instagram/dirección) — se agregó en la migración `0020_correo_cliente.sql`, con campo
+    nuevo en el formulario de Clientes. Sin esto, "avisar al cliente por correo" habría sido
+    imposible sin inventar un dato.
+  - **Decisión explicada, no silenciosa**: NO se conectó el aviso de "factura rechazada" — hoy
+    *todas* las facturas quedan rechazadas por diseño (sin proveedor DIAN conectado), así que
+    mandar un correo en cada intento sería spam engañoso, no una alerta real. Se deja para cuando
+    haya un proveedor real.
+  - `src/lib/email.ts` nuevo: wrapper con `fetch` directo a la API de Resend (sin SDK), nunca
+    bloquea ni rompe la acción que lo llama. Conectado a: pedido nuevo → dueños (`saveOrder`),
+    pedido → "Enviado" → cliente si tiene correo (`moveOrder`), formulario de contacto nuevo en la
+    portada pública.
+  - **Verificación real, no solo "parece que compila"**: se probó el envío real contra la API de
+    Resend (`curl` directo) antes de confiar en que el runtime funcionaba — confirmó HTTP 200 con
+    ID de mensaje aunque el dominio `hebrasoft.com` todavía no estaba verificado en Resend; el
+    usuario confirmó que los correos SÍ llegaron a su Gmail real. Después, con un cliente y pedido
+    de prueba reales (creados y luego limpiados), se confirmó también el correo de "pedido
+    enviado" sin errores en el log del servidor.
+  - El usuario pidió explícitamente mejorar el diseño de los correos ("que no se vean genericos
+    default sino con la identidad y el logo de hebra con un copywriter bien amigable") — reescrito
+    con los tokens exactos de color de `globals.css`, tipografía serif para encabezados, logo real
+    (`hebra-mark.png`), y copy cálido en vez de texto plano. Confirmado visualmente en Gmail real.
+  - **Pendiente manual, fuera de código**: configurar SMTP personalizado de Resend en el dashboard
+    de Supabase (Authentication → SMTP Settings) para que los correos de registro/invitación que
+    hoy manda Supabase también salgan con la marca de HEBRA — no se puede hacer desde el repo.
+  - **Cards de la portada**: el usuario mandó 4 fotos para usar de fondo en las 4 cards de "Todo tu
+    taller", pero 3 de las 4 traían la misma leyenda "Insumos" quemada en el píxel — no eran 4
+    fotos distintas por card. Se preguntó antes de asumir nada; el usuario autorizó modificarlas.
+    Se reasignaron por el contenido real fotografiado (no la leyenda incorrecta): notebook con
+    "Technique sketch" → Recetario, notebook con "Customer order/Tracking timeline" → Pedidos,
+    ovillos con etiquetas de lote → Insumos, libro contable con gráfico → Caja y finanzas (la única
+    que ya coincidía).
+  - **Bug real encontrado en la propia verificación visual** (no se habría visto solo leyendo
+    código): con las fotos como fondo vía `object-cover` en una card vertical, la leyenda quemada
+    original seguía viéndose a través del degradado, superpuesta con el texto nuevo — porque
+    `object-cover` en una card más alta que ancha recorta sobre todo a lo ancho, no a lo alto, así
+    que toda la altura original de la foto (leyenda incluida) seguía entrando en el recorte. Se
+    resolvió recortando físicamente el 45% superior de cada imagen (sin texto) antes de subirla,
+    no confiando solo en el degradado de CSS para taparla.
+  - `npm run lint`/`test` (83/83)/`build` pasan limpio.

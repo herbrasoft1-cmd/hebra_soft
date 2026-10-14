@@ -1,12 +1,14 @@
 "use server";
 
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
+import { sendCustomerOrderShipped, sendOwnerNotification } from "@/lib/email";
 import { suggestedRefund } from "@/lib/finance";
 import { getActiveLocationId } from "@/lib/location";
 import { canFully } from "@/lib/permissions";
 import { getSession } from "@/lib/tenant";
-import type { OrderStatus } from "@/lib/types";
+import type { Membership, OrderStatus } from "@/lib/types";
 
 const STATUSES: OrderStatus[] = ["espera", "proceso", "calidad", "enviado"];
 
@@ -15,6 +17,18 @@ function revalidate() {
   revalidatePath("/pedidos/[id]", "page");
   revalidatePath("/inicio");
   revalidatePath("/insumos");
+}
+
+async function siteOrigin() {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  return `${proto}://${host}`;
+}
+
+async function ownerEmails(supabase: Awaited<ReturnType<typeof getSession>>["supabase"], tenantId: string): Promise<string[]> {
+  const { data } = await supabase.rpc("list_members", { p_tenant_id: tenantId });
+  return ((data ?? []) as Membership[]).filter((m) => m.role === "owner").map((m) => m.email);
 }
 
 export async function saveOrder(formData: FormData) {
@@ -62,6 +76,20 @@ export async function saveOrder(formData: FormData) {
       .from("orders")
       .insert({ ...record, tenant_id: tenant.id, status: "espera", location_id });
     if (error) throw new Error("No se pudo crear el pedido.");
+
+    // Se espera a que termine (no "fire and forget"): en el runtime de Cloudflare Workers,
+    // una promesa sin await puede cortarse apenas la acción responde, antes de que el fetch
+    // a Resend llegue a completarse.
+    const to = await ownerEmails(supabase, tenant.id);
+    const origin = await siteOrigin();
+    await sendOwnerNotification({
+      to,
+      subject: `Nuevo pedido: ${record.title}`,
+      heading: "Tienes un pedido nuevo 🧵",
+      bodyHtml: `Se registró <strong>${record.title}</strong>${record.quantity > 1 ? ` x${record.quantity}` : ""} en tu taller.`,
+      ctaHref: `${origin}/pedidos`,
+      ctaLabel: "Ver pedidos",
+    });
   }
   revalidate();
 }
@@ -71,6 +99,25 @@ export async function moveOrder(id: string, status: OrderStatus) {
   const { supabase, tenant } = await getSession();
   const { error } = await supabase.from("orders").update({ status }).eq("id", id).eq("tenant_id", tenant.id);
   if (error) throw new Error("No se pudo mover el pedido.");
+
+  if (status === "enviado") {
+    const { data: order } = await supabase
+      .from("orders")
+      .select("title, quantity, tracking_token, customers(name, email)")
+      .eq("id", id)
+      .eq("tenant_id", tenant.id)
+      .maybeSingle();
+    const customer = order?.customers as unknown as { name: string; email: string | null } | null;
+    if (order && customer?.email) {
+      const origin = await siteOrigin();
+      await sendCustomerOrderShipped({
+        to: customer.email,
+        customerName: customer.name,
+        orderTitle: order.title,
+        trackingUrl: `${origin}/seguimiento/${order.tracking_token}`,
+      });
+    }
+  }
   revalidate();
 }
 

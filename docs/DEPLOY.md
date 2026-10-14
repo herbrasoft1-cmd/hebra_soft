@@ -33,19 +33,23 @@ cambios.
 
 ## Variables de entorno
 
-HEBRA solo necesita las dos variables públicas de Supabase (no hay claves privadas en el
-servidor: todo lo sensible pasa por funciones `security definer` en Postgres con RLS):
+- `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — públicas, no hay claves privadas
+  de Supabase en el servidor (todo lo sensible pasa por funciones `security definer` en Postgres
+  con RLS).
+- `RESEND_API_KEY` — **privada**, solo se usa en el servidor para `src/lib/email.ts` (notificar al
+  dueño/a, avisar al cliente que su pedido se envió, el formulario de contacto). Nunca se versiona
+  en ningún archivo del repo.
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-
-Como son `NEXT_PUBLIC_*`, Next.js las incrusta en el bundle **durante el build**, no solo en
-runtime. Por eso hay que configurarlas en dos lugares distintos según cómo se despliegue:
+Como `NEXT_PUBLIC_*` son públicas, Next.js las incrusta en el bundle **durante el build**, no solo
+en runtime — por eso hay que configurarlas en dos lugares distintos según cómo se despliegue.
+`RESEND_API_KEY` en cambio solo hace falta en runtime (se lee en el momento de enviar el correo),
+pero igual conviene configurarla junto con las otras para no olvidarla:
 
 1. **Build automático desde GitHub (recomendado, "Workers Builds"):** en el dashboard de
    Cloudflare → Workers & Pages → el proyecto `hebra-soft` → *Settings → Variables and Secrets* →
-   agregar ambas como variables de **build** (no solo de runtime), con los valores reales del
-   proyecto de Supabase (Project Settings → API).
+   agregar `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` como variables de **build**
+   (con los valores reales del proyecto de Supabase, Project Settings → API), y `RESEND_API_KEY`
+   como **secret** (no hace falta en build time, pero sí que esté disponible en runtime).
 2. **Deploy manual desde esta máquina (`npm run deploy`):** copiar `.env.example` → `.env.local`
    (ya existe, para `next dev`/`next build` local) y además `.dev.vars.example` → `.dev.vars` si se
    va a usar `npm run preview` para probar el Worker en local antes de subir.

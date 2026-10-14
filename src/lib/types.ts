@@ -118,6 +118,7 @@ export type Customer = {
   instagram: string | null;
   address: string | null;
   document_number: string | null;
+  email: string | null;
 };
 
 export type Order = {

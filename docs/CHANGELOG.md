@@ -2,6 +2,48 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Correos transaccionales con Resend + portada con fotos reales (2026-10-13)
+
+**Correos (`src/lib/email.ts`, nuevo):** wrapper mínimo sobre la API HTTP de Resend (`fetch`
+directo, sin SDK), `from: hola@hebrasoft.com`, `reply-to: herbrasoft1@gmail.com`. Nunca bloquea ni
+rompe la acción que lo llama — si falla (sin `RESEND_API_KEY`, error de Resend), solo se registra
+en consola. Tres usos conectados:
+
+- **Dueño/a por correo cuando hay un pedido nuevo** (`saveOrder`, en la rama de creación) — a
+  todos los miembros con rol `owner`, vía `list_members`.
+- **Cliente por correo cuando su pedido pasa a "Enviado"** (`moveOrder`) — solo si el cliente tiene
+  correo cargado (campo nuevo, ver migración abajo); incluye el link de seguimiento ya existente
+  (`tracking_token`). Verificado de punta a punta con un cliente y pedido de prueba reales.
+- **Formulario de contacto en la portada pública** (`src/app/contact-form.tsx` +
+  `contact-actions.ts`) — llega a `herbrasoft1@gmail.com` con reply-to al correo de quien escribió.
+
+**Deliberadamente NO conectado:** aviso por correo cuando una factura queda "rechazada". Hoy,
+*toda* factura emitida queda rechazada por diseño (no hay proveedor DIAN conectado, ver
+`src/lib/invoicing.ts`) — mandar un correo en cada intento sería spam engañoso, no una alerta real.
+Se conecta cuando haya un proveedor real.
+
+**Diseño de los correos:** reescrito con la identidad de HEBRA (logo, tipografía serif para
+títulos, paleta exacta de `globals.css`, tarjeta con el mismo radio/borde que `.card`) y
+copywriting cálido en vez de texto genérico. Verificado en Gmail real (no solo renderizado local).
+
+**Pendiente, manual, en el dashboard de Supabase (no es código):** configurar SMTP personalizado
+con las credenciales de Resend en Authentication → SMTP Settings, para que los correos de
+confirmación de cuenta e invitación (que hoy manda Supabase con su propio remitente genérico)
+también salgan con la marca de HEBRA.
+
+**Portada — las 4 cards de "Todo tu taller" ahora tienen foto de fondo real** en vez de
+ícono+color plano. El usuario mandó 4 fotos de producto (props artesanales); 3 de las 4 traían la
+misma leyenda "Insumos" quemada en el píxel (no eran 4 fotos distintas por card) — se reasignaron
+por el contenido real de cada foto, no por su leyenda: notebook con "Technique sketch" → Recetario,
+notebook con "Customer order/Tracking timeline" → Pedidos, ovillos con etiquetas de lote/código de
+barras → Insumos, libro contable con gráfico de ingresos/gastos → Caja y finanzas (esta sí
+coincidía). **Bug encontrado y corregido en el camino:** al poner las fotos como fondo con
+`object-cover` en una card vertical, la leyenda quemada original seguía viéndose detrás del texto
+nuevo (la card recorta sobre todo a lo ancho, no a lo alto, así que toda la altura original —
+leyenda incluida — queda visible). Se resolvió recortando físicamente el 45% superior de cada foto
+(sin texto) antes de subirla, no solo con un degradado por CSS.
+`npm run lint`/`test` (83/83)/`build` pasan limpio.
+
 ## Ajuste — Scroll innecesario en el sidebar (2026-10-13)
 
 El usuario reportó un scroll vertical en el menú lateral. Medido con Playwright: a 800px de alto
