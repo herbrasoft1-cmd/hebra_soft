@@ -2,6 +2,29 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Fix de verdad — favicon transparente (el blanco sólido anterior era incorrecto) (2026-10-14)
+
+El fix anterior (relleno blanco sólido) fue un malentendido: el usuario aclaró que el favicon no
+debe tener ningún relleno — ni blanco ni oscuro —, solo el logo flotando transparente, igual que
+cualquier favicon normal (lo "oscuro" que vio al principio era el navegador/SO en tema oscuro
+mostrándose a través de la transparencia, comportamiento normal, no un bug). El relleno blanco que
+Google pone en los resultados de búsqueda es de la propia interfaz de Google, no depende del
+archivo.
+
+**Causa raíz real del problema original** (encontrada recién en este segundo intento, no en el
+primero): `System.Drawing.Icon.FromHandle(bitmap.GetHicon())` — el método usado para generar el
+`.ico` — no preserva canal alfa real: compone la imagen contra **negro opaco**. El primer
+"favicon transparente" nunca fue transparente de verdad, por eso se veía oscuro en la pestaña.
+
+**Fix correcto**: se abandona `GetHicon()`/`Icon.Save()` por completo. Se arma el `.ico` a mano
+(cabecera `ICONDIR`/`ICONDIRENTRY` de 22 bytes + un PNG de 48×48 con alfa real embebido tal cual —
+formato "PNG-in-ICO", estándar desde Windows Vista y soportado por todos los navegadores
+modernos). Verificado en tres niveles antes de confiar en él: (1) el PNG intermedio tiene
+`A=0` en la esquina antes de empaquetarlo, (2) los bytes del `.ico` final se parsearon a mano para
+confirmar que el PNG embebido es válido byte por byte, (3) renderizado en Chromium real sobre
+fondo oscuro y claro — el logo flota sin ningún cuadrado de relleno en ningún caso.
+`npm run lint`/`test` (83/83)/`build` pasan limpio.
+
 ## Fix — favicon con fondo transparente se veía oscuro (2026-10-14)
 
 El `favicon.ico` agregado horas antes (ver entrada anterior) usaba el logo con su transparencia

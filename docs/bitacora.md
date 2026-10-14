@@ -1369,3 +1369,15 @@ partir de la comparación de Pedidos/Producción contra `Ent-Produccion.dc.html`
     del navegador el área transparente del favicon tomaba el color oscuro del navegador/SO en vez
     de verse en blanco. Se regeneró con relleno blanco sólido detrás del logo (verificado
     pixel por pixel con `GetPixel` antes de confiar en él, no solo "se ve bien" a simple vista).
+  - **El relleno blanco fue el fix equivocado — el usuario corrigió el malentendido**: lo que
+    pidió no es "blanco en vez de oscuro", es "sin relleno, ni blanco ni oscuro, solo el logo
+    flotando" (igual que cualquier favicon normal; el blanco que Google muestra en resultados de
+    búsqueda es de la interfaz de Google, no del archivo). Al investigar de nuevo apareció la
+    causa raíz real que el primer intento nunca encontró: `Icon.FromHandle(bitmap.GetHicon())` no
+    preserva alfa de verdad, compone contra **negro opaco** — el primer "favicon transparente"
+    nunca fue transparente, por eso se veía oscuro. Se abandonó ese método por completo: el `.ico`
+    final se arma a mano (header `ICONDIR`/`ICONDIRENTRY` + un PNG de 48×48 con alfa real embebido
+    tal cual, formato "PNG-in-ICO" estándar). Verificado en tres niveles antes de confiar en él:
+    alfa del PNG intermedio, parseo manual de los bytes del `.ico` final, y render en Chromium real
+    sobre fondo oscuro y claro a la vez — recién ahí se confirmó que el logo flota sin relleno en
+    ningún caso.
