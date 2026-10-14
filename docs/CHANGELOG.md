@@ -2,6 +2,15 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Fix — favicon con fondo transparente se veía oscuro (2026-10-14)
+
+El `favicon.ico` agregado horas antes (ver entrada anterior) usaba el logo con su transparencia
+real — se veía bien en la vista previa, pero en la pestaña del navegador el área transparente
+toma el color del navegador/SO, mostrándose oscura en vez de blanca. El usuario pidió que se vea
+en fondo blanco en todos lados. Se regeneró `src/app/favicon.ico` con un relleno blanco sólido
+(255,255,255 opaco, verificado pixel por pixel antes de confiar en él) detrás del logo, en vez de
+depender de la transparencia. `npm run lint`/`build` pasan limpio.
+
 ## Fix — favicon.ico faltante (icono gris en resultados de Google) (2026-10-14)
 
 El usuario ya indexó el sitio en Google, pero en el resultado de búsqueda aparecía un ícono gris

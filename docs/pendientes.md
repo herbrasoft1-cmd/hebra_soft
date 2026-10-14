@@ -4,6 +4,31 @@
 > fase) y el estado detallado en `docs/ESTADO.md`. Este archivo sigue para lo operativo del día a
 > día (migraciones por correr, cuentas externas pendientes) — no se descontinúa, se complementan.
 
+## Desplegado en producción (2026-10-13/14) — ver `docs/DEPLOY.md`
+
+HEBRA ya está en producción real en **Cloudflare Workers**, dominio propio **`hebrasoft.com`**
+(no Vercel — las menciones a Vercel más abajo en este archivo son de una decisión anterior que se
+cambió; quedan tal cual para no reescribir historia, pero ya no aplican). Detalle completo de cómo
+se desplegó, por qué Next.js quedó fijado en `16.3.8`, y las dos advertencias reales encontradas
+(proxy en runtime Node "experimental" en Cloudflare, build en Windows no 100% confiable) en
+`docs/DEPLOY.md`.
+
+- [ ] **Confirmar que `supabase/migrations/0020_correo_cliente.sql` se corrió en Supabase**
+      (columna `customers.email`) — sin esto, el aviso por correo al cliente cuando su pedido pasa
+      a "Enviado" va a fallar silencioso (no rompe nada, pero tampoco manda el correo).
+- [ ] **Confirmar que `RESEND_API_KEY` quedó cargada como *secret* en Cloudflare** (Workers &
+      Pages → `hebra-soft` → Settings → Variables and Secrets) — sin esto, los 3 correos
+      transaccionales (dueño/a por pedido nuevo, cliente por pedido enviado, formulario de
+      contacto) fallan silenciosos en producción (solo queda un `[email]` error en los logs de
+      Cloudflare, no rompe la acción que lo dispara).
+- [x] SMTP de Resend configurado en Supabase (Authentication → SMTP Settings) para que los
+      correos de registro/invitación salgan con la marca de HEBRA — confirmado por el usuario.
+- [x] Dominio `hebrasoft.com` verificado en Cloudflare DNS para Google Search Console; sitemap
+      cargado (tuvo un error transitorio de la propia consola de Google, no del sitio — se resolvió
+      reintentando). Indexación solicitada por el usuario.
+- [x] `favicon.ico` real agregado en la raíz (faltaba, Google mostraba un ícono genérico en
+      resultados de búsqueda) — puede tardar unos días en reflejarse en Google.
+
 ## Para poder desplegar a producción
 - [x] Completar `.env.local` con las credenciales reales del proyecto Supabase.
 - [x] Correr `supabase/migrations/0001_hebra_schema.sql` en Supabase (SQL Editor).

@@ -1365,3 +1365,7 @@ partir de la comparación de Pedidos/Producción contra `Ent-Produccion.dc.html`
     `System.Drawing.Icon`, 48×48, transparencia verificada visualmente antes de confiar en él) a
     partir del ícono oficial de HEBRA — Next.js lo sirve solo por convención de archivo especial.
   - `npm run lint`/`test` (83/83)/`build` pasan limpio.
+  - **Esa misma transparencia resultó un problema real, reportado horas después**: en la pestaña
+    del navegador el área transparente del favicon tomaba el color oscuro del navegador/SO en vez
+    de verse en blanco. Se regeneró con relleno blanco sólido detrás del logo (verificado
+    pixel por pixel con `GetPixel` antes de confiar en él, no solo "se ve bien" a simple vista).
