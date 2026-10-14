@@ -3,6 +3,26 @@
  * en consola — crear un pedido o mover su estado no puede depender de que un
  * correo de aviso haya salido bien. */
 
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+
+declare global {
+  interface CloudflareEnv {
+    RESEND_API_KEY?: string;
+  }
+}
+
+/** process.env.RESEND_API_KEY no se puede confiar en Cloudflare Workers: solo se popula si
+ * compatibility_date es 2025-04-01+ (o el flag nodejs_compat_populate_process_env), y en la
+ * práctica esto quedó inconsistente entre lo que corre el Worker y lo que declara el repo (ver
+ * docs/bitacora.md). getCloudflareContext().env lee el binding directo, sin depender de eso. */
+async function resendApiKey(): Promise<string | undefined> {
+  try {
+    const { env } = await getCloudflareContext({ async: true });
+    if (env.RESEND_API_KEY) return env.RESEND_API_KEY;
+  } catch {}
+  return process.env.RESEND_API_KEY;
+}
+
 const FROM = "HEBRA <hola@hebrasoft.com>";
 const REPLY_TO = "herbrasoft1@gmail.com";
 const LOGO_URL = "https://hebrasoft.com/brand/hebra-mark.png";
@@ -32,7 +52,7 @@ async function send({
   html: string;
   replyTo?: string;
 }): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = await resendApiKey();
   if (!apiKey) {
     console.error("[email] RESEND_API_KEY no configurada, correo no enviado:", subject);
     return;

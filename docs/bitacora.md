@@ -1398,3 +1398,26 @@ partir de la comparación de Pedidos/Producción contra `Ent-Produccion.dc.html`
   dev` por un lock de Windows en `.open-next/` (procesos `workerd`/`node` colgados de pruebas
   anteriores en la sesión que no soltaban el archivo) — se decidió verificar directo en producción
   en su lugar, mismo entorno donde se manifestó el bug originalmente.
+
+- **El flag tampoco alcanzó — fix real encontrado viendo el log en vivo (2026-10-14).** El usuario
+  agregó el flag a mano en el dashboard (Settings → Runtime) y redesplegó, pero el correo de
+  contacto siguió sin llegar. En vez de seguir adivinando, se activó Observability en el Worker
+  (estaba deshabilitada — otro hallazgo en el camino) y se vio el evento en vivo mientras se
+  disparaba una prueba real: el log mostró explícitamente
+  `"[email] RESEND_API_KEY no configurada, correo no enviado"` — confirmando que
+  `process.env.RESEND_API_KEY` seguía `undefined` pese a todo lo anterior.
+  - Se abandonó por completo la dependencia de `process.env` para secrets de Cloudflare. Fix real:
+    `src/lib/email.ts` ahora usa `getCloudflareContext({ async: true }).env.RESEND_API_KEY` de
+    `@opennextjs/cloudflare` — la forma oficial del adaptador para leer bindings/secrets,
+    independiente de cualquier compatibility flag. `next.config.ts` gana
+    `initOpenNextCloudflareForDev()` para que esto también funcione en local (`next dev`/`wrangler
+    dev`, leyendo de `.dev.vars`).
+  - **Esta vez sí se verificó en el runtime real antes de subir a producción**, no se repitió el
+    error de confiar en que "compila" bastaba: se encontraron y mataron procesos `wrangler
+    dev`/`workerd` colgados de horas antes en la sesión (eran la causa del lock de `.open-next/`
+    del intento anterior — cada vez que se mataba un `workerd` reaparecía otro, hasta encontrar el
+    proceso padre real que los relanzaba), se compiló limpio, se levantó el Worker real con
+    `wrangler dev` y la key real en `.dev.vars`, se mandó el formulario de contacto contra ese
+    Worker, y se confirmó en el dashboard de Resend (no solo "no tiró error") que el correo llegó
+    de verdad.
+  - `npm run lint`/`test` (83/83) pasan limpio.

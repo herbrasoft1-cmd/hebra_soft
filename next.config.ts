@@ -1,4 +1,9 @@
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
+// Permite que `next dev` lea bindings/secrets de Cloudflare (ej. RESEND_API_KEY desde .dev.vars)
+// a través de getCloudflareContext(), igual que en el Worker real. No bloqueante (no se "awaitea").
+initOpenNextCloudflareForDev();
 
 const nextConfig: NextConfig = {
   experimental: {

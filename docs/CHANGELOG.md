@@ -2,6 +2,25 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Fix definitivo — el secret de Resend ahora sí llega a los correos (2026-10-14)
+
+El flag `nodejs_compat_populate_process_env` (commit anterior) no resolvió el problema: con
+Observability activado y probando en vivo se confirmó en el log real del Worker que
+`process.env.RESEND_API_KEY` seguía `undefined`, incluso después de agregar el flag a mano
+directo en el dashboard de Cloudflare (Settings → Runtime) y redesplegar. Se abandona el enfoque
+de depender de `process.env` para secrets de Cloudflare por completo.
+
+**Fix real**: `src/lib/email.ts` ahora lee la key con `getCloudflareContext({ async: true }).env`
+de `@opennextjs/cloudflare` — la forma oficial y documentada del adaptador para acceder a
+bindings/secrets del Worker, independiente de cualquier compatibility flag. `next.config.ts` gana
+`initOpenNextCloudflareForDev()` para que esto también funcione en `next dev`/`wrangler dev`
+locales (lee de `.dev.vars`).
+
+Verificado de punta a punta en el runtime real antes de subir a producción (no solo "compila"):
+build con `opennextjs-cloudflare build`, Worker levantado con `wrangler dev` en local con la key
+real en `.dev.vars`, formulario de contacto enviado contra ese Worker, y confirmado en el
+dashboard de Resend que el correo llegó. `npm run lint`/`test` (83/83) pasan limpio.
+
 ## Fix real — los secrets de Cloudflare no llegaban a `process.env` (2026-10-14)
 
 El correo de contacto (y por extensión los avisos de pedido nuevo/pedido enviado) nunca llegaban en
