@@ -13,14 +13,14 @@ se desplegó, por qué Next.js quedó fijado en `16.3.8`, y las dos advertencias
 (proxy en runtime Node "experimental" en Cloudflare, build en Windows no 100% confiable) en
 `docs/DEPLOY.md`.
 
-- [ ] **Confirmar que `supabase/migrations/0020_correo_cliente.sql` se corrió en Supabase**
-      (columna `customers.email`) — sin esto, el aviso por correo al cliente cuando su pedido pasa
-      a "Enviado" va a fallar silencioso (no rompe nada, pero tampoco manda el correo).
-- [ ] **Confirmar que `RESEND_API_KEY` quedó cargada como *secret* en Cloudflare** (Workers &
-      Pages → `hebra-soft` → Settings → Variables and Secrets) — sin esto, los 3 correos
-      transaccionales (dueño/a por pedido nuevo, cliente por pedido enviado, formulario de
-      contacto) fallan silenciosos en producción (solo queda un `[email]` error en los logs de
-      Cloudflare, no rompe la acción que lo dispara).
+- [x] Migración `supabase/migrations/0020_correo_cliente.sql` corrida en Supabase (columna
+      `customers.email`) — confirmado por el usuario.
+- [x] `RESEND_API_KEY` cargada correctamente en Cloudflare — **tuvo un bug real de verdad**: quedó
+      primero en la sección de "Build variables" (para `NEXT_PUBLIC_*`, solo build time) en vez de
+      "Runtime variables and secrets" (pestaña Production), así que el Worker desplegado nunca la
+      veía. Verificado de punta a punta con logs en vivo (Observability), el dashboard de Resend, y
+      el correo llegando al Gmail real del usuario. Ver `docs/DEPLOY.md` para no repetir la
+      confusión — las dos secciones se llaman parecido en el dashboard.
 - [x] SMTP de Resend configurado en Supabase (Authentication → SMTP Settings) para que los
       correos de registro/invitación salgan con la marca de HEBRA — confirmado por el usuario.
 - [x] Dominio `hebrasoft.com` verificado en Cloudflare DNS para Google Search Console; sitemap

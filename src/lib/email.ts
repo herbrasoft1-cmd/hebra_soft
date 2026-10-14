@@ -11,22 +11,17 @@ declare global {
   }
 }
 
-/** process.env.RESEND_API_KEY no se puede confiar en Cloudflare Workers: solo se popula si
- * compatibility_date es 2025-04-01+ (o el flag nodejs_compat_populate_process_env), y en la
- * práctica esto quedó inconsistente entre lo que corre el Worker y lo que declara el repo (ver
- * docs/bitacora.md). getCloudflareContext().env lee el binding directo, sin depender de eso. */
+/** No usar process.env.RESEND_API_KEY directo: en Cloudflare Workers no es confiable (ver
+ * docs/bitacora.md para la investigación completa). getCloudflareContext().env lee el binding
+ * directo — en el dashboard de Cloudflare, el secret tiene que estar en "Settings → Variables and
+ * secrets → Runtime variables and secrets" (no en "Build variables", que es solo para
+ * NEXT_PUBLIC_* en build time). */
 async function resendApiKey(): Promise<string | undefined> {
   try {
     const { env } = await getCloudflareContext({ async: true });
     if (env.RESEND_API_KEY) return env.RESEND_API_KEY;
-    // DIAGNÓSTICO TEMPORAL — solo nombres de bindings, nunca valores. Quitar una vez resuelto.
-    console.error("[email][diag] getCloudflareContext.env sin RESEND_API_KEY. Claves presentes:", Object.keys(env));
-  } catch (e) {
-    console.error("[email][diag] getCloudflareContext() lanzó una excepción:", e instanceof Error ? e.message : String(e));
-  }
-  if (process.env.RESEND_API_KEY) return process.env.RESEND_API_KEY;
-  console.error("[email][diag] process.env tampoco la tiene. Claves presentes:", Object.keys(process.env ?? {}));
-  return undefined;
+  } catch {}
+  return process.env.RESEND_API_KEY;
 }
 
 const FROM = "HEBRA <hola@hebrasoft.com>";

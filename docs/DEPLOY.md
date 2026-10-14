@@ -46,10 +46,18 @@ en runtime — por eso hay que configurarlas en dos lugares distintos según có
 pero igual conviene configurarla junto con las otras para no olvidarla:
 
 1. **Build automático desde GitHub (recomendado, "Workers Builds"):** en el dashboard de
-   Cloudflare → Workers & Pages → el proyecto `hebra-soft` → *Settings → Variables and Secrets* →
-   agregar `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` como variables de **build**
-   (con los valores reales del proyecto de Supabase, Project Settings → API), y `RESEND_API_KEY`
-   como **secret** (no hace falta en build time, pero sí que esté disponible en runtime).
+   Cloudflare → Workers & Pages → el proyecto `hebra-soft` → *Settings*, hay **dos secciones
+   distintas que se llaman parecido — no confundirlas** (ya pasó, le costó una sesión entera de
+   debugging encontrar el correo que nunca llegaba):
+   - **"Builds" → Build variables**: acá van `NEXT_PUBLIC_SUPABASE_URL`/
+     `NEXT_PUBLIC_SUPABASE_ANON_KEY` (con los valores reales del proyecto de Supabase, Project
+     Settings → API). Solo se usan *durante* `npm run build:cf` — Next.js las incrusta como texto
+     literal en el bundle, nunca se leen en runtime.
+   - **"Variables and secrets" → Runtime variables and secrets** (pestaña **"Production"**, no
+     "Previews Base"): acá va `RESEND_API_KEY`, tipo **Secret**. Esta sección es la que el Worker
+     ya desplegado lee en cada request vía `getCloudflareContext().env` (ver `src/lib/email.ts`) —
+     si `RESEND_API_KEY` queda en la sección de Build por error, el Worker nunca la ve y los
+     correos fallan en silencio (solo un `console.error` en los logs, no rompe nada visiblemente).
 2. **Deploy manual desde esta máquina (`npm run deploy`):** copiar `.env.example` → `.env.local`
    (ya existe, para `next dev`/`next build` local) y además `.dev.vars.example` → `.dev.vars` si se
    va a usar `npm run preview` para probar el Worker en local antes de subir.

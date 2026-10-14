@@ -1421,3 +1421,27 @@ partir de la comparación de Pedidos/Producción contra `Ent-Produccion.dc.html`
     Worker, y se confirmó en el dashboard de Resend (no solo "no tiró error") que el correo llegó
     de verdad.
   - `npm run lint`/`test` (83/83) pasan limpio.
+
+- **Causa raíz real, por fin (2026-10-14).** `getCloudflareContext()` seguía sin encontrar la key
+  en producción pese a todo lo anterior. En vez de seguir cambiando código a ciegas, se agregó un
+  log de diagnóstico temporal (`src/lib/email.ts`, solo nombres de claves/bindings, nunca valores)
+  y se vio en vivo con Observability: `getCloudflareContext().env` en producción solo tenía
+  `WORKER_SELF_REFERENCE` y `ASSETS` — exactamente los bindings declarados en `wrangler.jsonc`.
+  `RESEND_API_KEY` **nunca estuvo adjunta al Worker desplegado**, a pesar de aparecer cargada en
+  el dashboard.
+  - Revisando la pantalla real de Cloudflare junto con el usuario apareció la causa: el dashboard
+    tiene DOS secciones separadas bajo "Variables and Secrets" — **Build variables** (para
+    `NEXT_PUBLIC_*`, usadas solo durante `npm run build:cf`, donde SÍ viven
+    `NEXT_PUBLIC_SUPABASE_URL`/`ANON_KEY` desde la Fase de Cloudflare) y **Runtime variables and
+    secrets** (lo que el Worker ya desplegado lee en cada request). La key se había cargado en la
+    de Build — con la pestaña "Production" de Runtime abierta, la lista estaba literalmente vacía
+    ("Configure API tokens and other runtime variables"), confirmando que nunca estuvo ahí. Fácil
+    de confundir porque ambas pantallas se llaman "Variables and Secrets" y se usó la misma mecánica
+    para cargar las de Supabase sin que causara problema (esas sí van en Build).
+  - Se agregó el secret en la sección correcta (Runtime, Production) y se verificó de punta a
+    punta: log en vivo sin error, entrada nueva en el dashboard de Resend, correo real recibido en
+    el Gmail del usuario — confirmado por el usuario mismo en cada paso, no asumido.
+  - Se quitó el log de diagnóstico temporal, se deja `getCloudflareContext()` como forma
+    definitiva de leer la key (de todas formas es la recomendada por el adaptador, más robusta que
+    `process.env`).
+  - `npm run lint`/`test` (83/83) pasan limpio.

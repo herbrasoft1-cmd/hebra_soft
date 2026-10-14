@@ -2,6 +2,26 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Cierre real — causa raíz encontrada: el secret estaba en la sección equivocada (2026-10-14)
+
+El cambio a `getCloudflareContext()` (commit anterior) era correcto y necesario, pero no era la
+causa completa. Con un log de diagnóstico temporal (solo nombres de bindings, nunca valores) se
+confirmó en vivo que `getCloudflareContext().env` en producción solo tenía `WORKER_SELF_REFERENCE`
+y `ASSETS` — los únicos bindings declarados en `wrangler.jsonc`. **`RESEND_API_KEY` nunca estuvo
+adjunta al Worker desplegado en absoluto**, pese a aparecer cargada en el dashboard.
+
+Causa real: el dashboard de Cloudflare tiene dos secciones separadas bajo "Variables and Secrets"
+— **Build variables** (para `NEXT_PUBLIC_*`, se usan solo durante `npm run build:cf`) y **Runtime
+variables and secrets** (para lo que el Worker ya desplegado lee en cada request). La key se había
+cargado en la sección de Build, no en la de Runtime — con la pestaña "Production" visible y la
+lista vacía ("Configure API tokens and other runtime variables"), confirmando que nunca estuvo ahí.
+Se agregó en la sección correcta y se verificó de punta a punta: log en vivo sin error, entrada
+nueva en el dashboard de Resend, correo real recibido en Gmail.
+
+Queda `getCloudflareContext()` como la forma de leer la key (más robusta que `process.env` de
+todas formas, es la recomendada por el adaptador) y el log de diagnóstico temporal se quitó.
+`npm run lint`/`test` (83/83) pasan limpio.
+
 ## Fix definitivo — el secret de Resend ahora sí llega a los correos (2026-10-14)
 
 El flag `nodejs_compat_populate_process_env` (commit anterior) no resolvió el problema: con
