@@ -19,8 +19,14 @@ async function resendApiKey(): Promise<string | undefined> {
   try {
     const { env } = await getCloudflareContext({ async: true });
     if (env.RESEND_API_KEY) return env.RESEND_API_KEY;
-  } catch {}
-  return process.env.RESEND_API_KEY;
+    // DIAGNÓSTICO TEMPORAL — solo nombres de bindings, nunca valores. Quitar una vez resuelto.
+    console.error("[email][diag] getCloudflareContext.env sin RESEND_API_KEY. Claves presentes:", Object.keys(env));
+  } catch (e) {
+    console.error("[email][diag] getCloudflareContext() lanzó una excepción:", e instanceof Error ? e.message : String(e));
+  }
+  if (process.env.RESEND_API_KEY) return process.env.RESEND_API_KEY;
+  console.error("[email][diag] process.env tampoco la tiene. Claves presentes:", Object.keys(process.env ?? {}));
+  return undefined;
 }
 
 const FROM = "HEBRA <hola@hebrasoft.com>";
