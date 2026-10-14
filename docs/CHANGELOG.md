@@ -2,6 +2,20 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Fix real — los secrets de Cloudflare no llegaban a `process.env` (2026-10-14)
+
+El correo de contacto (y por extensión los avisos de pedido nuevo/pedido enviado) nunca llegaban en
+producción aunque el usuario ya había cargado `RESEND_API_KEY` como secret en Cloudflare y
+redesplegado. **Causa raíz real** (investigada, no asumida): Cloudflare solo popula
+`process.env` automáticamente con las variables/secrets del Worker si la `compatibility_date` es
+del 1 de abril de 2025 en adelante (flag `nodejs_compat_populate_process_env`, activo por defecto
+desde esa fecha) — la nuestra quedó en `2024-12-30` desde el primer despliegue. Por eso
+`NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` sí funcionaban (esas se "hornean" en el
+build, no dependen de esto) pero `RESEND_API_KEY` — una secret de solo-runtime — quedaba
+`undefined` aunque estuviera cargada en el dashboard. Se agregó el flag explícitamente a
+`wrangler.jsonc` sin tocar `compatibility_date` (cambiar la fecha podría traer otros cambios de
+comportamiento no evaluados; el flag es un fix puntual).
+
 ## Fix de verdad — favicon transparente (el blanco sólido anterior era incorrecto) (2026-10-14)
 
 El fix anterior (relleno blanco sólido) fue un malentendido: el usuario aclaró que el favicon no

@@ -1381,3 +1381,20 @@ partir de la comparación de Pedidos/Producción contra `Ent-Produccion.dc.html`
     alfa del PNG intermedio, parseo manual de los bytes del `.ico` final, y render en Chromium real
     sobre fondo oscuro y claro a la vez — recién ahí se confirmó que el logo flota sin relleno en
     ningún caso.
+
+- **El correo de contacto nunca llegó — causa raíz real encontrada (2026-10-14).** El usuario ya
+  había cargado `RESEND_API_KEY` como secret en Cloudflare y redesplegado (una vez con "Retry
+  deploy", otra con un push fresco forzado) y el correo de prueba seguía sin llegar. En vez de
+  seguir probando a ciegas, se investigó por qué: Cloudflare solo popula `process.env`
+  automáticamente con las variables/secrets de un Worker si la `compatibility_date` es del
+  2025-04-01 en adelante (flag `nodejs_compat_populate_process_env`) — la nuestra quedó en
+  `2024-12-30` desde el primer despliegue (Fase de Cloudflare, antes en esta misma sesión). Eso
+  explica por qué las `NEXT_PUBLIC_*` sí funcionaban (se hornean en el build, no dependen de esto)
+  pero `RESEND_API_KEY` quedaba `undefined` en runtime aunque estuviera bien cargada en el
+  dashboard — el código de `src/lib/email.ts` ya tenía el guard correcto (`if (!apiKey) return`),
+  por eso fallaba en silencio sin romper nada, solo sin mandar el correo. Se agregó el flag a
+  `wrangler.jsonc` sin tocar `compatibility_date` (un cambio de fecha podría traer otros efectos no
+  evaluados; el flag resuelve justo este problema). No se pudo verificar en local con `wrangler
+  dev` por un lock de Windows en `.open-next/` (procesos `workerd`/`node` colgados de pruebas
+  anteriores en la sesión que no soltaban el archivo) — se decidió verificar directo en producción
+  en su lugar, mismo entorno donde se manifestó el bug originalmente.
