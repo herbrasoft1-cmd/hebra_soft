@@ -1348,3 +1348,20 @@ partir de la comparación de Pedidos/Producción contra `Ent-Produccion.dc.html`
     carpeta `.next/` al mismo tiempo — se resolvió deteniendo el dev server antes de compilar y
     borrando `.next/`, no hubo que tocar ningún archivo del repo.
   - `npm run lint`/`test` (83/83)/`build` pasan limpio.
+
+- **Sitemap en Search Console y favicon faltante (2026-10-14).** El usuario reportó "Dirección de
+  sitemap no válida" al cargar `sitemap.xml` a mano en Search Console. Antes de asumir nada se
+  probó el endpoint real simulando el user-agent de Googlebot (`curl -A "...Googlebot..."`) —
+  respondió 200 con el XML correcto, confirmando que el problema era del lado de la consola de
+  Google (error instantáneo, antes de que pudiera intentar siquiera leer el archivo — típico bug
+  reportado por otros en foros de soporte de Google, sin fix oficial). Se le indicó que no era
+  bloqueante (`Sitemap:` ya estaba declarado en `robots.txt`, que Google lee solo) y, tras
+  reintentar, el usuario confirmó que sí funcionó.
+  - Reporte siguiente: en los resultados de Google aparecía un ícono gris genérico en vez del logo
+    de HEBRA. Verificado (no asumido): `/favicon.ico` devolvía 404, aunque el `<link rel="icon">`
+    sí apuntaba correctamente a `/icons/icon-192.png` (200 OK) — muchos sistemas, Google incluido,
+    buscan además `/favicon.ico` en la raíz por convención, independientemente del `<link>`. Se
+    generó `src/app/favicon.ico` real (no un PNG renombrado: un `.ico` de verdad vía
+    `System.Drawing.Icon`, 48×48, transparencia verificada visualmente antes de confiar en él) a
+    partir del ícono oficial de HEBRA — Next.js lo sirve solo por convención de archivo especial.
+  - `npm run lint`/`test` (83/83)/`build` pasan limpio.

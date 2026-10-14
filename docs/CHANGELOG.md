@@ -2,6 +2,18 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Fix — favicon.ico faltante (icono gris en resultados de Google) (2026-10-14)
+
+El usuario ya indexó el sitio en Google, pero en el resultado de búsqueda aparecía un ícono gris
+genérico de "mundo" en vez del logo de HEBRA. Causa real confirmada (no asumida): `/favicon.ico`
+devolvía 404 — el `<link rel="icon">` sí apuntaba a `/icons/icon-192.png` (ese sí respondía bien),
+pero muchos rastreadores e integraciones (Google incluido) buscan además `/favicon.ico` en la raíz
+por convención. Se generó `src/app/favicon.ico` (48×48, real `.ico` multi-resolución vía
+`System.Drawing.Icon`, no un PNG renombrado) a partir del ícono oficial — Next.js lo sirve solo en
+`/favicon.ico` por convención de archivo especial. Puede tardar unos días en reflejarse en
+Google (el ícono de los resultados de búsqueda se cachea aparte del rastreo normal de contenido).
+`npm run lint`/`test` (83/83)/`build` pasan limpio.
+
 ## SEO básico: robots, sitemap, Open Graph (2026-10-13)
 
 El usuario ya creó Google Search Console y verificó el sitio por DNS en Cloudflare (sin cambios de
