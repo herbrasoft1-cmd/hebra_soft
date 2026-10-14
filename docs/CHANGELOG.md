@@ -2,6 +2,16 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Rediseño "enterprise" de las plantillas de correo (2026-10-14)
+
+`src/lib/email.ts`: las 3 plantillas (aviso de pedido nuevo al dueño, aviso de envío al cliente,
+mensaje de contacto) comparten ahora un `layout()` con franja superior oscura con el logo (mismo
+patrón visual que el badge del sidebar de la app), tarjeta clara con el borde/radio de `.card`,
+botón primario terracota y pie con línea divisoria — reemplaza la plantilla genérica anterior
+(fondo blanco liso, sin identidad de marca). Tokens de color tomados directo de `globals.css` (modo
+claro) para que el correo se vea como extensión de la app. Verificado con un envío real de contacto
+en dev y confirmado por el usuario viendo el correo rediseñado en Gmail.
+
 ## Cierre real — causa raíz encontrada: el secret estaba en la sección equivocada (2026-10-14)
 
 El cambio a `getCloudflareContext()` (commit anterior) era correcto y necesario, pero no era la

@@ -40,6 +40,10 @@ const COLOR = {
   primary: "#a4533d",
   primaryHover: "#7e3d2c",
   primarySoft: "#f6e9e2",
+  night: "#26221f",
+  onNight: "#f3eae0",
+  onNightMuted: "#bfb2a4",
+  accentLight: "#e2a285",
 };
 
 async function send({
@@ -72,35 +76,48 @@ async function send({
   }
 }
 
-/** Cascarón visual compartido: logo, tarjeta clara con el mismo borde/radio que
- * ".card" en la app, botón primario terracota. Fuentes web-safe (serif/sans)
- * porque Fraunces/Geist no cargan de forma confiable en clientes de correo. */
+/** Cascarón visual compartido: franja superior oscura con el logo (mismo patrón que el badge del
+ * sidebar en la app), tarjeta clara con el borde/radio de ".card", botón primario terracota, pie
+ * con línea divisoria en vez de flotar suelto. Fuentes web-safe (serif/sans) porque Fraunces/Geist
+ * no cargan de forma confiable en clientes de correo. */
 function layout(bodyHtml: string): string {
   return `<!doctype html>
 <html lang="es">
   <body style="margin:0;padding:0;background:${COLOR.bg};">
     <div style="display:none;max-height:0;overflow:hidden;opacity:0;">&nbsp;</div>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${COLOR.bg};padding:32px 16px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${COLOR.bg};padding:40px 16px;">
       <tr>
         <td align="center">
           <table role="presentation" width="100%" style="max-width:480px;" cellpadding="0" cellspacing="0">
             <tr>
-              <td style="padding-bottom:20px;" align="center">
-                <img src="${LOGO_URL}" width="40" height="40" alt="HEBRA" style="display:block;border:0;" />
+              <td style="background:${COLOR.night};border-radius:16px 16px 0 0;padding:22px 32px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="background:${COLOR.onNight};border-radius:9px;width:34px;height:34px;" align="center" valign="middle">
+                      <img src="${LOGO_URL}" width="22" height="22" alt="" style="display:block;border:0;" />
+                    </td>
+                    <td style="padding-left:12px;font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:700;color:${COLOR.onNight};letter-spacing:0.01em;">
+                      hebra
+                    </td>
+                  </tr>
+                </table>
               </td>
             </tr>
             <tr>
-              <td style="background:${COLOR.surface};border:1px solid ${COLOR.border};border-radius:20px;padding:36px 32px;">
+              <td style="background:${COLOR.surface};border:1px solid ${COLOR.border};border-top:none;padding:40px 32px;">
                 <div style="font-family:Georgia,'Times New Roman',serif;color:${COLOR.ink};">
                   ${bodyHtml}
                 </div>
               </td>
             </tr>
             <tr>
-              <td style="padding-top:22px;" align="center">
-                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${COLOR.muted};">
-                  Hecho a mano, con cariño, por <a href="https://hebrasoft.com" style="color:${COLOR.muted};">HEBRA</a> — software de gestión privado.
-                </p>
+              <td style="background:${COLOR.surface};border:1px solid ${COLOR.border};border-top:none;border-radius:0 0 16px 16px;padding:0 32px 28px;">
+                <div style="border-top:1px solid ${COLOR.border};padding-top:18px;">
+                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:${COLOR.muted};">
+                    <a href="https://hebrasoft.com" style="color:${COLOR.ink2};font-weight:600;text-decoration:none;">HEBRA</a>
+                    &nbsp;·&nbsp; Software de gestión privado.
+                  </p>
+                </div>
               </td>
             </tr>
           </table>

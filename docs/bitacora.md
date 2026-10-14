@@ -1445,3 +1445,22 @@ partir de la comparación de Pedidos/Producción contra `Ent-Produccion.dc.html`
     definitiva de leer la key (de todas formas es la recomendada por el adaptador, más robusta que
     `process.env`).
   - `npm run lint`/`test` (83/83) pasan limpio.
+
+- **Rediseño "enterprise" de las plantillas de correo (2026-10-14).** El usuario pasó una captura
+  de un correo real de contacto recibido en Gmail y pidió que el diseño se viera más profesional
+  ("enterprise"), no genérico.
+  - `src/lib/email.ts`: se extrajo un `layout()` compartido para las 3 plantillas (aviso de pedido
+    nuevo al dueño, aviso de envío al cliente, mensaje de contacto público) con: franja superior
+    oscura con el logo en una insignia clara (mismo patrón que el badge del sidebar de la app
+    dentro del sistema de diseño), tarjeta clara con el borde/radio que usa `.card` en el resto de
+    HEBRA, botón primario terracota, y pie con una línea divisoria en vez de texto flotando suelto.
+    Fuentes web-safe (Georgia/Arial) porque Fraunces/Geist no cargan de forma confiable en clientes
+    de correo.
+  - Tokens de color copiados literalmente de `globals.css` (modo claro: `night`, `onNight`,
+    `onNightMuted`, `accentLight`, más los ya existentes `bg/surface/border/ink/ink2/muted/
+    primary/primaryHover/primarySoft`), para que el correo se sienta como una extensión visual de
+    la app y no una plantilla genérica de SaaS cualquiera.
+  - Verificado enviando un correo de contacto real contra el dev server local (con
+    `RESEND_API_KEY` real en `.dev.vars`) y el usuario confirmó visualmente en Gmail que el diseño
+    nuevo se ve bien ("si se ve").
+  - `npm run lint`/`test` (83/83) pasan limpio antes de pedir confirmación para el commit.
