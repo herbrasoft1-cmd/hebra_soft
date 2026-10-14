@@ -2,6 +2,15 @@
 
 Registro corto por fase, agregado al cerrar cada una (ver "Cómo cerrar una fase" en `CLAUDE.md`).
 
+## Copy de la portada más neutral (2026-10-13)
+
+Se saca "artesanales"/"taller" del copy público (hero, chips de confianza, encabezado de
+funciones, CTA final, metadescripción) y se reemplaza por lenguaje de negocio general. La bajada
+del hero también se amplía para cubrir más del core (insumos, producción, equipo y finanzas) en
+vez de listar solo los nombres de los módulos. El manifest de instalación (`src/app/manifest.ts`)
+no se tocó a propósito — es el nombre/descripción que ve el cliente real al instalar la PWA, y ese
+cliente sí es un negocio de tejido.
+
 ## Correos transaccionales con Resend + portada con fotos reales (2026-10-13)
 
 **Correos (`src/lib/email.ts`, nuevo):** wrapper mínimo sobre la API HTTP de Resend (`fetch`

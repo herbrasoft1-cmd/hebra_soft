@@ -93,8 +93,8 @@ export default async function Home() {
               El costo real de cada pieza, no una estimación.
             </h1>
             <p className="max-w-lg text-[17px] leading-relaxed text-ink-2">
-              HEBRA organiza insumos, recetario, pedidos y finanzas de negocios artesanales en un solo lugar — para
-              que sepas exactamente cuánto cuesta y cuánto cobrar.
+              HEBRA conecta insumos, producción, equipo y finanzas de tu negocio en un solo lugar — para que
+              decidas con el número real, no a ojo: cuánto cuesta, cuánto cobrar y qué tan bien te está yendo.
             </p>
             <div className="mt-1 flex flex-wrap items-center gap-3">
               <Link href="/login" className="btn-primary min-h-12 px-7 text-[15px]">
@@ -105,7 +105,7 @@ export default async function Home() {
               </Link>
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-ink-2">
-              {["Costeo real por pieza", "Un dato por negocio", "Pensado para talleres"].map((t) => (
+              {["Costeo real por pieza", "Un dato por negocio", "Pensado para crecer contigo"].map((t) => (
                 <span key={t} className="flex items-center gap-1.5">
                   <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-success-soft text-success-ink">
                     <IconCheck size={11} />
@@ -169,7 +169,7 @@ export default async function Home() {
       <section className="mx-auto w-full max-w-6xl px-5 pb-16 md:px-8">
         <div className="mb-8 flex flex-col gap-2 text-center">
           <h2 className="font-display text-[28px] md:text-[32px]" style={titleShadow}>
-            Todo tu taller, en un solo lugar
+            Todo tu negocio, en un solo lugar
           </h2>
           <p className="text-[15px] text-ink-2">Cuatro piezas que trabajan juntas, no cuatro herramientas sueltas.</p>
         </div>
@@ -210,7 +210,7 @@ export default async function Home() {
       <section className="mx-auto w-full max-w-6xl px-5 pb-16 md:px-8">
         <div className="flex flex-col items-center gap-5 rounded-[28px] border border-border bg-night px-6 py-12 text-center text-on-night md:py-16">
           <h2 className="font-display text-[28px] md:text-[34px]" style={titleShadowOnNight}>
-            ¿Ya tienes acceso a tu taller en HEBRA?
+            ¿Ya tienes acceso a tu negocio en HEBRA?
           </h2>
           <p className="max-w-md text-[15px] text-on-night-muted">
             Inicia sesión para seguir donde quedaste, o usa tu invitación si es tu primera vez.

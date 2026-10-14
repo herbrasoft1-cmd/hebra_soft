@@ -5,7 +5,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: { default: "HEBRA", template: "%s · HEBRA" },
-  description: "Costea, organiza y cobra lo que tejes. Gestión para negocios handmade.",
+  description: "Costea, organiza y cobra con el número real. Gestión integral para tu negocio.",
   applicationName: "HEBRA",
   appleWebApp: { capable: true, title: "HEBRA", statusBarStyle: "default" },
   icons: {
